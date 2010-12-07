@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
@@ -10,9 +12,18 @@ def flatten(listOfLists):
     return chain.from_iterable(listOfLists)
 
 def html2rst(html):
+    
+    def cleanString(s):
+        s = s.replace(u"\u001c", u"“")
+        s = s.replace(u"\u001d", u"”")
+        s = s.replace(u"\u0019", u"’")
+        s = s.replace("&nbsp;", " ")
+        s = s.replace("\n", "")
+        return s
+
     def walk(node):
         if ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
-            return nodes.Text(unicode(node).replace("\n","").replace("&nbsp;",""))
+            return nodes.Text(cleanString(unicode(node)))
         else:
             if (node.name == 'span'):
                 if (node.has_key('style') and (node['style'] == "font-style:italic;")):
