@@ -5,11 +5,12 @@
 Background
 ----------
 
-`Zotero`_ is a useful tool for managing citations.
+Zotero_ is a useful tool for managing citations.
 
-``zotero-plain`` consists of two parts (so far): a tool including
+``zotero-plain`` consists of two parts (so far): a tool for including
 citations in reStructuredText_ documents, and a tool for interaction
-with emacs_.
+with emacs_. Both tools use Zotero_ via mozrepl_ to generate citations
+in various formats.
 
 Installation
 ------------
