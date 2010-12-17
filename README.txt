@@ -93,10 +93,12 @@ To insert a citation into a `org-mode`_ document, first enable the
 
   M-x org-zotero-mode
 
-Then select one or more items in zotero_. Finally, in emacs_, use:
-``C-c z i`` to insert these items as citations.
+Then select one or more items ina Zotero_ pane. Finally, in emacs_,
+use: ``C-c z i`` to insert these items as citations. This inserts a
+zotero link with descriptive link text.
 
-To update the note text from Zotero_, use ``C-c z u``.
+To update the link text to reflect changed metadata from Zotero_, use
+``C-c z u`` over the link.
 
 .. _Zotero: http://www.zotero.org/
 .. _mozrepl: https://github.com/bard/mozrepl/wiki
