@@ -66,7 +66,7 @@ integration (``zotero-rst.el``).
 
 To install, add the following to your ``.emacs`` file::
 
-  (add-to-list load-path "/path/to/zotero-plain/elisp/")
+  (add-to-list 'load-path "/path/to/zotero-plain/elisp/")
   (autoload 'zotero-rst-mode "zotero-rst" "" t)
   (autoload 'org-zotero-mode "org-zotero" "" t)
   
