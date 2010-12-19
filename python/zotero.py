@@ -35,7 +35,7 @@ def html2rst(html):
                 return nodes.paragraph("", "", *children)
             elif (node.name == 'a'):
                 children = [ walk(c) for c in node.contents ]
-                return nodes.reference("", "", *children,  refuri=node['href'])
+                return apply(nodes.reference, ["", ""] + children, { 'refuri' : node['href'] })
             elif (node.name == 'div'):
                 return walk(node.p)
 
