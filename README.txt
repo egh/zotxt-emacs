@@ -22,6 +22,11 @@ Installation
 reStructuredText
 ----------------
 
+reStructuredText support depends on:
+
+1. docutils_.
+2. The `Beautiful Soup`_ HTML parser.
+
 Zotero_ citations may be added to a reStructuredText document using the
 following syntax::
 
@@ -108,3 +113,6 @@ To update the link text to reflect changed metadata from Zotero_, use
 .. _emacs: http://www.gnu.org/software/emacs/
 .. _`org-mode`: http://orgmode.org/
 .. _reStructuredText: http://docutils.sourceforge.net/rst.html
+.. _`Beautiful soup`: http://www.crummy.com/software/BeautifulSoup/
+.. _docutils: http://docutils.sourceforge.net/
+
