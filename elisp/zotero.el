@@ -13,6 +13,15 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
+(defun zotero-reset-mozrepl ()
+  (delete-process (inferior-moz-process)))
+
+(defun zotero-send-string (str)
+  (comint-send-string (inferior-moz-process) str))
+
+(defun zotero-send-strings (str-list)
+  (mapc 'zotero-send-string str-list))
+
 (defun zotero-js-write-to-file (filename expr)
   (let ((js-func-def "
 function writeFile(filename, data) {
@@ -23,9 +32,10 @@ function writeFile(filename, data) {
   foStream.write(data, data.length);
   foStream.close();
 };"))
-    (comint-send-string (inferior-moz-process) js-func-def)
-    (comint-send-string (inferior-moz-process)
-                        (format "writeFile(\"%s\", %s);" filename expr))))
+    (zotero-reset-mozrepl)
+    (zotero-send-strings 
+     (list js-func-def
+           (format "writeFile(\"%s\", %s);" filename expr)))))
 
 (defun zotero-js-get-string-value (expr)
   (let ((tmp-file (make-temp-file "zotero")))
@@ -36,12 +46,6 @@ function writeFile(filename, data) {
                (insert-file-contents tmp-file)
                (buffer-substring-no-properties (point-min) (point-max))))
       (delete-file tmp-file))))
-
-(defun zotero-send-string (str)
-  (comint-send-string (inferior-moz-process) str))
-
-(defun zotero-send-strings (str-list)
-  (mapc 'zotero-send-string str-list))
   
 (defun zotero-generate-bib-entry-from-id (item-id &optional style bib-format)
   (let* ((bib-type (format "bibliography=%s"
@@ -49,6 +53,7 @@ function writeFile(filename, data) {
          (bib-format (or bib-format "text")))
     (if (not (string-match "^[0-9]+_" item-id))
         (setq item-id (format "0_%s" item-id)))
+    (zotero-reset-mozrepl)
     (zotero-send-strings
      `("var Zotero = Components.classes[\"@zotero.org/Zotero;1\"] .getService(Components.interfaces.nsISupports).wrappedJSObject;"
        ,(format "var lkh = Zotero.Items.parseLibraryKeyHash(\"%s\");" item-id)
@@ -60,6 +65,7 @@ function writeFile(filename, data) {
      (zotero-js-get-string-value (format "biblio.%s" bib-format)))))
 
 (defun zotero-get-selected-item-ids ()
+  (zotero-reset-mozrepl)
   (zotero-send-strings
    `("var ZoteroPane = Components.classes[\"@mozilla.org/appshell/window-mediator;1\"] .getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow(\"navigator:browser\").ZoteroPane;"
      "var selected_items = ZoteroPane.getSelectedItems();"))
