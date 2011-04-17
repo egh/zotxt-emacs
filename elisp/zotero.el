@@ -39,8 +39,10 @@ function writeFile(filename, data) {
 
 (defun zotero-js-get-string-value (expr)
   (let ((tmp-file (make-temp-file "zotero")))
+    (delete-file tmp-file) ;; delete our version
     (zotero-js-write-to-file tmp-file expr)
-    (sleep-for 0 50)
+    (while (not (file-exists-p tmp-file))
+      (sleep-for 0 10))
     (prog1 (save-excursion
              (with-temp-buffer
                (insert-file-contents tmp-file)
