@@ -20,7 +20,6 @@
             (insert (format
                      "[[zotero://select//%s][%s]]\n"
                      id id))
-            (forward-line -1)
             (org-zotero-update-reference-link-at-point)
             (forward-line 1))
           ids)))
