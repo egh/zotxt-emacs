@@ -4,7 +4,7 @@ from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
 from itertools import chain
-import BeautifulSoup,re,telnetlib, tempfile
+import BeautifulSoup, os, re, telnetlib, tempfile, time
 
 citation_format = "http://www.zotero.org/styles/chicago-note-bibliography"
 
@@ -22,7 +22,9 @@ def html2rst(html):
         return s
 
     def walk(node):
-        if ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
+        if node == None:
+            return nodes.Text("")
+        elif ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
             return nodes.Text(cleanString(unicode(node)))
         else:
             if (node.name == 'span'):
@@ -30,6 +32,9 @@ def html2rst(html):
                     return nodes.emphasis(text="".join([ unicode(walk(c)) for c in node.contents ]))
                 else:
                     return walk("".join([ str(c) for c in node.contents ]))
+            if (node.name == 'i'):
+                print node
+                return nodes.emphasis(text="".join([ unicode(walk(c)) for c in node.contents ]))
             elif (node.name == 'p'):
                 children = [ walk(c) for c in node.contents ]
                 return nodes.paragraph("", "", *children)
@@ -37,8 +42,8 @@ def html2rst(html):
                 children = [ walk(c) for c in node.contents ]
                 return apply(nodes.reference, ["", ""] + children, { 'refuri' : node['href'] })
             elif (node.name == 'div'):
-                return walk(node.p)
-
+                children = [ walk(c) for c in node.contents ]
+                return nodes.paragraph("", "", *children)
     doc = BeautifulSoup.BeautifulSoup(html)
     return [ walk(c) for c in doc.contents ]
 
@@ -56,17 +61,26 @@ class Zotero(object):
         self.bibType = kwargs.get('bibType',
                                   citation_format)
         
-    def getItem(self, itemId):
+    def get_tmpfile_name(self):
         tmpfile = tempfile.NamedTemporaryFile()
+        tmpfile.close()
+        if os.path.exists(tmpfile.name): os.remove(tmpfile.name)
+        tmpfilename = tmpfile.name
+        tmpfile = None
+        return tmpfilename
+
+    def getItem(self, itemId):
+        tmpfile = self.get_tmpfile_name()
         if not(re.match(r"^[0-9]+_", itemId)):
             itemId = "0_%s"%(itemId)
         self.cmd("var lkh = Zotero.Items.parseLibraryKeyHash(\"%s\");"%(itemId));
         self.cmd("var item = Zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);");
         self.cmd("var biblio = Zotero.QuickCopy.getContentFromItems(new Array(item), \"bibliography=%s\");"%(self.bibType))
-        self.writeToFile(tmpfile.name, "biblio.html")
-        html = tmpfile.read().decode('latin-1')
+        self.writeToFile(tmpfile, "biblio.html")
+        while(not(os.path.exists(tmpfile))):
+            time.sleep(0.1)
+        html = open(tmpfile).read().decode('latin-1')
         retval = html2rst(html)
-        tmpfile.close()
         return retval
 
     def writeToFile(self, filename, expr):
