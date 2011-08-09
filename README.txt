@@ -7,17 +7,28 @@ Background
 
 Zotero_ is a useful tool for managing citations.
 
-``zotero-plain`` consists of two parts (so far): a tool for including
-citations in reStructuredText_ documents, and a tool for interaction
-with emacs_. Both tools use Zotero_ via mozrepl_ to generate citations
-in various formats.
+``zotero-plain`` consists of two parts (so far): an extension to the Python
+docutils for including citations in reStructuredText_ documents, and
+elisp code for accessing Zotero from emacs_. Both tools interact with Zotero_ 
+via the jsbridge_ module, which we borrow from the mozmill_ project.
 
 Installation
 ------------
 
 1. Install Zotero_.
-2. Install mozrepl_.
-3. Start firefox. Using the Tools menu, start mozrepl_.
+2. Download the `mozmill source`_.
+3. Enter the mozmill source subdir `jsbridge/jsbridge/extension`, and say::
+
+      zip -r jsbridge.xpi *
+
+4. Install the jsbridge XPI in Firefox and restart.
+5. Enter the mozmill source subdir `jsbridge`, and say::
+
+      python ./setup.py install
+
+
+(Not fully working yet, but you can run ./testme.py after setting up as above.)
+
 
 reStructuredText
 ----------------
@@ -25,7 +36,6 @@ reStructuredText
 reStructuredText support depends on:
 
 1. docutils_.
-2. The `Beautiful Soup`_ HTML parser.
 
 Zotero_ citations may be added to a reStructuredText document using the
 following syntax::
@@ -108,6 +118,7 @@ zotero link with descriptive link text.
 To update the link text to reflect changed metadata from Zotero_, use
 ``C-c z u`` over the link.
 
+.. _`mozmill source`: https://github.com/mozautomation/mozmill
 .. _Zotero: http://www.zotero.org/
 .. _mozrepl: https://github.com/bard/mozrepl/wiki
 .. _emacs: http://www.gnu.org/software/emacs/
