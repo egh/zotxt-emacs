@@ -1,11 +1,5 @@
 # -*- coding: utf-8 -*-
 
-'''Alternative strategy
-    
-Obtain output in target format direct from processor.
-
-'''
-
 from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
@@ -14,37 +8,35 @@ import os, re, telnetlib, tempfile, time
 
 import jsbridge
 
-citation_format = "http://www.zotero.org/styles/bluebook-demo-x"
-
-#def flatten(listOfLists):
-#    return chain.from_iterable(listOfLists)
+citation_format = "http://www.zotero.org/styles/chicago-author-date"
+JSBRIDGE_PORT = 24242
+JSBRIDGE_TIMEOUT = 60. # timeout for jsbridge
 
 class Zotero(object):
     def __init__(self, **kwargs):
-        global citation_format
+        global citation_format, JSBRIDGE_PORT, JSBRIDGE_TIMEOUT
         self.bibType = kwargs.get('bibType',
                                   citation_format)
+        self.jsbridge_port = kwargs.get('jsbridge_port',
+                                        JSBRIDGE_PORT)
+        self.jsbridge_timeout = kwargs.get('jsbridge_timeout',
+                                           JSBRIDGE_TIMEOUT)
+        connection = self.firefox_connect()
+        self.methods = self.zotero_resource()
+
+    def firefox_connect(self):
+        # get the bridge and the back-channel
+        self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1",
+                                                                          self.jsbridge_port)
+
+        # set a timeout on jsbridge actions in order to ensure termination
+        # (don't think we'll be needing back_channel)
+        self.back_channel.timeout = self.bridge.timeout = self.jsbridge_timeout
+
+    def zotero_resource(self):
+        zotero = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://zotero-for-restructured-text/modules/export.js')")
+        return zotero
         
-        # setup bridge
-
-    
-    # This will be moved to the other side of the bridge, into the
-    # plugin JS.
-    def getItem(self, itemId):
-        tmpfile = self.get_tmpfile_name()
-        if not(re.match(r"^[0-9]+_", itemId)):
-            itemId = "0_%s"%(itemId)
-        self.cmd("var lkh = Zotero.Items.parseLibraryKeyHash(\"%s\");"%(itemId));
-        self.cmd("var item = Zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);");
-        self.cmd("var biblio = Zotero.QuickCopy.getContentFromItems(new Array(item), \"bibliography=%s\");"%(self.bibType))
-        self.writeToFile(tmpfile, "biblio.html")
-        while(not(os.path.exists(tmpfile))):
-            time.sleep(0.1)
-        html = open(tmpfile).read().decode('latin-1')
-        retval = html2rst(html)
-        print "ret of getItem: %s" % (type(retval),)
-        return retval
-
 class ZoteroSetupDirective(Directive):
     from docutils.parsers.rst.directives import unchanged
 
