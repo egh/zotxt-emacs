@@ -1,12 +1,19 @@
 # -*- coding: utf-8 -*-
 
+'''Alternative strategy
+    
+Obtain output in target format direct from processor.
+
+'''
+
 from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
 from itertools import chain
 import BeautifulSoup, os, re, telnetlib, tempfile, time
 
-citation_format = "http://www.zotero.org/styles/chicago-note-bibliography"
+citation_format = "http://www.zotero.org/styles/bluebook-demo-x"
+
 
 def flatten(listOfLists):
     return chain.from_iterable(listOfLists)
@@ -45,6 +52,7 @@ def html2rst(html):
                 children = [ walk(c) for c in node.contents ]
                 return nodes.paragraph("", "", *children)
     doc = BeautifulSoup.BeautifulSoup(html)
+    print "ret of html2rst: %s" % (type(doc),)
     return [ walk(c) for c in doc.contents ]
 
 class Zotero(object):
@@ -81,6 +89,7 @@ class Zotero(object):
             time.sleep(0.1)
         html = open(tmpfile).read().decode('latin-1')
         retval = html2rst(html)
+        print "ret of getItem: %s" % (type(retval),)
         return retval
 
     def writeToFile(self, filename, expr):
@@ -108,10 +117,21 @@ class ZoteroSetupDirective(Directive):
         return []
 
 class ZoteroDirective(Directive):
+    """
+    Zotero cite.
+
+    Zotero cites are generated in two passes: initial parse and
+    transform. During the initial parse, a 'pending' element is
+    generated which acts as a placeholder, storing the cite ID and
+    any options internally.  At a later stage in the processing, the
+    'pending' element is replaced by something else.
+    """
     required_arguments = 1
-    optional_arguments = 9999
-    has_content = True
+    optional_arguments = 1
+    final_argument_whitespace = True
+    has_content = False
 
     def run(self):
         z = Zotero()
-        return z.getItem(self.arguments[0])
+        ret = z.getItem(self.arguments[0])
+        return ret
