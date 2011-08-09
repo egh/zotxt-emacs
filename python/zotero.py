@@ -130,6 +130,11 @@ class ZoteroDirective(Directive):
     optional_arguments = 1
     final_argument_whitespace = True
     has_content = False
+    option_spec = {'locator': directives.unchanged,
+                   'label': directives.unchanged,
+                   'prefix': directives.unchanged,
+                   'suffix': directives.unchanged,
+                   'suppress-author', directives.flag}
 
     def run(self):
         z = Zotero()
