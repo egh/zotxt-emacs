@@ -84,7 +84,8 @@ class ZoteroTransformDirective(Transform):
     def apply(self):
         # Do stuff before trashing the node
         print "================ Citation run #2 (render cite and insert) ================"
-        print zotero_thing.getCitationBlock({'citationItems':[{'id':66}],'properties':{'noteIndex':1}})
+        res = zotero_thing.getCitationBlock({'citationItems':[{'id':66}],'properties':{'noteIndex':1}})
+        print res
         self.startnode.parent.remove(self.startnode)
         # Do stuff after trashing the node
         

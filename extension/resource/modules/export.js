@@ -46,7 +46,8 @@ function getCitationBlock (citation) {
 		zotero.debug("XXX  oops: "+e);
 	}
 	zotero.debug("XXX   ret: " + ret);
-	return ret;
+	zotero.debug("XXX   ret: " + ret.length);
+	return ret[0][1];
 };
 
 function getBibliographyData () {
