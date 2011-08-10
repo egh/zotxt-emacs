@@ -82,6 +82,7 @@ class ZoteroSetupDirective(Directive, ZoteroConnection):
 
 class ZoteroTransformDirective(Transform):
     default_priority = 510
+
     def unquote_u(self,source):
         res = unquote(source)
         if '%u' in res:
@@ -90,17 +91,17 @@ class ZoteroTransformDirective(Transform):
 
     def apply(self):
         global note_number
-        # Do stuff before trashing the node
         print "================ Citation run #2 (render cite and insert) ================"
+        ##
+        ## Need to figure out whether we're in a note and what the note number is somehow.
+        ## When that's been sorted ... we're done!
+        ##
         res = zotero_thing.getCitationBlock({'citationItems':[{'id':66}],'properties':{'noteIndex':note_number}})
         note_number += 1
         mystr = self.unquote_u(res)
-
-
-        print mystr
-        self.startnode.parent.remove(self.startnode)
-        # Do stuff after trashing the node
-        
+        # Don't know what the empty string as first argument is for.
+        newnode = nodes.generated('', mystr)
+        self.startnode.replace_self(newnode)
 
 class ZoteroDirective(Directive):
     """
@@ -136,7 +137,7 @@ class ZoteroDirective(Directive):
             item_list.append(itemID)
         # Probably no need to stash anything in the options, but there they are.
         #print self.options
-        pending = nodes.pending(ZoteroTransformDirective)
+        pending = nodes.pending(ZoteroTransformDirective, {'notenum': 1}, rawsource="big *bogus* thing")
         pending.details.update(self.options)
         self.state_machine.document.note_pending(pending)
         return [pending]
