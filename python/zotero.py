@@ -10,6 +10,7 @@ from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
 from itertools import chain
 import os, re, time
+from docutils.transforms import TransformError, Transform
 
 
 citation_format = "http://www.zotero.org/styles/chicago-author-date"
@@ -58,6 +59,14 @@ class ZoteroSetupDirective(Directive, ZoteroConnection):
             citation_format = self.options['format']
         return []
 
+class ZoteroTransformDirective(Transform):
+    default_priority = 780
+    def apply(self):
+        # Do stuff before trashing the node
+        self.startnode.parent.remove(self.startnode)
+        # Do stuff after trashing the node
+        
+
 class ZoteroDirective(Directive):
     """
     Zotero cite.
@@ -88,5 +97,9 @@ class ZoteroDirective(Directive):
         if not item_array.has_key(itemID):
             item_array[itemID] = True
             item_list.append(itemID)
-        print item_list
-        return []
+        # Probably no need to stash anything in the options, but there they are.
+        #print self.options
+        pending = nodes.pending(ZoteroTransformDirective)
+        pending.details.update(self.options)
+        self.state_machine.document.note_pending(pending)
+        return [pending]
