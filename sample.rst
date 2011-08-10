@@ -3,7 +3,7 @@
 ===================================
 
 .. zotero_setup::
-   :format: -- <<hello, we have a global container space>>
+   :format: chicago-author-date
 
 This is an example document which cites one source. [#]_ And another source. [#]_
 
