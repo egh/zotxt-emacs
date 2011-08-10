@@ -14,7 +14,7 @@ function getItemId (idStr) {
         idStr = "0_" + idStr;
 	}
 	var lkh = zotero.Items.parseLibraryKeyHash(idStr);
-    var item = Zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);
+    var item = zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);
 	return item.id;
 };
 

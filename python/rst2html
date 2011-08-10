@@ -6,8 +6,8 @@
 from docutils.parsers.rst import directives
 from zotero import ZoteroDirective, ZoteroSetupDirective
 
-directives.register_directive('zotero', ZoteroDirective)
 directives.register_directive('zotero_setup', ZoteroSetupDirective)
+directives.register_directive('zotero', ZoteroDirective)
 
 """
 A minimal front end to the Docutils Publisher, producing HTML.
@@ -20,7 +20,6 @@ except:
     pass
 
 from docutils.core import publish_cmdline, default_description
-
 
 description = ('Generates (X)HTML documents from standalone reStructuredText '
                'sources.  ' + default_description)
