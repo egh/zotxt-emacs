@@ -39,15 +39,16 @@ function registerItemIds (ids) {
 };
 
 function getCitationBlock (citation) {
-	zotero.debug("XXX citation: " + citation.citationItems + "\n");
 	try {
-		ret = zotero.reStructuredCSL.appendCitationCluster(citation);
+		var ret = zotero.reStructuredCSL.appendCitationCluster(citation);
 	} catch (e) {
 		zotero.debug("XXX  oops: "+e);
 	}
-	zotero.debug("XXX   ret: " + ret);
-	zotero.debug("XXX   ret: " + ret.length);
-	return ret[0][1];
+	zotero.debug("XXX ret[0][1]: " + ret[0][1]);
+	var retme = "" + ret[0][1];
+	// This should be binary Unicode now
+	retme = escape( retme );
+	return retme
 };
 
 function getBibliographyData () {

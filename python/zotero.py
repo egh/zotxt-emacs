@@ -11,11 +11,12 @@ from docutils.parsers.rst import directives
 from itertools import chain
 import os, re, time
 from docutils.transforms import TransformError, Transform
-
+from urllib import unquote
 
 citation_format = "http://www.zotero.org/styles/chicago-author-date"
 item_list = []
 item_array = {}
+note_number = 1
 zotero_thing = None;
 
 class ZoteroConnection(object):
@@ -81,11 +82,22 @@ class ZoteroSetupDirective(Directive, ZoteroConnection):
 
 class ZoteroTransformDirective(Transform):
     default_priority = 510
+    def unquote_u(self,source):
+        res = unquote(source)
+        if '%u' in res:
+            res = res.replace('%u','\\u').decode('unicode_escape')
+        return res
+
     def apply(self):
+        global note_number
         # Do stuff before trashing the node
         print "================ Citation run #2 (render cite and insert) ================"
-        res = zotero_thing.getCitationBlock({'citationItems':[{'id':66}],'properties':{'noteIndex':1}})
-        print res
+        res = zotero_thing.getCitationBlock({'citationItems':[{'id':66}],'properties':{'noteIndex':note_number}})
+        note_number += 1
+        mystr = self.unquote_u(res)
+
+
+        print mystr
         self.startnode.parent.remove(self.startnode)
         # Do stuff after trashing the node
         

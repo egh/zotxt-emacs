@@ -3,7 +3,7 @@
 ===================================
 
 .. zotero_setup::
-   :format: chicago-author-date
+   :format: chicago-note
 
 This is an example document which cites one source. [#]_ And another source. [#]_
 
