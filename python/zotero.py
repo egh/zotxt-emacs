@@ -34,6 +34,34 @@ zotero_thing = None;
 # verbose flag
 verbose_flag = False
 
+class ZoteroCleanup:
+    def walk(self, node):
+        if node == None:
+            return nodes.Text("")
+        elif ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
+            return nodes.Text(cleanString(unicode(node)))
+        else:
+            if (node.name == 'span'):
+                if (node.has_key('style') and (node['style'] == "font-style:italic;")):
+                    return nodes.emphasis(text="".join([ unicode(walk(c)) for c in node.contents ]))
+                else:
+                    return walk("".join([ str(c) for c in node.contents ]))
+            if (node.name == 'i'):
+                print node
+                return nodes.emphasis(text="".join([ unicode(walk(c)) for c in node.contents ]))
+            elif (node.name == 'p'):
+                children = [ walk(c) for c in node.contents ]
+                return nodes.paragraph("", "", *children)
+            elif (node.name == 'a'):
+                children = [ walk(c) for c in node.contents ]
+                return apply(nodes.reference, ["", ""] + children, { 'refuri' : node['href'] })
+            elif (node.name == 'div'):
+                children = [ walk(c) for c in node.contents ]
+                return nodes.paragraph("", "", *children)
+    doc = BeautifulSoup.BeautifulSoup(html)
+    return [ walk(c) for c in doc.contents ]
+
+
 class CitationVisitor(nodes.SparseNodeVisitor):
 
     def visit_pending(self, node):
