@@ -64,8 +64,24 @@ def html2rst (html):
     doc = BeautifulSoup.BeautifulSoup(html)
     return [ walk(c, True) for c in doc.contents ]
 
-class CitationVisitor(nodes.SparseNodeVisitor):
+class MultipleCitationVisitor(nodes.SparseNodeVisitor):
+    def visit_footnote(self, node):
+        # Should be able to insert magic here that
+        # converts in-footnote paras between
+        # citations to inline. Could also look at
+        # merging adjacent cites into proper multiple
+        # citations -- tricky, but we have full control
+        # in this phase of processing.
+        for pos in range(len(node.children) - 2, -1, -1):
+            print node.children[pos]
+            # Use isInstanceOf to check that we're on a pending node.
+            # Apart from that, this is straightforward.
+            if node.children[pos + 1].details.has_key('zoteroCitation'):
+                print 'Gotcha: merge to previous citation and pop node.'
+    def depart_footnote(self, node):
+        pass
 
+class NoteIndexVisitor(nodes.SparseNodeVisitor):
     def visit_pending(self, node):
         global cite_list, cite_pos, in_note, note_count
         if node.details.has_key('zoteroCitation'):
@@ -75,26 +91,13 @@ class CitationVisitor(nodes.SparseNodeVisitor):
             cite_pos += 1
     def depart_pending(self, node):
         pass
-
     def visit_footnote(self, node):
         global in_note, note_count
         in_note = True
         note_count += 1
-        
     def depart_footnote(self, node):
         global in_note
         in_note = False
-
-    def visit_paragraph(self, node):
-        # Should be able to insert magic here that
-        # converts in-footnote paras between
-        # citations to inline. Could also look at
-        # merging adjacent cites into proper multiple
-        # citations -- tricky, but we have full control
-        # in this phase of processing.
-        pass
-    def depart_paragraph(self, node):
-        pass
 
 class ZoteroConnection(object):
     def __init__(self, **kwargs):
@@ -147,9 +150,11 @@ class ZoteroSetupTransformDirective(Transform):
         self.startnode.parent.remove(self.startnode)
         ## Here we walk the document, checking note state and
         ## setting noteIndex value as we go along.
-        visitor = CitationVisitor(self.document)
+        visitor = NoteIndexVisitor(self.document)
         self.document.walkabout(visitor)
         cite_pos = 0
+        visitor = MultipleCitationVisitor(self.document)
+        self.document.walkabout(visitor)
 
 class ZoteroDirective(Directive):
     """
