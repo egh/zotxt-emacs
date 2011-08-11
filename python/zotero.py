@@ -35,11 +35,14 @@ zotero_thing = None;
 verbose_flag = False
 
 def html2rst (html):
-    def walk(node):
+    def walk(node, atTop=False):
         if node == None:
             return nodes.Text("")
         elif ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
-            return nodes.Text(node)
+            if atTop:
+                return nodes.generated('', unicode(node))
+            else:
+                return nodes.Text(unicode(node))
         else:
             if (node.name == 'span'):
                 if (node.has_key('style') and (node['style'] == "font-style:italic;")):
@@ -47,7 +50,7 @@ def html2rst (html):
                 else:
                     return walk("".join([ str(c) for c in node.contents ]))
             if (node.name == 'i'):
-                print node
+                #print node
                 return nodes.emphasis(text="".join([ unicode(walk(c)) for c in node.contents ]))
             elif (node.name == 'p'):
                 children = [ walk(c) for c in node.contents ]
@@ -59,7 +62,7 @@ def html2rst (html):
                 children = [ walk(c) for c in node.contents ]
                 return nodes.paragraph("", "", *children)
     doc = BeautifulSoup.BeautifulSoup(html)
-    return [ walk(c) for c in doc.contents ]
+    return [ walk(c, True) for c in doc.contents ]
 
 class CitationVisitor(nodes.SparseNodeVisitor):
 
@@ -233,7 +236,5 @@ class ZoteroTransformDirective(Transform):
         res = zotero_thing.getCitationBlock(citation)
         cite_pos += 1
         mystr = self.unquote_u(res)
-        mystr = html2rst(mystr)
-        # Don't know what the empty string as first argument is for.
-        newnode = nodes.generated('', mystr)
+        newnode = html2rst(mystr)
         self.startnode.replace_self(newnode)
