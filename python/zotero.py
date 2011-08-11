@@ -9,9 +9,9 @@ from docutils import nodes
 from docutils.parsers.rst import Directive
 from docutils.parsers.rst import directives
 from itertools import chain
-import os, re, time
 from docutils.transforms import TransformError, Transform
 from urllib import unquote
+import BeautifulSoup
 
 citation_format = "http://www.zotero.org/styles/chicago-author-date"
 
@@ -34,12 +34,12 @@ zotero_thing = None;
 # verbose flag
 verbose_flag = False
 
-class ZoteroCleanup:
-    def walk(self, node):
+def html2rst (html):
+    def walk(node):
         if node == None:
             return nodes.Text("")
         elif ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
-            return nodes.Text(cleanString(unicode(node)))
+            return nodes.Text(node)
         else:
             if (node.name == 'span'):
                 if (node.has_key('style') and (node['style'] == "font-style:italic;")):
@@ -61,7 +61,6 @@ class ZoteroCleanup:
     doc = BeautifulSoup.BeautifulSoup(html)
     return [ walk(c) for c in doc.contents ]
 
-
 class CitationVisitor(nodes.SparseNodeVisitor):
 
     def visit_pending(self, node):
@@ -69,7 +68,7 @@ class CitationVisitor(nodes.SparseNodeVisitor):
         if node.details.has_key('zoteroCitation'):
             # Do something about the number
             if in_note:
-                cite_list[cite_pos]['noteIndex'] = note_count
+                cite_list[cite_pos][0]['noteIndex'] = note_count
             cite_pos += 1
     def depart_pending(self, node):
         pass
@@ -179,8 +178,13 @@ class ZoteroDirective(Directive):
         for key in ['locator', 'label', 'prefix', 'suffix']:
             if not self.options.has_key(key):
                 self.options[key] = ''
+        # The noteIndex and indexNumber belong in properties,
+        # but we fudge that in this phase, before citations are
+        # composed -- we'll pull the values out of the first cite in
+        # the cluster in the composition pass.
+
         details = {
-            'itemID':itemID,
+            'id':itemID,
             'noteIndex':0,
             'indexNumber': len(cite_list),
             'locator': self.options['locator'],
@@ -191,7 +195,7 @@ class ZoteroDirective(Directive):
         if not item_array.has_key(itemID):
             item_array[itemID] = True
             item_list.append(itemID)
-        cite_list.append(details)
+        cite_list.append([details])
         pending = nodes.pending(ZoteroTransformDirective)
         pending.details.update(self.options)
         pending.details['zoteroCitation'] = True
@@ -219,25 +223,17 @@ class ZoteroTransformDirective(Transform):
         global note_number, cite_pos, cite_list, verbose_flag
         if verbose_flag:
             print "--- Zotero4reST: Citation run #2 (render cite and insert) ---"
-        details = cite_list[cite_pos]
         citation = {
-            'citationItems':[
-                {
-                    'id': details['itemID'],
-                    'prefix': details['prefix'],
-                    'suffix': details['suffix'],
-                    'locator': details['locator'],
-                    'label': details['label']
-                }
-            ],
+            'citationItems':cite_list[cite_pos],
             'properties': {
                 'index': cite_pos,
-                'noteIndex': details['noteIndex']
+                'noteIndex': cite_list[cite_pos][0]['noteIndex']
             }
         }
         res = zotero_thing.getCitationBlock(citation)
         cite_pos += 1
         mystr = self.unquote_u(res)
+        mystr = html2rst(mystr)
         # Don't know what the empty string as first argument is for.
         newnode = nodes.generated('', mystr)
         self.startnode.replace_self(newnode)
