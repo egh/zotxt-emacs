@@ -27,7 +27,7 @@ function instantiateCiteProc (styleid) {
 		zotero.debug("XXX does this exist?: " + styleid);
 		var style = zotero.Styles.get(styleid);
 		zotero.reStructuredCSL = style.csl;
-		zotero.reStructuredCSL.setOutputFormat("text");
+		zotero.reStructuredCSL.setOutputFormat("html");
 	} catch (e) {
 		zotero.debug("XXX instantiateCiteProc oops: " + e);
 	}
