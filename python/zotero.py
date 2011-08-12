@@ -65,20 +65,30 @@ def html2rst (html):
     return [ walk(c, True) for c in doc.contents ]
 
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
-    def visit_footnote(self, node):
-        # Should be able to insert magic here that
-        # converts in-footnote paras between
-        # citations to inline. Could also look at
-        # merging adjacent cites into proper multiple
-        # citations -- tricky, but we have full control
-        # in this phase of processing.
-        for pos in range(len(node.children) - 2, -1, -1):
-            print node.children[pos]
-            # Use isInstanceOf to check that we're on a pending node.
-            # Apart from that, this is straightforward.
-            if node.children[pos + 1].details.has_key('zoteroCitation'):
-                print 'Gotcha: merge to previous citation and pop node.'
-    def depart_footnote(self, node):
+    def visit_pending(self, node):
+        global cite_pos
+        children = node.parent.children
+        for pos in range(0, len(children) - 1, 1):
+            thisIsPending = isinstance(children[pos], nodes.pending)
+            thisIsZotero = children[pos].details.has_key('zoteroCitation')
+            nextIsPendingToo = isinstance(children[pos + 1], nodes.pending)
+            nextIsZotero = children[pos + 1].details.has_key('zoteroCitation')
+            
+            if thisIsPending and thisIsZotero:
+                offset = 0
+                while nextIsPendingToo and nextIsZotero:
+                    offset += 1
+                    if pos + offset > len(children) - 1:
+                        break
+
+                    nextIsPendingToo = isinstance(children[pos + offset], nodes.pending)
+                    nextIsZotero = children[pos + offset].details.has_key('zoteroCitation')
+
+                    children[pos + offset].details.pop('zoteroCitation')
+                    cite_list[cite_pos].append(cite_list[cite_pos + 1][0])
+                    cite_list.pop(cite_pos + 1)
+        cite_pos += 1
+    def depart_pending(self, node):
         pass
 
 class NoteIndexVisitor(nodes.SparseNodeVisitor):
@@ -155,6 +165,7 @@ class ZoteroSetupTransformDirective(Transform):
         cite_pos = 0
         visitor = MultipleCitationVisitor(self.document)
         self.document.walkabout(visitor)
+        cite_pos = 0
 
 class ZoteroDirective(Directive):
     """
@@ -229,17 +240,20 @@ class ZoteroTransformDirective(Transform):
 
     def apply(self):
         global note_number, cite_pos, cite_list, verbose_flag
-        if verbose_flag:
-            print "--- Zotero4reST: Citation run #2 (render cite and insert) ---"
-        citation = {
-            'citationItems':cite_list[cite_pos],
-            'properties': {
-                'index': cite_pos,
-                'noteIndex': cite_list[cite_pos][0]['noteIndex']
+        if not self.startnode.details.has_key('zoteroCitation'):
+            self.startnode.parent.remove(self.startnode)
+        else:
+            if verbose_flag:
+                print "--- Zotero4reST: Citation run #2 (render cite and insert) ---"
+            citation = {
+                'citationItems':cite_list[cite_pos],
+                'properties': {
+                    'index': cite_pos,
+                    'noteIndex': cite_list[cite_pos][0]['noteIndex']
+                }
             }
-        }
-        res = zotero_thing.getCitationBlock(citation)
-        cite_pos += 1
-        mystr = self.unquote_u(res)
-        newnode = html2rst(mystr)
-        self.startnode.replace_self(newnode)
+            res = zotero_thing.getCitationBlock(citation)
+            cite_pos += 1
+            mystr = self.unquote_u(res)
+            newnode = html2rst(mystr)
+            self.startnode.replace_self(newnode)
