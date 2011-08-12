@@ -7,13 +7,21 @@ from jsbridge import wait_and_create_network, JSObject
 
 from docutils import nodes
 from docutils.parsers.rst import Directive
-from docutils.parsers.rst import directives
+from docutils.parsers.rst import directives, roles
 from itertools import chain
 from docutils.transforms import TransformError, Transform
 from urllib import unquote
 import BeautifulSoup
 
+class smallcaps(nodes.Inline, nodes.TextElement): pass
+roles.register_local_role("smallcaps", smallcaps)
+
+
 citation_format = "http://www.zotero.org/styles/chicago-author-date"
+
+### How to set up custom text role in zotero.py?
+
+
 
 # unique items
 item_list = []
@@ -47,6 +55,8 @@ def html2rst (html):
             if (node.name == 'span'):
                 if (node.has_key('style') and (node['style'] == "font-style:italic;")):
                     return nodes.emphasis(text="".join([ unicode(walk(c)) for c in node.contents ]))
+                elif (node.has_key('style') and (node['style'] == "font-variant:small-caps;")):
+                    return smallcaps(text="".join([ unicode(walk(c)) for c in node.contents ]))
                 else:
                     return walk("".join([ str(c) for c in node.contents ]))
             if (node.name == 'i'):
@@ -62,27 +72,39 @@ def html2rst (html):
                 children = [ walk(c) for c in node.contents ]
                 return nodes.paragraph("", "", *children)
     doc = BeautifulSoup.BeautifulSoup(html)
-    return [ walk(c, True) for c in doc.contents ]
+    ret =  [ walk(c, True) for c in doc.contents ]
+    return nodes.paragraph("", "", *ret)
+
+def isZoteroCite(node):
+    ret = False
+    isPending = isinstance(node, nodes.pending)
+    isZotero = isPending and node.details.has_key('zoteroCitation')
+    if isZotero:
+        ret = True
+    return ret
+
+class MergeCitationToPrecedingParagraphVisitor(nodes.SparseNodeVisitor):
+    def visit_paragraph(self, node):
+        print node.attributes
+        pass
+    def depart_paragraph(self, node):
+        pass
 
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
     def visit_pending(self, node):
         global cite_pos
         children = node.parent.children
         for pos in range(0, len(children) - 1, 1):
-            thisIsPending = isinstance(children[pos], nodes.pending)
-            thisIsZotero = children[pos].details.has_key('zoteroCitation')
-            nextIsPendingToo = isinstance(children[pos + 1], nodes.pending)
-            nextIsZotero = children[pos + 1].details.has_key('zoteroCitation')
             
-            if thisIsPending and thisIsZotero:
+            if isZoteroCite(children[pos]) and isZoteroCite(children[pos + 1]):
                 offset = 0
-                while nextIsPendingToo and nextIsZotero:
+                nextIsZoteroCite = True;
+                while nextIsZoteroCite:
                     offset += 1
                     if pos + offset > len(children) - 1:
                         break
 
-                    nextIsPendingToo = isinstance(children[pos + offset], nodes.pending)
-                    nextIsZotero = children[pos + offset].details.has_key('zoteroCitation')
+                    nextIsZoteroCite = isZoteroCite(children[pos + offset])
 
                     children[pos + offset].details.pop('zoteroCitation')
                     cite_list[cite_pos].append(cite_list[cite_pos + 1][0])
@@ -140,7 +162,7 @@ class ZoteroSetupDirective(Directive, ZoteroConnection):
     option_spec = {'format': unchanged}
     def run(self):
         global citation_format, zotero_thing, verbose_flag
-        if verbose_flag:
+        if verbose_flag == 1:
             print "=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ==="
         if self.options.has_key('format'):
             citation_format = self.options['format']
@@ -154,7 +176,7 @@ class ZoteroSetupTransformDirective(Transform):
     default_priority = 500
     def apply(self):
         global zotero_thing, cite_pos, verbose_flag
-        if verbose_flag:
+        if verbose_flag == 1:
             print "=== Zotero4reST: Setup run #2 (load IDs to processor) ==="
         zotero_thing.registerItemIds(item_list)
         self.startnode.parent.remove(self.startnode)
@@ -191,7 +213,7 @@ class ZoteroDirective(Directive):
     def run(self):
         global citation_format, item_list, item_array, zotero_thing, cite_list, verbose_flag
         # XXX Should complain if zotero_setup:: declaration was missing.
-        if verbose_flag:
+        if verbose_flag == 1:
             print "--- Zotero4reST: Citation run #1 (record ID) ---"
         itemID = int(zotero_thing.getItemId(self.arguments[0]))
         for key in ['locator', 'label', 'prefix', 'suffix']:
@@ -243,7 +265,7 @@ class ZoteroTransformDirective(Transform):
         if not self.startnode.details.has_key('zoteroCitation'):
             self.startnode.parent.remove(self.startnode)
         else:
-            if verbose_flag:
+            if verbose_flag == 1:
                 print "--- Zotero4reST: Citation run #2 (render cite and insert) ---"
             citation = {
                 'citationItems':cite_list[cite_pos],
@@ -256,4 +278,17 @@ class ZoteroTransformDirective(Transform):
             cite_pos += 1
             mystr = self.unquote_u(res)
             newnode = html2rst(mystr)
-            self.startnode.replace_self(newnode)
+
+            moved = False
+            parent = self.startnode.parent
+            for pos in range(len(parent.children)-1, -1, -1):
+                if parent.children[pos] == self.startnode:
+                    if pos > 0 and isinstance(parent.children[pos - 1], nodes.paragraph):
+                        parent.children[pos - 1] += nodes.generated("", " ")
+                        for mychild in newnode:
+                            parent.children[pos - 1] += mychild
+                        moved = True
+            if moved:
+                self.startnode.parent.remove(self.startnode)
+            else:
+                self.startnode.replace_self(newnode)

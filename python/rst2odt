@@ -16,8 +16,10 @@ except:
     pass
 
 from docutils.core import publish_cmdline_to_binary, default_description
-from docutils.writers.odf_odt import Writer, Reader
+from docutils.writers.odf_odt import Writer, Reader, ODFTranslator, SubElement
 from docutils.parsers.rst import directives
+from docutils.writers import Writer as WriterBase
+
 from zotero import ZoteroDirective, ZoteroSetupDirective
 
 directives.register_directive('zotero', ZoteroDirective)
@@ -26,8 +28,22 @@ directives.register_directive('zotero_setup', ZoteroSetupDirective)
 description = ('Generates OpenDocument/OpenOffice/ODF documents from '
                'standalone reStructuredText sources.  ' + default_description)
 
+class ODFTranslatorWithSmallCaps(ODFTranslator):
 
-writer = Writer()
+    def visit_smallcaps(self, node):
+        el = SubElement(self.current_element, 'text:span',
+            attrib={'text:style-name': 'rststyle-small-caps'})
+        self.set_current_element(el)
+
+    def depart_smallcaps(self, node):
+        self.set_to_parent()
+
+class WriterWithSmallCaps(Writer):
+    def __init__(self):
+        WriterBase.__init__(self)
+        self.translator_class = ODFTranslatorWithSmallCaps
+
+writer = WriterWithSmallCaps()
 reader = Reader()
 output = publish_cmdline_to_binary(reader=reader, writer=writer,
     description=description)

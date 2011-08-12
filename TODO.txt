@@ -1,0 +1,24 @@
+===========================
+Zotero for reStructuredText
+===========================
+-----------------
+Things left to do
+-----------------
+
+* In-text styles should be auto-detected, with any footnotes
+  that consist entirely of zotero:: directives moved into the
+  main text, and their footnotes quashed. Priority of the
+  citation rendering passes might need to be adjusted, to
+  catch notes in the correct state for this.
+
+* rst2pdf doesn't work. As touchups will often be needed
+  anyway, maybe rst2odf -> odf -> print to PDF is an acceptable
+  processing chain?
+
+* EasyInstall should maybe be hooked up, to get zotero.py,
+  the processing scripts and the modified styles.odt (for
+  small-caps support) onto the user's system with a minimum
+  of fuss.
+
+* Maybe the variant rst2xxx scripts should be given separate
+  names, like zrst2xxx?

@@ -3,25 +3,47 @@
 # $Id: rst2html.py 4564 2006-05-21 20:44:42Z wiemann $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
-from docutils.parsers.rst import directives
-from zotero import ZoteroDirective, ZoteroSetupDirective
-
-directives.register_directive('zotero_setup', ZoteroSetupDirective)
-directives.register_directive('zotero', ZoteroDirective)
-
 """
-A minimal front end to the Docutils Publisher, producing HTML.
+A front end to the Docutils Publisher, producing OpenOffice documents.
 """
 
+import sys
 try:
     import locale
     locale.setlocale(locale.LC_ALL, '')
 except:
     pass
 
-from docutils.core import publish_cmdline, default_description
+from docutils.core import publish_cmdline_to_binary, default_description
+from docutils.writers.html4css1 import Writer, HTMLTranslator
+from docutils.readers.standalone import Reader
+from docutils.writers import Writer as WriterBase
 
-description = ('Generates (X)HTML documents from standalone reStructuredText '
-               'sources.  ' + default_description)
 
-publish_cmdline(writer_name='html', description=description)
+from docutils.parsers.rst import directives
+
+from zotero import ZoteroDirective, ZoteroSetupDirective
+
+directives.register_directive('zotero_setup', ZoteroSetupDirective)
+directives.register_directive('zotero', ZoteroDirective)
+
+description = ('Generates HTML with small-caps support from '
+               'standalone reStructuredText sources.  ' + default_description)
+
+class HTMLTranslatorWithSmallCaps(HTMLTranslator):
+
+    def visit_smallcaps(self, node):
+        self.body.append(self.starttag(node, 'span style="font-variant:small-caps"', ''))
+        
+    def depart_smallcaps(self, node):
+        self.body.append('</span>')
+
+class WriterWithSmallCaps(Writer):
+    def __init__(self):
+        WriterBase.__init__(self)
+        self.translator_class = HTMLTranslatorWithSmallCaps
+
+writer = WriterWithSmallCaps()
+reader = Reader()
+output = publish_cmdline_to_binary(reader=reader, writer=writer,
+    description=description)

@@ -16,18 +16,16 @@ Installation
 ------------
 
 1. Install Zotero_.
-2. Download the `mozmill source`_.
-3. Enter the mozmill source subdir `jsbridge/jsbridge/extension`, and say::
+2. Install mozrepl_
+3. Download the `mozmill source`_.
+4. Enter the mozmill source subdir `jsbridge/jsbridge/extension`, and say::
 
-      zip -r jsbridge.xpi *
+      ./build.sh jsbridge.xpi *
 
-4. Install the jsbridge XPI in Firefox and restart.
-5. Enter the mozmill source subdir `jsbridge`, and say::
+5. Install the jsbridge XPI in Firefox and restart.
+6. Enter the mozmill source subdir `jsbridge`, and say::
 
       python ./setup.py install
-
-
-(Not fully working yet, but you can run ./testme.py after setting up as above.)
 
 
 reStructuredText
