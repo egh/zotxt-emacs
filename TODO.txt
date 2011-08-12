@@ -22,3 +22,12 @@ Things left to do
 
 * Maybe the variant rst2xxx scripts should be given separate
   names, like zrst2xxx?
+
+* With a bit more work (later) it should be possible to
+  embed the JSON for cited items in a dump of the original
+  source document, in a ReST comment block. We could then
+  provide an option to process with the embedded data. There
+  would be some details to work out (esp. where citeproc-js 
+  would reside in that case), but it would give us a portable
+  copy of the document, which would be very handy in
+  production.
