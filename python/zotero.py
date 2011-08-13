@@ -49,14 +49,11 @@ def html2rst (html):
         str = str.replace("&#32;", ">")
         str = str.replace("&#160;", u"\u00A0")
         return str
-    def walk(node, atTop=False):
+    def walk(node):
         if node == None:
             return nodes.Text("")
         elif ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
-            if atTop:
-                return nodes.generated('', cleanString(unicode(node)))
-            else:
-                return nodes.Text(cleanString(unicode(node)))
+            return nodes.Text(cleanString(unicode(node)), rawsource=cleanString(unicode(node)))
         else:
             if (node.name == 'span'):
                 if (node.has_key('style') and (node['style'] == "font-style:italic;")):
@@ -78,7 +75,7 @@ def html2rst (html):
                 children = [ walk(c) for c in node.contents ]
                 return nodes.paragraph("", "", *children)
     doc = BeautifulSoup.BeautifulSoup(html)
-    ret =  [ walk(c, True) for c in doc.contents ]
+    ret =  [ walk(c) for c in doc.contents ]
     return nodes.paragraph("", "", *ret)
 
 def isZoteroCite(node):
@@ -287,11 +284,16 @@ class ZoteroTransformDirective(Transform):
             parent = self.startnode.parent
             for pos in range(len(parent.children)-1, -1, -1):
                 if parent.children[pos] == self.startnode:
+                    if pos < len(parent.children) - 1 and isinstance(parent.children[pos + 1], nodes.paragraph):
+                        print "GOTCHA!"
+                        raw = newnode.children[-1].rawsource
+                        print raw
                     if pos > 0 and isinstance(parent.children[pos - 1], nodes.paragraph):
                         parent.children[pos - 1] += nodes.generated("", " ")
                         for mychild in newnode:
                             parent.children[pos - 1] += mychild
                         moved = True
+                        
             if moved:
                 self.startnode.parent.remove(self.startnode)
             else:
