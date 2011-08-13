@@ -12,6 +12,7 @@ from itertools import chain
 from docutils.transforms import TransformError, Transform
 from urllib import unquote
 import BeautifulSoup
+import sys
 
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
@@ -41,6 +42,10 @@ zotero_thing = None;
 
 # verbose flag
 verbose_flag = False
+
+# processing progress flags
+started_recording_ids = False
+started_transforming_cites = False
 
 def html2rst (html):
     def cleanString(str):
@@ -178,7 +183,7 @@ class ZoteroSetupTransformDirective(Transform):
     def apply(self):
         global zotero_thing, cite_pos, verbose_flag
         if verbose_flag == 1:
-            print "=== Zotero4reST: Setup run #2 (load IDs to processor) ==="
+            print "\n=== Zotero4reST: Setup run #2 (load IDs to processor) ==="
         zotero_thing.registerItemIds(item_list)
         self.startnode.parent.remove(self.startnode)
         ## Here we walk the document, checking note state and
@@ -212,10 +217,11 @@ class ZoteroDirective(Directive):
                    'suppress-author': directives.flag}
 
     def run(self):
-        global citation_format, item_list, item_array, zotero_thing, cite_list, verbose_flag
+        global citation_format, item_list, item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
         # XXX Should complain if zotero_setup:: declaration was missing.
-        if verbose_flag == 1:
+        if verbose_flag == 1 and not started_recording_ids:
             print "--- Zotero4reST: Citation run #1 (record ID) ---"
+            started_recording_ids = True
         itemID = int(zotero_thing.getItemId(self.arguments[0]))
         for key in ['locator', 'label', 'prefix', 'suffix']:
             if not self.options.has_key(key):
@@ -242,6 +248,9 @@ class ZoteroDirective(Directive):
         pending.details.update(self.options)
         pending.details['zoteroCitation'] = True
         self.state_machine.document.note_pending(pending)
+        if verbose_flag == 1:
+            sys.stdout.write(".")
+            sys.stdout.flush()
         return [pending]
 
 class ZoteroTransformDirective(Transform):
@@ -262,12 +271,16 @@ class ZoteroTransformDirective(Transform):
         return res
 
     def apply(self):
-        global note_number, cite_pos, cite_list, verbose_flag
+        global note_number, cite_pos, cite_list, verbose_flag, started_transforming_cites
         if not self.startnode.details.has_key('zoteroCitation'):
             self.startnode.parent.remove(self.startnode)
-        else:
             if verbose_flag == 1:
+                sys.stdout.write("<")
+                sys.stdout.flush()
+        else:
+            if verbose_flag == 1 and not started_transforming_cites:
                 print "--- Zotero4reST: Citation run #2 (render cite and insert) ---"
+                started_transforming_cites = True
             citation = {
                 'citationItems':cite_list[cite_pos],
                 'properties': {
@@ -279,6 +292,9 @@ class ZoteroTransformDirective(Transform):
             cite_pos += 1
             mystr = self.unquote_u(res)
             newnode = html2rst(mystr)
+            if verbose_flag == 1:
+                sys.stdout.write(".")
+                sys.stdout.flush()
 
             moved = False
             parent = self.startnode.parent
