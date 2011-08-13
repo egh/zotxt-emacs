@@ -43,14 +43,20 @@ zotero_thing = None;
 verbose_flag = False
 
 def html2rst (html):
+    def cleanString(str):
+        str = str.replace("&#38;", "&")
+        str = str.replace("&#60;", "<")
+        str = str.replace("&#32;", ">")
+        str = str.replace("&#160;", u"\u00A0")
+        return str
     def walk(node, atTop=False):
         if node == None:
             return nodes.Text("")
         elif ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
             if atTop:
-                return nodes.generated('', unicode(node))
+                return nodes.generated('', cleanString(unicode(node)))
             else:
-                return nodes.Text(unicode(node))
+                return nodes.Text(cleanString(unicode(node)))
         else:
             if (node.name == 'span'):
                 if (node.has_key('style') and (node['style'] == "font-style:italic;")):
@@ -83,22 +89,20 @@ def isZoteroCite(node):
         ret = True
     return ret
 
-class MergeCitationToPrecedingParagraphVisitor(nodes.SparseNodeVisitor):
-    def visit_paragraph(self, node):
-        print node.attributes
-        pass
-    def depart_paragraph(self, node):
-        pass
-
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
     def visit_pending(self, node):
         global cite_pos
         children = node.parent.children
-        for pos in range(0, len(children) - 1, 1):
+        # Start at THIS child's offset.
+        for start in range(0, len(children), 1):
+            if children[start] == node:
+                break
+            cite_pos += 1
+        for pos in range(start, len(children) - 1, 1):
             
             if isZoteroCite(children[pos]) and isZoteroCite(children[pos + 1]):
-                offset = 0
                 nextIsZoteroCite = True;
+                offset = 0
                 while nextIsZoteroCite:
                     offset += 1
                     if pos + offset > len(children) - 1:
