@@ -285,15 +285,27 @@ class ZoteroTransformDirective(Transform):
             for pos in range(len(parent.children)-1, -1, -1):
                 if parent.children[pos] == self.startnode:
                     if pos < len(parent.children) - 1 and isinstance(parent.children[pos + 1], nodes.paragraph):
-                        print "GOTCHA!"
-                        raw = newnode.children[-1].rawsource
-                        print raw
+                        quashed_period = False
+                        following_para = parent.children[pos + 1]
+                        if len(following_para.children) and isinstance(following_para.children[0], nodes.Text):
+                            if following_para.children[0].rawsource[0] in [",", ";"]:
+                                if isinstance(newnode.children[-1], nodes.Text):
+                                    if newnode.children[-1].rawsource[-1] == ".":
+                                        raw = newnode.children[-1].rawsource
+                                        newchild = nodes.Text(raw[:-1], rawsource=raw[:-1])
+                                        newnode.remove(newnode.children[-1])
+                                        newnode += newchild
+                                        quashed_period = True
+                        if not quashed_period:
+                            newnode += nodes.Text(" ")
+                        for child in following_para.children:
+                            newnode += child
+                        parent.remove(following_para)
                     if pos > 0 and isinstance(parent.children[pos - 1], nodes.paragraph):
                         parent.children[pos - 1] += nodes.generated("", " ")
                         for mychild in newnode:
                             parent.children[pos - 1] += mychild
                         moved = True
-                        
             if moved:
                 self.startnode.parent.remove(self.startnode)
             else:
