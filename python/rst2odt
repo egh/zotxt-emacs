@@ -24,7 +24,7 @@ from docutils import nodes
 from zotero import ZoteroDirective, ZoteroSetupDirective
 
 directives.register_directive('zotero', ZoteroDirective)
-directives.register_directive('zotero_setup', ZoteroSetupDirective)
+directives.register_directive('zotero-setup', ZoteroSetupDirective)
 
 description = ('Generates OpenDocument/OpenOffice/ODF documents from '
                'standalone reStructuredText sources.  ' + default_description)

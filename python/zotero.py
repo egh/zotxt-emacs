@@ -13,6 +13,7 @@ from docutils.transforms import TransformError, Transform
 from urllib import unquote
 import BeautifulSoup
 import sys
+from docutils.utils import ExtensionOptionError
 
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
@@ -218,7 +219,14 @@ class ZoteroDirective(Directive):
 
     def run(self):
         global citation_format, item_list, item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
-        # XXX Should complain if zotero_setup:: declaration was missing.
+        if not zotero_thing:
+            ## A kludge, but makes a big noise about the extension syntax for clarity.
+            print "#####"
+            print "##"
+            print "##  Must set zotero-setup:: directive before zotero:: directive is used."
+            print "##"
+            print "#####"
+            raise ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
         if verbose_flag == 1 and not started_recording_ids:
             print "--- Zotero4reST: Citation run #1 (record ID) ---"
             started_recording_ids = True

@@ -2,8 +2,6 @@
  ``zotero-plain`` example document
 ==================================
 
-.. zotero_setup::
-   :format: chicago-note
 
 This is an example [#]_ document which cites one source. [#]_ And another source. [#]_ And another. [#]_
 

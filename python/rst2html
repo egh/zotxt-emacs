@@ -24,7 +24,7 @@ from docutils.parsers.rst import directives
 
 from zotero import ZoteroDirective, ZoteroSetupDirective
 
-directives.register_directive('zotero_setup', ZoteroSetupDirective)
+directives.register_directive('zotero-setup', ZoteroSetupDirective)
 directives.register_directive('zotero', ZoteroDirective)
 
 description = ('Generates HTML with small-caps support from '
