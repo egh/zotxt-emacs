@@ -53,3 +53,11 @@ function getCitationBlock (citation) {
 
 function getBibliographyData () {
 };
+
+function isInTextStyle() {
+	var ret = false;
+	if ('in-text' === zotero.reStructuredCSL.opt.xclass) {
+		ret = true;
+	}
+	return ret;
+};

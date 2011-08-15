@@ -2,8 +2,11 @@
  ``zotero-plain`` example document
 ==================================
 
+.. zotero-setup::
+   :format: chicago-author-date
 
 This is an example [#]_ document which cites one source. [#]_ And another source. [#]_ And another. [#]_
+With a final one here. [#]_
 
 .. [#] Zotero directives should always be placed inside a note. Author-date styles will
    (eventually) be adjusted automagically during ReST processor. In note styles,
@@ -14,7 +17,6 @@ This is an example [#]_ document which cites one source. [#]_ And another source
 
 
 .. [#] 
-
    .. zotero:: DDW6JB2S   Brooker
       :prefix: Affixes can be added to a cite as an option. For special formatting
                in cite affixes, use the ersatz-HTML markup recognized by the CSL processor. 
@@ -32,3 +34,5 @@ This is an example [#]_ document which cites one source. [#]_ And another source
    .. zotero:: MAJBZZZ4   Swan, Michael. Practical English Usage. 3rd ed. Oxford University Press, USA, 2005.
       :suffix: <i> </i>(note that <sc>Small Caps</sc> are available in the customized
                processing scripts)
+
+.. [#] Final Footnote.

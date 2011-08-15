@@ -48,6 +48,13 @@ verbose_flag = False
 started_recording_ids = False
 started_transforming_cites = False
 
+# for tracking mobile nodes
+# can't seem to catch document.footnotes with list content ... ?
+# so we roll our own.
+footnodes = []
+footnode_pos = 0
+autonomous_mobile_footnode_indexes = []
+
 def html2rst (html):
     def cleanString(str):
         str = str.replace("&#38;", "&")
@@ -94,13 +101,14 @@ def isZoteroCite(node):
 
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
     def visit_pending(self, node):
-        global cite_pos
+        global cite_list, cite_pos
         children = node.parent.children
         # Start at THIS child's offset.
         for start in range(0, len(children), 1):
             if children[start] == node:
                 break
-            cite_pos += 1
+            elif isZoteroCite(node):
+                cite_pos += 1
         for pos in range(start, len(children) - 1, 1):
             
             if isZoteroCite(children[pos]) and isZoteroCite(children[pos + 1]):
@@ -110,13 +118,12 @@ class MultipleCitationVisitor(nodes.SparseNodeVisitor):
                     offset += 1
                     if pos + offset > len(children) - 1:
                         break
-
                     nextIsZoteroCite = isZoteroCite(children[pos + offset])
-
                     children[pos + offset].details.pop('zoteroCitation')
                     cite_list[cite_pos].append(cite_list[cite_pos + 1][0])
                     cite_list.pop(cite_pos + 1)
-        cite_pos += 1
+        if isZoteroCite(node):
+            cite_pos += 1
     def depart_pending(self, node):
         pass
 
@@ -135,8 +142,36 @@ class NoteIndexVisitor(nodes.SparseNodeVisitor):
         in_note = True
         note_count += 1
     def depart_footnote(self, node):
-        global in_note
+        global in_note, footnodes
+        onlyZotero = True
+        for child in node.children:
+            if not isZoteroCite(child):
+                onlyZotero = False
+        if onlyZotero:
+            ## Abuse attributes segment
+            node.attributes['onlyZotero'] = True
+        footnodes.append(node)
         in_note = False
+
+class MobileFootNodeVisitor(nodes.SparseNodeVisitor):
+    def visit_footnote_reference(self, node):
+        global footnodes, footnode_pos, autonomous_mobile_footnode_indexes
+        if footnodes[footnode_pos].attributes.has_key('onlyZotero'):
+            parent = footnodes[footnode_pos].parent
+            footnote = footnodes[footnode_pos]
+            # Only footnotes consisting entirely of Zotero notes are affected
+            # by this transform. These are always wrapped in a single paragraph,
+            # which is the sole child of the footnote.
+            node.replace_self(nodes.generated('', '', *footnote.children[0].children))
+            parent.remove(footnote)
+            autonomous_mobile_footnode_indexes.append(footnode_pos)
+    def depart_footnote_reference(self, node):
+        global footnode_pos
+        footnode_pos += 1
+    def visit_smallcaps(self, node):
+        pass
+    def depart_smallcaps(self, node):
+        pass
 
 class ZoteroConnection(object):
     def __init__(self, **kwargs):
@@ -174,12 +209,18 @@ class ZoteroSetupDirective(Directive, ZoteroConnection):
         if self.options.has_key('format'):
             citation_format = self.options['format']
         zotero_thing.instantiateCiteProc(citation_format);
-        pending = nodes.pending(ZoteroSetupTransformDirective)
+        pending = nodes.pending(ZoteroSetupTransform)
         pending.details.update(self.options)
         self.state_machine.document.note_pending(pending)
-        return [pending]
+        ret = [pending]
+        if zotero_thing.isInTextStyle():
+            pending2 = nodes.pending(ZoteroCleanupTransform)
+            pending2.details.update(self.options)
+            self.state_machine.document.note_pending(pending2)
+            ret.append(pending2)
+        return ret
 
-class ZoteroSetupTransformDirective(Transform):
+class ZoteroSetupTransform(Transform):
     default_priority = 500
     def apply(self):
         global zotero_thing, cite_pos, verbose_flag
@@ -187,14 +228,23 @@ class ZoteroSetupTransformDirective(Transform):
             print "\n=== Zotero4reST: Setup run #2 (load IDs to processor) ==="
         zotero_thing.registerItemIds(item_list)
         self.startnode.parent.remove(self.startnode)
-        ## Here we walk the document, checking note state and
-        ## setting noteIndex value as we go along.
         visitor = NoteIndexVisitor(self.document)
         self.document.walkabout(visitor)
         cite_pos = 0
         visitor = MultipleCitationVisitor(self.document)
         self.document.walkabout(visitor)
         cite_pos = 0
+
+class ZoteroCleanupTransform(Transform):
+    default_priority = 520
+    def apply(self):
+        visitor = MobileFootNodeVisitor(self.document)
+        self.document.walkabout(visitor)
+        for i in range(len(autonomous_mobile_footnode_indexes)-1, -1, -1):
+            pos = autonomous_mobile_footnode_indexes[i]
+            self.document.autofootnotes.pop(pos)
+            self.document.autofootnote_refs.pop(pos)
+        self.startnode.parent.remove(self.startnode)
 
 class ZoteroDirective(Directive):
     """
@@ -252,7 +302,7 @@ class ZoteroDirective(Directive):
             item_array[itemID] = True
             item_list.append(itemID)
         cite_list.append([details])
-        pending = nodes.pending(ZoteroTransformDirective)
+        pending = nodes.pending(ZoteroTransform)
         pending.details.update(self.options)
         pending.details['zoteroCitation'] = True
         self.state_machine.document.note_pending(pending)
@@ -261,7 +311,7 @@ class ZoteroDirective(Directive):
             sys.stdout.flush()
         return [pending]
 
-class ZoteroTransformDirective(Transform):
+class ZoteroTransform(Transform):
     default_priority = 510
     # Bridge hangs if output contains above-ASCII chars (I guess Telnet kicks into
     # binary mode in that case, leaving us to wait for a null string terminator)
