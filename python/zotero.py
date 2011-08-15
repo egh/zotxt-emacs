@@ -144,11 +144,11 @@ class ZoteroConnection(object):
         self.zotero_resource()
 
     def firefox_connect(self):
-        self.back_channel, self.bridge = wait_and_create_network("127.0.0.1", 24247)
+        self.back_channel, self.bridge = wait_and_create_network("127.0.0.1", 24242)
         self.back_channel.timeout = self.bridge.timeout = 60
 
     def zotero_resource(self):
-        self.methods = JSObject(self.bridge, "Components.utils.import('resource://zotero-for-restructured-text/modules/export.js')")
+        self.methods = JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
 
 
 class ZoteroSetupDirective(Directive, ZoteroConnection):
