@@ -5,6 +5,10 @@
 .. zotero-setup::
    :format: chicago-author-date
 
+---------
+Text Zone
+---------
+
 This is an example [#]_ document which cites one source. [#]_ And another source. [#]_ And another. [#]_
 With a final one here. [#]_
 
@@ -36,3 +40,12 @@ With a final one here. [#]_
                processing scripts)
 
 .. [#] Final Footnote.
+
+------------
+Bibliography
+------------
+
+(Unformatted but, you know, we're getting there ...)
+
+.. zotero-bibliography::
+

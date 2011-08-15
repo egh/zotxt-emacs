@@ -14,6 +14,7 @@ from urllib import unquote
 import BeautifulSoup
 import sys
 from docutils.utils import ExtensionOptionError
+import json
 
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
@@ -49,20 +50,39 @@ started_recording_ids = False
 started_transforming_cites = False
 
 # for tracking mobile nodes
-# can't seem to catch document.footnotes with list content ... ?
-# so we roll our own.
 footnodes = []
 footnode_pos = 0
 autonomous_mobile_footnode_indexes = []
 
 def html2rst (html):
+    """
+    Transform html to reStructuredText internal representation.
+
+    reStructuredText inline markup cannot be nested. The CSL processor
+    does produce nested markup, so we ask the processor to deliver HTML,
+    and use this function to convert it to the internal representation.
+    It depends on Beautiful Soup.
+
+    Note that the function supports small-caps, with the smallcaps
+    node name. The Translator instance used by the Writer that consumes
+    the output must be extended to support this node type.
+    """
     def cleanString(str):
+        """
+        Replace HTML entities with character equivalents.
+
+        Only these four characters are encoded as entities by the CSL
+        processor when running in HTML mode.
+        """
         str = str.replace("&#38;", "&")
         str = str.replace("&#60;", "<")
         str = str.replace("&#32;", ">")
         str = str.replace("&#160;", u"\u00A0")
         return str
     def walk(node):
+        """
+        Walk the tree, building a reStructuredText object as we go.
+        """
         if node == None:
             return nodes.Text("")
         elif ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
@@ -91,6 +111,12 @@ def html2rst (html):
     ret =  [ walk(c) for c in doc.contents ]
     return nodes.paragraph("", "", *ret)
 
+def unquote_u(source):
+    res = unquote(source)
+    if '%u' in res:
+        res = res.replace('%u','\\u').decode('unicode_escape')
+    return res
+
 def isZoteroCite(node):
     ret = False
     isPending = isinstance(node, nodes.pending)
@@ -98,6 +124,20 @@ def isZoteroCite(node):
     if isZotero:
         ret = True
     return ret
+
+class ZoteroConnection(object):
+    def __init__(self, **kwargs):
+        self.bibType = kwargs.get('bibType', citation_format)
+        self.firefox_connect()
+        self.zotero_resource()
+
+    def firefox_connect(self):
+        self.back_channel, self.bridge = wait_and_create_network("127.0.0.1", 24242)
+        self.back_channel.timeout = self.bridge.timeout = 60
+
+    def zotero_resource(self):
+        self.methods = JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
+
 
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
     def visit_pending(self, node):
@@ -172,20 +212,6 @@ class MobileFootNodeVisitor(nodes.SparseNodeVisitor):
         pass
     def depart_smallcaps(self, node):
         pass
-
-class ZoteroConnection(object):
-    def __init__(self, **kwargs):
-        self.bibType = kwargs.get('bibType', citation_format)
-        self.firefox_connect()
-        self.zotero_resource()
-
-    def firefox_connect(self):
-        self.back_channel, self.bridge = wait_and_create_network("127.0.0.1", 24242)
-        self.back_channel.timeout = self.bridge.timeout = 60
-
-    def zotero_resource(self):
-        self.methods = JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
-
 
 class ZoteroSetupDirective(Directive, ZoteroConnection):
     from docutils.parsers.rst.directives import unchanged
@@ -322,11 +348,6 @@ class ZoteroTransform(Transform):
     # using the following suggestion for a Python unquote function worked,
     # so I stuck with it:
     #   http://stackoverflow.com/questions/300445/how-to-unquote-a-urlencoded-unicode-string-in-python
-    def unquote_u(self,source):
-        res = unquote(source)
-        if '%u' in res:
-            res = res.replace('%u','\\u').decode('unicode_escape')
-        return res
 
     def apply(self):
         global note_number, cite_pos, cite_list, verbose_flag, started_transforming_cites
@@ -348,7 +369,7 @@ class ZoteroTransform(Transform):
             }
             res = zotero_thing.getCitationBlock(citation)
             cite_pos += 1
-            mystr = self.unquote_u(res)
+            mystr = unquote_u(res)
             newnode = html2rst(mystr)
             if verbose_flag == 1:
                 sys.stdout.write(".")
@@ -384,3 +405,52 @@ class ZoteroTransform(Transform):
                 self.startnode.parent.remove(self.startnode)
             else:
                 self.startnode.replace_self(newnode)
+
+class ZoteroBibliographyDirective(Directive):
+
+    ## This could be extended to support selection of
+    ## included bibliography entries. The processor has
+    ## an API to support this, although it hasn't yet been
+    ## implemented in any products that I know of.
+    required_arguments = 0
+    optional_arguments = 1
+    has_content = False
+    def run(self):
+        if verbose_flag == 1:
+            print "\n--- Zotero4reST: Bibliography #1 (placeholder set) ---"
+        pending = nodes.pending(ZoteroBibliographyTransform)
+        pending.details.update(self.options)
+        self.state_machine.document.note_pending(pending)
+        return [pending]
+
+class ZoteroBibliographyTransform(Transform):
+
+    default_priority = 530
+
+    def apply(self):
+        if verbose_flag == 1:
+            print "\n--- Zotero4reST: Bibliography #2 (inserting content) ---"
+        rawbibdata = zotero_thing.getBibliographyData();
+        bibdata = json.loads(rawbibdata)
+        bibdata[0]["bibstart"] = unquote_u(bibdata[0]["bibstart"])
+        bibdata[0]["bibend"] = unquote_u(bibdata[0]["bibend"])
+        for i in range(0, len(bibdata[1]), 1):
+            bibdata[1][i] = unquote_u(bibdata[1][i])
+        #
+        # XXX There is some nasty business here.
+        #
+        # Some nested nodes come out serialized when run through html2rst, so something
+        # needs to be fixed there.
+        #
+        # More important, we need to figure out how to control formatting
+        # in the bib -- hanging indents especially. Probably the simplest thing
+        # is just to set some off-the-shelf named style blocks in style.odt, and
+        # apply them as more or less appropriate.
+        #
+        # s = bibdata[0]["bibstart"]
+        s = ""
+        for entry in bibdata[1]:
+            s += entry
+        #s += bibdata[0]["bibend"]
+        newnode = html2rst(s)
+        self.startnode.replace_self(nodes.generated('', *newnode.children))

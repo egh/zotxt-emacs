@@ -51,7 +51,29 @@ function getCitationBlock (citation) {
 	return retme
 };
 
-function getBibliographyData () {
+function getBibliographyData (arg) {
+	var ret;
+	zotero.debug("XXX WTF?")
+	try {
+		zotero.debug("XXX WTF? part two")
+		ret = zotero.reStructuredCSL.makeBibliography(arg);
+		zotero.debug("XXX WTF? part three")
+		if (ret) {
+			zotero.debug("XXX WTF? part four")
+			ret[0].bibstart = escape( ret[0].bibstart );
+			ret[0].bibend = escape( ret[0].bibend );
+			for (var i = 0, ilen = ret[1].length; i < ilen; i += 1) {
+				ret[1][i] = escape( ret[1][i] );
+			}
+			ret = JSON.stringify(ret);
+			zotero.debug("XXX WTF? part five")
+			
+		}
+	} catch (e) {
+		zotero.debug("XXX oops: "+e);
+	}
+	zotero.debug("XXX non-oops: "+ret);
+	return ret;
 };
 
 function isInTextStyle() {
