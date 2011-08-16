@@ -79,35 +79,37 @@ def html2rst (html):
         str = str.replace("&#32;", ">")
         str = str.replace("&#160;", u"\u00A0")
         return str
-    def walk(node):
+
+    def walk(html_node):
         """
         Walk the tree, building a reStructuredText object as we go.
         """
-        if node == None:
+        if html_node is None:
             return nodes.Text("")
-        elif ((type(node) == BeautifulSoup.NavigableString) or (type(node) == str) or (type(node) == unicode)):
-            return nodes.Text(cleanString(unicode(node)), rawsource=cleanString(unicode(node)))
+        elif ((type(html_node) == BeautifulSoup.NavigableString) or (type(html_node) == str) or (type(html_node) == unicode)):
+            return nodes.Text(cleanString(unicode(html_node)), rawsource=cleanString(unicode(html_node)))
         else:
-            if (node.name == 'span'):
-                if (node.has_key('style') and (node['style'] == "font-style:italic;")):
-                    return nodes.emphasis(text="".join([ unicode(walk(c)) for c in node.contents ]))
-                elif (node.has_key('style') and (node['style'] == "font-variant:small-caps;")):
-                    return smallcaps(text="".join([ unicode(walk(c)) for c in node.contents ]))
+            if (html_node.name == 'span'):
+                if (html_node.has_key('style') and (html_node['style'] == "font-style:italic;")):
+                    return nodes.emphasis(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
+                elif (html_node.has_key('style') and (html_node['style'] == "font-variant:small-caps;")):
+                    return smallcaps(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
                 else:
-                    return walk("".join([ str(c) for c in node.contents ]))
-            if (node.name == 'i'):
-                return nodes.emphasis(text="".join([ unicode(walk(c)) for c in node.contents ]))
-            elif (node.name == 'p'):
-                children = [ walk(c) for c in node.contents ]
+                    return walk("".join([ str(c) for c in html_node.contents ]))
+            if (html_node.name == 'i'):
+                return nodes.emphasis(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
+            elif (html_node.name == 'p'):
+                children = [ walk(c) for c in html_node.contents ]
                 return nodes.paragraph("", "", *children)
-            elif (node.name == 'a'):
-                children = [ walk(c) for c in node.contents ]
-                return apply(nodes.reference, ["", ""] + children, { 'refuri' : node['href'] })
-            elif (node.name == 'div'):
-                children = [ walk(c) for c in node.contents ]
+            elif (html_node.name == 'a'):
+                children = [ walk(c) for c in html_node.contents ]
+                return apply(nodes.reference, ["", ""] + children, { 'refuri' : html_node['href'] })
+            elif (html_node.name == 'div'):
+                children = [ walk(c) for c in html_node.contents ]
                 return nodes.paragraph("", "", *children)
+
     doc = BeautifulSoup.BeautifulSoup(html)
-    ret =  [ walk(c) for c in doc.contents ]
+    ret = [ walk(c) for c in doc.contents ]
     return nodes.paragraph("", "", *ret)
 
 def unquote_u(source):
