@@ -96,7 +96,6 @@ def html2rst (html):
                 else:
                     return walk("".join([ str(c) for c in node.contents ]))
             if (node.name == 'i'):
-                #print node
                 return nodes.emphasis(text="".join([ unicode(walk(c)) for c in node.contents ]))
             elif (node.name == 'p'):
                 children = [ walk(c) for c in node.contents ]
