@@ -54,7 +54,7 @@ footnodes = []
 footnode_pos = 0
 autonomous_mobile_footnode_indexes = []
 
-def html2rst (html):
+def html2rst (html, as_paragraph=False):
     """
     Transform html to reStructuredText internal representation.
 
@@ -110,7 +110,8 @@ def html2rst (html):
 
     doc = BeautifulSoup.BeautifulSoup(html)
     ret = [ walk(c) for c in doc.contents ]
-    return nodes.paragraph("", "", *ret)
+    if as_paragraph: return nodes.paragraph("", "", *ret)
+    else: return ret
 
 def unquote_u(source):
     res = unquote(source)
@@ -453,5 +454,42 @@ class ZoteroBibliographyTransform(Transform):
         for entry in bibdata[1]:
             s += entry
         #s += bibdata[0]["bibend"]
-        newnode = html2rst(s)
+        newnode = html2rst(s, True)
         self.startnode.replace_self(nodes.generated('', *newnode.children))
+
+def zot_cite_role(role, rawtext, text, lineno, inliner,
+                  options={}, content=[]):
+    global citation_format, item_list, item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
+    if not zotero_thing:
+        ## A kludge, but makes a big noise about the extension syntax for clarity.
+        print "#####"
+        print "##"
+        print "##  Must set zotero-setup:: directive before zotero:: directive is used."
+        print "##"
+        print "#####"
+        raise ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
+    zot_id = text
+    itemID = int(zotero_thing.getItemId(text))
+
+    # The noteIndex and indexNumber belong in properties,
+    # but we fudge that in this phase, before citations are
+    # composed -- we'll pull the values out of the first cite in
+    # the cluster in the composition pass.
+
+    details = {
+        'id':itemID,
+        'noteIndex':0,
+        'indexNumber': len(cite_list),
+        'locator': None, #self.options['locator'],
+        'label': None, #self.options['label'],
+        'prefix': None, #self.options['prefix'],
+        'suffix': None #self.options['suffix']
+    }
+    if not item_array.has_key(itemID):
+        item_array[itemID] = True
+        item_list.append(itemID)
+    cite_list.append([details])
+    pending = nodes.pending(ZoteroTransform)
+    pending.details['zoteroCitation'] = True
+    inliner.document.note_pending(pending)
+    return [pending], []

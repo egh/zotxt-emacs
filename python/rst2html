@@ -18,14 +18,14 @@ from docutils.core import publish_cmdline_to_binary, default_description
 from docutils.writers.html4css1 import Writer, HTMLTranslator
 from docutils.readers.standalone import Reader
 from docutils.writers import Writer as WriterBase
+from docutils.parsers.rst import directives, roles
 
-
-from docutils.parsers.rst import directives
-
-from zotero import ZoteroDirective, ZoteroSetupDirective
+from zotero import ZoteroDirective, ZoteroSetupDirective, ZoteroBibliographyDirective, zot_cite_role
 
 directives.register_directive('zotero-setup', ZoteroSetupDirective)
 directives.register_directive('zotero', ZoteroDirective)
+directives.register_directive('zotero-bibliography', ZoteroBibliographyDirective)
+roles.register_canonical_role('zc', zot_cite_role)
 
 description = ('Generates HTML with small-caps support from '
                'standalone reStructuredText sources.  ' + default_description)
