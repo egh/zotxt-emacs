@@ -2,23 +2,25 @@
   Module
 """
 # -*- coding: utf-8 -*-
+import BeautifulSoup
+import json
+import re
+import sys
 
 from jsbridge import wait_and_create_network, JSObject
 
 from docutils import nodes
-from docutils.parsers.rst import Directive
-from docutils.parsers.rst import directives, roles
-from itertools import chain
+from docutils.parsers.rst import Directive, directives, roles
 from docutils.transforms import TransformError, Transform
-from urllib import unquote
-import BeautifulSoup
-import sys
 from docutils.utils import ExtensionOptionError
-import json
+
+from itertools import chain, dropwhile, islice, takewhile
+
+from urllib import unquote
+
 
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
-
 
 citation_format = "http://www.zotero.org/styles/chicago-author-date"
 
@@ -53,6 +55,17 @@ started_transforming_cites = False
 footnodes = []
 footnode_pos = 0
 autonomous_mobile_footnode_indexes = []
+
+def check_zotero_thing():
+    global zotero_thing
+    if not zotero_thing:
+        ## A kludge, but makes a big noise about the extension syntax for clarity.
+        print "#####"
+        print "##"
+        print "##  Must set zotero-setup:: directive before zotero:: directive is used."
+        print "##"
+        print "#####"
+        raise ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
 
 def html2rst (html, as_paragraph=False):
     """
@@ -297,14 +310,8 @@ class ZoteroDirective(Directive):
 
     def run(self):
         global citation_format, item_list, item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
-        if not zotero_thing:
-            ## A kludge, but makes a big noise about the extension syntax for clarity.
-            print "#####"
-            print "##"
-            print "##  Must set zotero-setup:: directive before zotero:: directive is used."
-            print "##"
-            print "#####"
-            raise ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
+        check_zotero_thing()
+
         if verbose_flag == 1 and not started_recording_ids:
             print "--- Zotero4reST: Citation run #1 (record ID) ---"
             started_recording_ids = True
@@ -457,39 +464,54 @@ class ZoteroBibliographyTransform(Transform):
         newnode = html2rst(s, True)
         self.startnode.replace_self(nodes.generated('', *newnode.children))
 
+def zot_parse_cite_string(cite_string):
+    global zotero_thing, cite_list
+
+    def is_key(s): return re.match(r'-?@([A-Z0-9]+)', s)
+    def not_is_key(s): return not(is_key(s))
+
+    cite_string_list = re.split(r'; *', cite_string)
+    retval = []
+    for cite in cite_string_list:
+        words = re.split(r' ', cite)
+        raw_keys = [ word for word in words if is_key(word) ]
+        if len(raw_keys) == 0:
+            raise ExtensionOptionError("No key found in citation: '%s'."%(cite_string))
+        elif len(raw_keys) > 1:
+            raise ExtensionOptionError("Too many keys in citation: '%s'."%(cite_string))
+        else:
+            key = is_key(raw_keys[0]).group(1)
+            retval.append({
+                    'id'          : int(zotero_thing.getItemId(key)),
+                    'noteIndex'   : 0,
+                    'indexNumber' : len(cite_list),
+                    'locator'     : None, 
+                    'label'       : None,
+                    'prefix'      : " ".join(takewhile(not_is_key, words)),
+                    'suffix'      : " ".join(islice(dropwhile(not_is_key, words), 1, None)) })
+    return retval
+
 def zot_cite_role(role, rawtext, text, lineno, inliner,
                   options={}, content=[]):
-    global citation_format, item_list, item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
-    if not zotero_thing:
-        ## A kludge, but makes a big noise about the extension syntax for clarity.
-        print "#####"
-        print "##"
-        print "##  Must set zotero-setup:: directive before zotero:: directive is used."
-        print "##"
-        print "#####"
-        raise ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
-    zot_id = text
-    itemID = int(zotero_thing.getItemId(text))
+    global citation_format, item_list, item_array, cite_list
+    check_zotero_thing()
 
-    # The noteIndex and indexNumber belong in properties,
-    # but we fudge that in this phase, before citations are
-    # composed -- we'll pull the values out of the first cite in
-    # the cluster in the composition pass.
+    pending_list = []
+    cites = zot_parse_cite_string(text)
+    for details in cites:
+        cite_list.append([details])
+        itemID = details['id']
+        if not item_array.has_key(itemID):
+            item_array[itemID] = True
+            item_list.append(itemID)
+        pending = nodes.pending(ZoteroTransform)
+        pending.details['zoteroCitation'] = True
+        inliner.document.note_pending(pending)
+        pending_list.append(pending)
+    return pending_list, []
 
-    details = {
-        'id':itemID,
-        'noteIndex':0,
-        'indexNumber': len(cite_list),
-        'locator': None, #self.options['locator'],
-        'label': None, #self.options['label'],
-        'prefix': None, #self.options['prefix'],
-        'suffix': None #self.options['suffix']
-    }
-    if not item_array.has_key(itemID):
-        item_array[itemID] = True
-        item_list.append(itemID)
-    cite_list.append([details])
-    pending = nodes.pending(ZoteroTransform)
-    pending.details['zoteroCitation'] = True
-    inliner.document.note_pending(pending)
-    return [pending], []
+# setup zotero directives
+directives.register_directive('zotero-setup', ZoteroSetupDirective)
+directives.register_directive('zotero', ZoteroDirective)
+directives.register_directive('zotero-bibliography', ZoteroBibliographyDirective)
+roles.register_canonical_role('zc', zot_cite_role)
