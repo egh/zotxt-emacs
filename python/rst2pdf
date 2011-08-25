@@ -3,15 +3,8 @@
 __requires__ = 'rst2pdf==0.16'
 import sys
 from pkg_resources import load_entry_point
-from docutils.parsers.rst import directives, roles
 
-from zotero import ZoteroDirective, ZoteroSetupDirective, ZoteroBibliographyDirective, zot_cite_role
-
-
-directives.register_directive('zotero', ZoteroDirective)
-directives.register_directive('zotero-setup', ZoteroSetupDirective)
-directives.register_directive('zotero-bibliography', ZoteroBibliographyDirective)
-roles.register_canonical_role('zc', zot_cite_role)
+import zotero
 
 if __name__ == '__main__':
     sys.exit(
