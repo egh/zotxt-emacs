@@ -233,7 +233,6 @@ class MobileFootNodeVisitor(nodes.SparseNodeVisitor):
         pass
 
 class ZoteroSetupDirective(Directive, ZoteroConnection):
-    from docutils.parsers.rst.directives import unchanged
     def __init__(self, *args):
         global zotero_thing, verbose_flag
         Directive.__init__(self, *args)
@@ -246,7 +245,7 @@ class ZoteroSetupDirective(Directive, ZoteroConnection):
     required_arguments = 0
     optional_arguments = 0
     has_content = False
-    option_spec = {'format': unchanged}
+    option_spec = {'format': directives.unchanged}
     def run(self):
         global citation_format, zotero_thing
         z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
