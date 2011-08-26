@@ -55,20 +55,20 @@ footnodes = []
 footnode_pos = 0
 autonomous_mobile_footnode_indexes = []
 
-def z4r_debug(str):
+def z4r_debug(what):
     global verbose_flag
     if verbose_flag == 1:
-        print str
+        sys.stderr.write("%s\n"%(what))
 
 def check_zotero_thing():
     global zotero_thing
     if not zotero_thing:
         ## A kludge, but makes a big noise about the extension syntax for clarity.
-        print "#####"
-        print "##"
-        print "##  Must set zotero-setup:: directive before zotero:: directive is used."
-        print "##"
-        print "#####"
+        sys.stderr.write("#####\n")
+        sys.stderr.write("##\n")
+        sys.stderr.write("##  Must set zotero-setup:: directive before zotero:: directive is used.\n")
+        sys.stderr.write("##\n")
+        sys.stderr.write("#####\n")
         raise ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
 
 def html2rst (html):
@@ -340,7 +340,7 @@ class ZoteroDirective(Directive):
         check_zotero_thing()
 
         if verbose_flag == 1 and not started_recording_ids:
-            print "--- Zotero4reST: Citation run #1 (record ID) ---"
+            sys.stderr.write("--- Zotero4reST: Citation run #1 (record ID) ---\n")
             started_recording_ids = True
         for key in ['locator', 'label', 'prefix', 'suffix']:
             if not self.options.has_key(key):
@@ -363,8 +363,8 @@ class ZoteroDirective(Directive):
         pending.details['zoteroCitation'] = True
         self.state_machine.document.note_pending(pending)
         if verbose_flag == 1:
-            sys.stdout.write(".")
-            sys.stdout.flush()
+            sys.stderr.write(".")
+            sys.stderr.flush()
         return [pending]
 
 class ZoteroTransform(Transform):
@@ -384,11 +384,11 @@ class ZoteroTransform(Transform):
         if not self.startnode.details.has_key('zoteroCitation'):
             self.startnode.parent.remove(self.startnode)
             if verbose_flag == 1:
-                sys.stdout.write("<")
-                sys.stdout.flush()
+                sys.stderr.write("<")
+                sys.stderr.flush()
         else:
             if verbose_flag == 1 and not started_transforming_cites:
-                print "--- Zotero4reST: Citation run #2 (render cite and insert) ---"
+                sys.stderr.write("--- Zotero4reST: Citation run #2 (render cite and insert) ---\n")
                 started_transforming_cites = True
             citation = {
                 'citationItems':cite_list[cite_pos],
@@ -402,8 +402,8 @@ class ZoteroTransform(Transform):
             mystr = unquote_u(res)
             newnode = html2rst(mystr)
             if verbose_flag == 1:
-                sys.stdout.write(".")
-                sys.stdout.flush()
+                sys.stderr.write(".")
+                sys.stderr.flush()
 
             moved = False
             parent = self.startnode.parent
@@ -475,9 +475,7 @@ class ZoteroBibliographyTransform(Transform):
         # is just to set some off-the-shelf named style blocks in style.odt, and
         # apply them as more or less appropriate.
         #
-        # s = bibdata[0]["bibstart"]
-        s = "%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"])
-        newnode = html2rst(s)
+        newnode = html2rst("%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"]))
         self.startnode.replace_self(newnode)
 
 class ZoteroJSONEncoder(jsbridge.network.JSObjectEncoder):
