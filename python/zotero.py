@@ -8,7 +8,6 @@ import re
 import sys
 
 import jsbridge
-from jsbridge import wait_and_create_network, JSObject
 
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives, roles
@@ -147,11 +146,11 @@ class ZoteroConnection(object):
         self.zotero_resource()
 
     def firefox_connect(self):
-        self.back_channel, self.bridge = wait_and_create_network("127.0.0.1", 24242)
+        self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
         self.back_channel.timeout = self.bridge.timeout = 60
 
     def zotero_resource(self):
-        self.methods = JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
+        self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
 
 
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
