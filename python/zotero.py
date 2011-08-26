@@ -258,14 +258,13 @@ class MobileFootNodeVisitor(nodes.SparseNodeVisitor):
     def depart_smallcaps(self, node):
         pass
 
-class ZoteroSetupDirective(Directive, ZoteroConnection):
-    def __init__(self, *args):
+class ZoteroSetupDirective(Directive):
+    def __init__(self, *args, **kwargs):
         global zotero_thing, verbose_flag
         Directive.__init__(self, *args)
         # This is necessary: connection hangs if created outside of an instantiated
         # directive class.
-        ZoteroConnection.__init__(self)
-        zotero_thing = self.methods
+        zotero_thing = ZoteroConnection().methods
         verbose_flag = self.state_machine.reporter.report_level
 
     required_arguments = 0
@@ -458,8 +457,7 @@ class ZoteroBibliographyTransform(Transform):
 
     def apply(self):
         z4r_debug("\n--- Zotero4reST: Bibliography #2 (inserting content) ---")
-        rawbibdata = zotero_thing.getBibliographyData();
-        bibdata = json.loads(rawbibdata)
+        bibdata = json.loads(zotero_thing.getBibliographyData())
         bibdata[0]["bibstart"] = unquote_u(bibdata[0]["bibstart"])
         bibdata[0]["bibend"] = unquote_u(bibdata[0]["bibend"])
         for i in range(0, len(bibdata[1])):
