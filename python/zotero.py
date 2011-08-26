@@ -35,11 +35,6 @@ item_array = {}
 cite_list = []
 cite_pos = 0
 
-# variables for use in final assignment of note numbers
-# (see CitationVisitor)
-in_note = False
-note_count = 0
-
 # placeholder for global bridge to Zotero
 zotero_thing = None;
 
@@ -232,21 +227,27 @@ class MultipleCitationVisitor(nodes.SparseNodeVisitor):
         pass
 
 class NoteIndexVisitor(nodes.SparseNodeVisitor):
+    def __init__(self, *args, **kwargs):
+        self.in_note = False
+        self.note_count = 0
+        nodes.SparseNodeVisitor.__init__(self, *args, **kwargs)
+
     def visit_pending(self, node):
-        global cite_list, cite_pos, in_note, note_count
+        global cite_list, cite_pos
         if node.details.has_key('zoteroCitation'):
             # Do something about the number
-            if in_note:
-                cite_list[cite_pos][0].noteIndex = note_count
+            if self.in_note:
+                cite_list[cite_pos][0].noteIndex = self.note_count
             cite_pos += 1
     def depart_pending(self, node):
         pass
+
     def visit_footnote(self, node):
-        global in_note, note_count
-        in_note = True
-        note_count += 1
+        self.in_note = True
+        self.note_count += 1
+
     def depart_footnote(self, node):
-        global in_note, footnodes
+        global footnodes
         onlyZotero = True
         for child in node.children:
             if not isZoteroCite(child):
@@ -255,7 +256,7 @@ class NoteIndexVisitor(nodes.SparseNodeVisitor):
             ## Abuse attributes segment
             node.attributes['onlyZotero'] = True
         footnodes.append(node)
-        in_note = False
+        self.in_note = False
 
 class MobileFootNodeVisitor(nodes.SparseNodeVisitor):
     def visit_footnote_reference(self, node):
