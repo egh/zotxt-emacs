@@ -127,7 +127,7 @@ def html2rst (html):
         elif ((type(html_node) == BeautifulSoup.NavigableString) or (type(html_node) == str) or (type(html_node) == unicode)):
             text = cleanString(unicode(html_node))
             # whitespace is significant in reST, so strip out empty text nodes
-            if re.match("\s+", text):
+            if re.match("^\s+$", text):
                 return None
             else:
                 return nodes.Text(text, rawsource=text)
