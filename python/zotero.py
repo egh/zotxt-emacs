@@ -264,7 +264,7 @@ class ZoteroSetupDirective(Directive):
         Directive.__init__(self, *args)
         # This is necessary: connection hangs if created outside of an instantiated
         # directive class.
-        zotero_thing = ZoteroConnection().methods
+        zotero_thing = ZoteroConnection()
         verbose_flag = self.state_machine.reporter.report_level
 
     required_arguments = 0
@@ -274,12 +274,12 @@ class ZoteroSetupDirective(Directive):
     def run(self):
         global zotero_thing
         z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
-        zotero_thing.instantiateCiteProc(self.options.get('format', DEFAULT_CITATION_FORMAT))
+        zotero_thing.methods.instantiateCiteProc(self.options.get('format', DEFAULT_CITATION_FORMAT))
         pending = nodes.pending(ZoteroSetupTransform)
         pending.details.update(self.options)
         self.state_machine.document.note_pending(pending)
         ret = [pending]
-        if zotero_thing.isInTextStyle():
+        if zotero_thing.methods.isInTextStyle():
             pending2 = nodes.pending(ZoteroCleanupTransform)
             pending2.details.update(self.options)
             self.state_machine.document.note_pending(pending2)
@@ -291,7 +291,7 @@ class ZoteroSetupTransform(Transform):
     def apply(self):
         global zotero_thing, cite_pos
         z4r_debug("\n=== Zotero4reST: Setup run #2 (load IDs to processor) ===")
-        zotero_thing.registerItemIds(item_array.keys())
+        zotero_thing.methods.registerItemIds(item_array.keys())
         self.startnode.parent.remove(self.startnode)
         visitor = NoteIndexVisitor(self.document)
         self.document.walkabout(visitor)
@@ -394,7 +394,7 @@ class ZoteroTransform(Transform):
                     'noteIndex': cite_list[cite_pos][0].noteIndex
                 }
             }
-            res = zotero_thing.getCitationBlock(citation)
+            res = zotero_thing.methods.getCitationBlock(citation)
             cite_pos += 1
             mystr = unquote_u(res)
             newnode = html2rst(mystr)
@@ -455,7 +455,7 @@ class ZoteroBibliographyTransform(Transform):
 
     def apply(self):
         z4r_debug("\n--- Zotero4reST: Bibliography #2 (inserting content) ---")
-        bibdata = json.loads(zotero_thing.getBibliographyData())
+        bibdata = json.loads(zotero_thing.methods.getBibliographyData())
         bibdata[0]["bibstart"] = unquote_u(bibdata[0]["bibstart"])
         bibdata[0]["bibend"] = unquote_u(bibdata[0]["bibend"])
         for i in range(0, len(bibdata[1])):
@@ -494,7 +494,7 @@ class ZoteroCitationInfo(object):
     def __init__(self, **kwargs):
         global zotero_thing
         self.key = kwargs['key']
-        self.id = int(zotero_thing.getItemId(self.key))
+        self.id = int(zotero_thing.methods.getItemId(self.key))
         self.indexNumber = kwargs.get('indexNumber', None)
         self.label = kwargs.get('label', None)
         self.locator = kwargs.get('locator', None)
