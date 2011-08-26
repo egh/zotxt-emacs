@@ -7,6 +7,7 @@ import json
 import re
 import sys
 
+import jsbridge
 from jsbridge import wait_and_create_network, JSObject
 
 from docutils import nodes
@@ -188,7 +189,7 @@ class NoteIndexVisitor(nodes.SparseNodeVisitor):
         if node.details.has_key('zoteroCitation'):
             # Do something about the number
             if in_note:
-                cite_list[cite_pos][0]['noteIndex'] = note_count
+                cite_list[cite_pos][0].noteIndex = note_count
             cite_pos += 1
     def depart_pending(self, node):
         pass
@@ -324,15 +325,12 @@ class ZoteroDirective(Directive):
         # composed -- we'll pull the values out of the first cite in
         # the cluster in the composition pass.
 
-        details = {
-            'id':itemID,
-            'noteIndex':0,
-            'indexNumber': len(cite_list),
-            'locator': self.options['locator'],
-            'label': self.options['label'],
-            'prefix': self.options['prefix'],
-            'suffix': self.options['suffix']
-        }
+        details = ZoteroCitationInfo(key=self.arguments[0],
+                                     indexNumber=len(cite_list),
+                                     locator=self.options['locator'],
+                                     label=self.options['label'],
+                                     prefix=self.options['prefix'],
+                                     suffix=self.options['suffix'])
         if not item_array.has_key(itemID):
             item_array[itemID] = True
             item_list.append(itemID)
@@ -373,7 +371,7 @@ class ZoteroTransform(Transform):
                 'citationItems':cite_list[cite_pos],
                 'properties': {
                     'index': cite_pos,
-                    'noteIndex': cite_list[cite_pos][0]['noteIndex']
+                    'noteIndex': cite_list[cite_pos][0].noteIndex
                 }
             }
             res = zotero_thing.getCitationBlock(citation)
@@ -464,10 +462,42 @@ class ZoteroBibliographyTransform(Transform):
         newnode = html2rst(s, True)
         self.startnode.replace_self(nodes.generated('', *newnode.children))
 
-def zot_parse_cite_string(cite_string):
-    global zotero_thing, cite_list
+class ZoteroJSONEncoder(jsbridge.network.JSObjectEncoder):
+    """An encoder for our JSON objects."""
+    def default(self, obj):
+        if isinstance(obj, ZoteroCitationInfo):
+            return { 'id'          : obj.id,
+                     'indexNumber' : obj.indexNumber,
+                     'label'       : obj.label,
+                     'locator'     : obj.locator,
+                     'noteIndex'   : obj.noteIndex,
+                     'prefix'      : obj.prefix,
+                     'suffix'      : obj.suffix }
+        else: return json.JSONEncoder.default(self, obj)
 
-    def is_key(s): return re.match(r'-?@([A-Z0-9]+)', s)
+jsbridge.network.encoder = ZoteroJSONEncoder()
+
+class ZoteroCitationInfo(object):
+    """Class to hold information about a citation for passing to Zotero."""
+    def __init__(self, **kwargs):
+        global zotero_thing
+        self.key = kwargs['key']
+        self.id = int(zotero_thing.getItemId(self.key))
+        self.indexNumber = kwargs.get('indexNumber', None)
+        self.label = kwargs.get('label', None)
+        self.locator = kwargs.get('locator', None)
+        self.noteIndex = kwargs.get('noteIndex', 0)
+        self.prefix = kwargs.get('prefix', None)
+        self.suffix = kwargs.get('suffix', None)
+
+def zot_parse_cite_string(cite_string):
+    """Parse a citation string. This is inteded to be "pandoc-like".
+Examples: `see @Doe2008; also c.f. @Doe2010`
+Returns an array of hashes with information."""
+    global cite_list
+
+    KEY_RE = r'-?@([A-Z0-9]+)'
+    def is_key(s): return re.match(KEY_RE, s)
     def not_is_key(s): return not(is_key(s))
 
     cite_string_list = re.split(r'; *', cite_string)
@@ -480,15 +510,10 @@ def zot_parse_cite_string(cite_string):
         elif len(raw_keys) > 1:
             raise ExtensionOptionError("Too many keys in citation: '%s'."%(cite_string))
         else:
-            key = is_key(raw_keys[0]).group(1)
-            retval.append({
-                    'id'          : int(zotero_thing.getItemId(key)),
-                    'noteIndex'   : 0,
-                    'indexNumber' : len(cite_list),
-                    'locator'     : None, 
-                    'label'       : None,
-                    'prefix'      : " ".join(takewhile(not_is_key, words)),
-                    'suffix'      : " ".join(islice(dropwhile(not_is_key, words), 1, None)) })
+            retval.append(ZoteroCitationInfo(key=re.match(KEY_RE, raw_keys[0]).group(1),
+                                             indexNumber=len(cite_list), 
+                                             prefix=" ".join(takewhile(not_is_key, words)),
+                                             suffix=" ".join(islice(dropwhile(not_is_key, words), 1, None))))
     return retval
 
 def zot_cite_role(role, rawtext, text, lineno, inliner,
@@ -498,9 +523,9 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
 
     pending_list = []
     cites = zot_parse_cite_string(text)
-    for details in cites:
-        cite_list.append([details])
-        itemID = details['id']
+    for cite_info in cites:
+        cite_list.append([cite_info])
+        itemID = cite_info.id
         if not item_array.has_key(itemID):
             item_array[itemID] = True
             item_list.append(itemID)
