@@ -97,14 +97,40 @@ def html2rst (html):
         str = str.replace("&#160;", u"\u00A0")
         return str
 
+    def wrap_text(node_list):
+        # in rst text must be wrapped in a paragraph, I believe
+        # at least rst2pdf disappears the text if it is not - EGH
+        retval = []
+        last_was_text = False
+        # group text nodes in paragraphs
+        for node in node_list:
+            if isinstance(node, nodes.Inline) or isinstance(node, nodes.Text):
+                if last_was_text:
+                    retval[-1] += node
+                else:
+                    retval.append(nodes.paragraph("","", node))
+                    last_was_text = True
+            else:
+                retval.append(node)
+                last_was_text = False
+        return retval
+
+    def compact(lst):
+        return [ x for x in lst if (x is not None) ]
+
     def walk(html_node):
         """
         Walk the tree, building a reStructuredText object as we go.
         """
         if html_node is None:
-            return nodes.Text("")
+            return None
         elif ((type(html_node) == BeautifulSoup.NavigableString) or (type(html_node) == str) or (type(html_node) == unicode)):
-            return nodes.Text(cleanString(unicode(html_node)), rawsource=cleanString(unicode(html_node)))
+            text = cleanString(unicode(html_node))
+            # whitespace is significant in reST, so strip out empty text nodes
+            if re.match("\s+", text):
+                return None
+            else:
+                return nodes.Text(text, rawsource=text)
         else:
             if (html_node.name == 'span'):
                 if (html_node.has_key('style') and (html_node['style'] == "font-style:italic;")):
@@ -112,19 +138,20 @@ def html2rst (html):
                 elif (html_node.has_key('style') and (html_node['style'] == "font-variant:small-caps;")):
                     return smallcaps(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
                 else:
-                    return walk("".join([ str(c) for c in html_node.contents ]))
+                    return compact(walk("".join([ str(c) for c in html_node.contents ])))
             if (html_node.name == 'i'):
                 return nodes.emphasis(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
             elif (html_node.name == 'p'):
-                children = [ walk(c) for c in html_node.contents ]
+                children = compact([ walk(c) for c in html_node.contents ])
                 return nodes.paragraph("", "", *children)
             elif (html_node.name == 'a'):
-                children = [ walk(c) for c in html_node.contents ]
+                children = compact([ walk(c) for c in html_node.contents ])
                 return apply(nodes.reference, ["", ""] + children, { 'refuri' : html_node['href'] })
             elif (html_node.name == 'div'):
-                children = [ walk(c) for c in html_node.contents ]
-                return nodes.paragraph("", "", *children)
-
+                children = compact([ walk(c) for c in html_node.contents ])
+                classes = re.split(" ", html_node.get('class', ""))
+                return nodes.container("", *wrap_text(children), classes=classes)
+    
     doc = BeautifulSoup.BeautifulSoup(html)
     ret = [ walk(c) for c in doc.contents ]
     return ret
@@ -435,9 +462,9 @@ class ZoteroBibliographyTransform(Transform):
         bibdata = json.loads(rawbibdata)
         bibdata[0]["bibstart"] = unquote_u(bibdata[0]["bibstart"])
         bibdata[0]["bibend"] = unquote_u(bibdata[0]["bibend"])
-        for i in range(0, len(bibdata[1]), 1):
+        for i in range(0, len(bibdata[1])):
             bibdata[1][i] = unquote_u(bibdata[1][i])
-        #
+
         # XXX There is some nasty business here.
         #
         # Some nested nodes come out serialized when run through html2rst, so something
@@ -449,10 +476,7 @@ class ZoteroBibliographyTransform(Transform):
         # apply them as more or less appropriate.
         #
         # s = bibdata[0]["bibstart"]
-        s = ""
-        for entry in bibdata[1]:
-            s += entry
-        #s += bibdata[0]["bibend"]
+        s = "%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"])
         newnode = html2rst(s)
         self.startnode.replace_self(newnode)
 
