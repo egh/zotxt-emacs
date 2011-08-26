@@ -153,7 +153,7 @@ def html2rst (html):
                 return nodes.container("", *wrap_text(children), classes=classes)
     
     doc = BeautifulSoup.BeautifulSoup(html)
-    ret = [ walk(c) for c in doc.contents ]
+    ret = compact([ walk(c) for c in doc.contents ])
     return ret
 
 def unquote_u(source):
