@@ -6,8 +6,7 @@
 << /F1 2 0 R
  /F2 3 0 R
  /F3 4 0 R
- /F4 7 0 R
- /F5 9 0 R >>
+ /F4 5 0 R >>
 endobj
 % 'F1': class PDFType1Font 
 2 0 obj
@@ -36,109 +35,24 @@ endobj
  /Subtype /Type1
  /Type /Font >>
 endobj
-% 'Annot.NUMBER1': class LinkAnnotation 
-5 0 obj
-<< /Border [ 0
- 0
- 0 ]
- /Contents ()
- /Dest [ 11 0 R
- /XYZ
- 68.69291
- 638.8043
- 0 ]
- /Rect [ 268.3229
- 722.5936
- 320.0229
- 734.5936 ]
- /Subtype /Link
- /Type /Annot >>
-endobj
-% 'Annot.NUMBER2': class LinkAnnotation 
-6 0 obj
-<< /Border [ 0
- 0
- 0 ]
- /Contents ()
- /Dest [ 11 0 R
- /XYZ
- 68.69291
- 614.8043
- 0 ]
- /Rect [ 380.0529
- 722.5936
- 431.7529
- 734.5936 ]
- /Subtype /Link
- /Type /Annot >>
-endobj
 % 'F4': class PDFType1Font 
-7 0 obj
-% Font Times-Roman
-<< /BaseFont /Times-Roman
+5 0 obj
+% Font Helvetica-Oblique
+<< /BaseFont /Helvetica-Oblique
  /Encoding /WinAnsiEncoding
  /Name /F4
  /Subtype /Type1
  /Type /Font >>
 endobj
-% 'Annot.NUMBER3': class LinkAnnotation 
-8 0 obj
-<< /Border [ 0
- 0
- 0 ]
- /Contents ()
- /Dest [ 11 0 R
- /XYZ
- 265.5429
- 735.8436
- 0 ]
- /Rect [ 68.69291
- 625.5543
- 120.3929
- 637.5543 ]
- /Subtype /Link
- /Type /Annot >>
-endobj
-% 'F5': class PDFType1Font 
-9 0 obj
-% Font Helvetica-Oblique
-<< /BaseFont /Helvetica-Oblique
- /Encoding /WinAnsiEncoding
- /Name /F5
- /Subtype /Type1
- /Type /Font >>
-endobj
-% 'Annot.NUMBER4': class LinkAnnotation 
-10 0 obj
-<< /Border [ 0
- 0
- 0 ]
- /Contents ()
- /Dest [ 11 0 R
- /XYZ
- 377.2729
- 735.8436
- 0 ]
- /Rect [ 68.69291
- 601.5543
- 120.3929
- 613.5543 ]
- /Subtype /Link
- /Type /Annot >>
-endobj
 % 'Page1': class PDFPage 
-11 0 obj
+6 0 obj
 % Page dictionary
-<< /Annots [ 5 0 R
- 6 0 R
- 8 0 R
- 10 0 R ]
- /Contents 15 0 R
+<< /Contents 12 0 R
  /MediaBox [ 0
  0
  595.2756
  841.8898 ]
- /Parent 14 0 R
+ /Parent 11 0 R
  /Resources << /Font 1 0 R
  /ProcSet [ /PDF
  /Text
@@ -149,144 +63,119 @@ endobj
  /Trans <<  >>
  /Type /Page >>
 endobj
-% 'R12': class PDFCatalog 
-12 0 obj
+% 'R7': class PDFCatalog 
+7 0 obj
 % Document Root
-<< /Outlines 16 0 R
- /PageLabels 17 0 R
+<< /Outlines 9 0 R
+ /PageLabels 13 0 R
  /PageMode /UseNone
- /Pages 14 0 R
+ /Pages 11 0 R
  /Type /Catalog >>
 endobj
-% 'R13': class PDFInfo 
-13 0 obj
+% 'R8': class PDFInfo 
+8 0 obj
 << /Author ()
- /CreationDate (D:20101207162118+06'00')
+ /CreationDate (D:20110825172648+08'00')
+ /Creator (\(unspecified\))
  /Keywords ()
- /Producer (ReportLab http://www.reportlab.com)
+ /Producer (ReportLab PDF Library - www.reportlab.com)
  /Subject (\(unspecified\))
  /Title (zotero-plain example document) >>
 endobj
-% 'R14': class PDFPages 
-14 0 obj
+% 'R9': class PDFOutlines 
+9 0 obj
+<< /Count 1
+ /First 10 0 R
+ /Last 10 0 R
+ /Type /Outlines >>
+endobj
+% 'Outline.0': class OutlineEntryObject 
+10 0 obj
+<< /Dest [ 6 0 R
+ /XYZ
+ 62.69291
+ 707.0236
+ 0 ]
+ /Parent 9 0 R
+ /Title (Bibliography) >>
+endobj
+% 'R11': class PDFPages 
+11 0 obj
 % page tree
 << /Count 1
- /Kids [ 11 0 R ]
+ /Kids [ 6 0 R ]
  /Type /Pages >>
 endobj
-% 'R15': class PDFStream 
-15 0 obj
+% 'R12': class PDFStream 
+12 0 obj
 % page stream
-<< /Length 1519 >>
+<< /Length 1073 >>
 stream
-1 0 0 1 0 0 cm BT /F1 12 Tf 14.4 TL ET
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
 q
 1 0 0 1 62.69291 741.0236 cm
 q
-BT 1 0 0 1 0 9.64 Tm 69.58488 0 Td 24 TL /F2 20 Tf 0 0 0 rg (zotero-plain ) Tj /F3 20 Tf (example document) Tj T* -69.58488 0 Td ET
+BT 1 0 0 1 0 4 Tm 69.58488 0 Td 24 TL /F2 20 Tf 0 0 0 rg (zotero-plain ) Tj /F3 20 Tf (example document) Tj T* -69.58488 0 Td ET
 Q
 Q
 q
 1 0 0 1 62.69291 719.0236 cm
 q
-BT 1 0 0 1 0 4.82 Tm 12 TL /F1 10 Tf 0 0 0 rg (This is an example document which cites two ) Tj ([) Tj 0 0 .501961 rg (Cohen2008) Tj 0 0 0 rg (] documents ) Tj ([) Tj 0 0 .501961 rg (Cohen2009) Tj 0 0 0 rg (].) Tj T* ET
+BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 0 rg (This is an example document which cites a document \(see Cohen, 2008 ch. 1\); \(see Cohen, 2008 ch. 1\).) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 662.3307 cm
-Q
+1 0 0 1 62.69291 686.0236 cm
 q
-1 0 0 1 62.69291 633.9843 cm
-n 0 14.17323 m 469.8898 14.17323 l S
-Q
-q
-1 0 0 1 62.69291 609.9843 cm
-0 0 0 rg
-BT /F4 10 Tf 12 TL ET
-q
-1 0 0 1 6 12 cm
-q
-BT 1 0 0 1 0 4.82 Tm 12 TL /F1 10 Tf 0 0 .501961 rg (Cohen2008) Tj T* ET
+BT 1 0 0 1 0 3.5 Tm 21 TL /F3 17.5 Tf 0 0 0 rg (Bibliography) Tj T* ET
 Q
 Q
 q
-1 0 0 1 91.03937 0 cm
+1 0 0 1 62.69291 644.0236 cm
 q
-BT 1 0 0 1 0 16.82 Tm 2.00549 Tw 12 TL /F1 10 Tf 0 0 0 rg (Cohen, D. J. \223Creating Scholarly Tools and Resources for the Digital Ecosystem:) Tj T* 0 Tw (Building Connections in the Zotero Project.\224 ) Tj /F5 10 Tf (First Monday ) Tj /F1 10 Tf (13, no. 8 \(2008\).) Tj T* ET
-Q
-Q
-q
-Q
-Q
-q
-1 0 0 1 62.69291 585.9843 cm
-0 0 0 rg
-BT /F4 10 Tf 12 TL ET
-q
-1 0 0 1 6 12 cm
-q
-BT 1 0 0 1 0 4.82 Tm 12 TL /F1 10 Tf 0 0 .501961 rg (Cohen2009) Tj T* ET
-Q
-Q
-q
-1 0 0 1 91.03937 0 cm
-q
-BT 1 0 0 1 0 16.82 Tm 2.095039 Tw 12 TL /F1 10 Tf 0 0 0 rg (Cohen, D. J. \223Zotero: Social and Semantic Computing for Historical Scholarship.\224) Tj T* 0 Tw /F5 10 Tf (Perspectives ) Tj /F1 10 Tf (27 \(2009\).) Tj T* ET
-Q
-Q
-q
+BT 1 0 0 1 0 26 Tm 3.355366 Tw 12 TL /F1 10 Tf 0 0 0 rg (Cohen, D. J. \(2008\). Creating Scholarly Tools and Resources for the Digital Ecosystem: Building) Tj T* 0 Tw 2.915697 Tw (Connections in the Zotero Project. ) Tj /F4 10 Tf (First Monday) Tj /F1 10 Tf (, ) Tj /F4 10 Tf (13) Tj /F1 10 Tf (\(8-4\). Cohen, D. J. \(2009\). Zotero: Social and) Tj T* 0 Tw (Semantic Computing for Historical Scholarship. ) Tj /F4 10 Tf (Perspectives) Tj /F1 10 Tf (, ) Tj /F4 10 Tf (27) Tj /F1 10 Tf (.) Tj T* ET
 Q
 Q
  
 endstream
-
 endobj
-% 'R16': class PDFOutlines 
-16 0 obj
-<< /Count 0
- /Type /Outlines >>
-endobj
-% 'R17': class PDFPageLabels 
-17 0 obj
+% 'R13': class PDFPageLabels 
+13 0 obj
 % Document Root
 << /Nums [ 0
- 18 0 R ] >>
+ 14 0 R ] >>
 endobj
-% 'R18': class PDFPageLabel 
-18 0 obj
+% 'R14': class PDFPageLabel 
+14 0 obj
 % None
 << /S /D
  /St 1 >>
 endobj
 xref
-0 19
+0 15
 0000000000 65535 f
 0000000113 00000 n
-0000000257 00000 n
-0000000422 00000 n
-0000000593 00000 n
-0000000781 00000 n
-0000001022 00000 n
-0000001250 00000 n
-0000001432 00000 n
-0000001660 00000 n
-0000001854 00000 n
-0000002081 00000 n
-0000002407 00000 n
-0000002566 00000 n
-0000002804 00000 n
-0000002912 00000 n
-0000004534 00000 n
-0000004617 00000 n
-0000004710 00000 n
+0000000245 00000 n
+0000000410 00000 n
+0000000581 00000 n
+0000000756 00000 n
+0000000935 00000 n
+0000001214 00000 n
+0000001370 00000 n
+0000001645 00000 n
+0000001769 00000 n
+0000001909 00000 n
+0000002016 00000 n
+0000003192 00000 n
+0000003285 00000 n
 trailer
 << /ID 
  % ReportLab generated PDF document -- digest (http://www.reportlab.com) 
- [(`\347\353\372\0120#y$\355\227m\272\270.\001) (`\347\353\372\0120#y$\355\227m\272\270.\001)] 
+ [(\222O\312LE<\032\236_\031@\321\3141B\206) (\222O\312LE<\032\236_\031@\321\3141B\206)] 
 
- /Info 13 0 R
- /Root 12 0 R
- /Size 19 >>
+ /Info 8 0 R
+ /Root 7 0 R
+ /Size 15 >>
 startxref
-4757
+3332
 %%EOF

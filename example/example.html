@@ -3,13 +3,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.7: http://docutils.sourceforge.net/" />
 <title>zotero-plain example document</title>
 <style type="text/css">
 
 /*
 :Author: David Goodger (goodger@python.org)
-:Id: $Id: html4css1.css 5951 2009-05-18 18:03:10Z milde $
+:Id: $Id: html4css1.css 6253 2010-03-02 00:24:53Z milde $
 :Copyright: This stylesheet has been placed in the public domain.
 
 Default cascading style sheet for the HTML output of Docutils.
@@ -157,15 +157,21 @@ h2.subtitle {
 hr.docutils {
   width: 75% }
 
-img.align-left, .figure.align-left{
+img.align-left, .figure.align-left, object.align-left {
   clear: left ;
   float: left ;
   margin-right: 1em }
 
-img.align-right, .figure.align-right {
+img.align-right, .figure.align-right, object.align-right {
   clear: right ;
   float: right ;
   margin-left: 1em }
+
+img.align-center, .figure.align-center, object.align-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 
 .align-left {
   text-align: left }
@@ -307,20 +313,15 @@ ul.auto-toc {
 <div class="document" id="zotero-plain-example-document">
 <h1 class="title"><tt class="docutils literal"><span class="pre">zotero-plain</span></tt> example document</h1>
 
-<p>This is an example document which cites two <a class="citation-reference" href="#cohen2008" id="id1">[Cohen2008]</a> documents
-<a class="citation-reference" href="#cohen2009" id="id2">[Cohen2009]</a>.</p>
-<table class="docutils citation" frame="void" id="cohen2008" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id1">[Cohen2008]</a></td><td>Cohen, D. J. “Creating Scholarly Tools and Resources for the Digital Ecosystem: Building Connections in the Zotero Project.” <em>First Monday</em> 13, no. 8 (2008).  </td></tr>
-</tbody>
-</table>
-<table class="docutils citation" frame="void" id="cohen2009" rules="none">
-<colgroup><col class="label" /><col /></colgroup>
-<tbody valign="top">
-<tr><td class="label"><a class="fn-backref" href="#id2">[Cohen2009]</a></td><td>Cohen, D. J. “Zotero: Social and Semantic Computing for Historical Scholarship.” <em>Perspectives</em> 27 (2009).  </td></tr>
-</tbody>
-</table>
+<p>This is an example document which cites a document (see Cohen, 2008 ch. 1); (see Cohen, 2008 ch. 1).</p>
+<div class="section" id="bibliography">
+<h1>Bibliography</h1>
+ <p>Cohen, D. J. (2008). Creating Scholarly Tools and Resources for the Digital Ecosystem: Building Connections in the Zotero Project. <em>First Monday</em>, <em>13</em>(8-4).</p>
+
+<p>Cohen, D. J. (2009). Zotero: Social and Semantic Computing for Historical Scholarship. <em>Perspectives</em>, <em>27</em>.</p>
+
+</div>
 </div>
 </body>
 </html>
+

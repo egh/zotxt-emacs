@@ -18,7 +18,6 @@ from docutils.core import publish_cmdline_to_binary, default_description
 from docutils.writers.html4css1 import Writer, HTMLTranslator
 from docutils.readers.standalone import Reader
 from docutils.writers import Writer as WriterBase
-from docutils.parsers.rst import directives, roles
 
 import zotero
 

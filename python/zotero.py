@@ -30,7 +30,6 @@ citation_format = "http://www.zotero.org/styles/chicago-author-date"
 
 
 # unique items
-item_list = []
 item_array = {}
 
 # everything, in sequence
@@ -268,7 +267,7 @@ class ZoteroSetupTransform(Transform):
         global zotero_thing, cite_pos, verbose_flag
         if verbose_flag == 1:
             print "\n=== Zotero4reST: Setup run #2 (load IDs to processor) ==="
-        zotero_thing.registerItemIds(item_list)
+        zotero_thing.registerItemIds(item_array.keys())
         self.startnode.parent.remove(self.startnode)
         visitor = NoteIndexVisitor(self.document)
         self.document.walkabout(visitor)
@@ -310,7 +309,7 @@ class ZoteroDirective(Directive):
                    'suppress-author': directives.flag}
 
     def run(self):
-        global citation_format, item_list, item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
+        global citation_format, item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
         check_zotero_thing()
 
         if verbose_flag == 1 and not started_recording_ids:
@@ -333,7 +332,6 @@ class ZoteroDirective(Directive):
                                      suffix=self.options['suffix'])
         if not item_array.has_key(itemID):
             item_array[itemID] = True
-            item_list.append(itemID)
         cite_list.append([details])
         pending = nodes.pending(ZoteroTransform)
         pending.details.update(self.options)
@@ -518,7 +516,7 @@ Returns an array of hashes with information."""
 
 def zot_cite_role(role, rawtext, text, lineno, inliner,
                   options={}, content=[]):
-    global citation_format, item_list, item_array, cite_list
+    global citation_format, item_array, cite_list
     check_zotero_thing()
 
     pending_list = []
@@ -528,7 +526,6 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
         itemID = cite_info.id
         if not item_array.has_key(itemID):
             item_array[itemID] = True
-            item_list.append(itemID)
         pending = nodes.pending(ZoteroTransform)
         pending.details['zoteroCitation'] = True
         inliner.document.note_pending(pending)
