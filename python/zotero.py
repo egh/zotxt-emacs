@@ -71,7 +71,7 @@ def check_zotero_thing():
         print "#####"
         raise ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
 
-def html2rst (html, as_paragraph=False):
+def html2rst (html):
     """
     Transform html to reStructuredText internal representation.
 
@@ -127,8 +127,7 @@ def html2rst (html, as_paragraph=False):
 
     doc = BeautifulSoup.BeautifulSoup(html)
     ret = [ walk(c) for c in doc.contents ]
-    if as_paragraph: return nodes.paragraph("", "", *ret)
-    else: return ret
+    return ret
 
 def unquote_u(source):
     res = unquote(source)
@@ -454,7 +453,7 @@ class ZoteroBibliographyTransform(Transform):
         for entry in bibdata[1]:
             s += entry
         #s += bibdata[0]["bibend"]
-        newnode = html2rst(s, True)
+        newnode = nodes.paragraph("", "", *html2rst(s))
         self.startnode.replace_self(nodes.generated('', *newnode.children))
 
 class ZoteroJSONEncoder(jsbridge.network.JSObjectEncoder):
