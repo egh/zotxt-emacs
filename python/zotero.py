@@ -330,8 +330,7 @@ class ZoteroDirective(Directive):
                                      label=self.options['label'],
                                      prefix=self.options['prefix'],
                                      suffix=self.options['suffix'])
-        if not item_array.has_key(itemID):
-            item_array[itemID] = True
+        item_array[itemID] = True
         cite_list.append([details])
         pending = nodes.pending(ZoteroTransform)
         pending.details.update(self.options)
@@ -524,8 +523,7 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
     for cite_info in cites:
         cite_list.append([cite_info])
         itemID = cite_info.id
-        if not item_array.has_key(itemID):
-            item_array[itemID] = True
+        item_array[itemID] = True
         pending = nodes.pending(ZoteroTransform)
         pending.details['zoteroCitation'] = True
         inliner.document.note_pending(pending)
