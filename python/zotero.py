@@ -26,11 +26,6 @@ DEFAULT_CITATION_FORMAT = "http://www.zotero.org/styles/chicago-author-date"
 
 ### How to set up custom text role in zotero.py?
 
-
-
-# unique items
-item_array = {}
-
 # everything, in sequence
 cite_list = []
 cite_pos = 0
@@ -170,6 +165,10 @@ class ZoteroConnection(object):
         self.bibType = kwargs.get('bibType', DEFAULT_CITATION_FORMAT)
         self.firefox_connect()
         self.zotero_resource()
+        self.tracked_items = []
+
+    def track_item(self, item):
+        self.tracked_items.append(item)
 
     def firefox_connect(self):
         self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
@@ -180,6 +179,7 @@ class ZoteroConnection(object):
 
     def generate_rest_bibliography(self):
         """Generate a bibliography of reST nodes."""
+        self.methods.registerItemIds([ item.id for item in self.tracked_items ])
         bibdata = json.loads(self.methods.getBibliographyData())
         bibdata[0]["bibstart"] = unquote_u(bibdata[0]["bibstart"])
         bibdata[0]["bibend"] = unquote_u(bibdata[0]["bibend"])
@@ -309,9 +309,8 @@ class ZoteroSetupDirective(Directive):
 class ZoteroSetupTransform(Transform):
     default_priority = 500
     def apply(self):
-        global zotero_thing, cite_pos
+        global cite_pos
         z4r_debug("\n=== Zotero4reST: Setup run #2 (load IDs to processor) ===")
-        zotero_thing.methods.registerItemIds(item_array.keys())
         self.startnode.parent.remove(self.startnode)
         visitor = NoteIndexVisitor(self.document)
         self.document.walkabout(visitor)
@@ -353,7 +352,7 @@ class ZoteroDirective(Directive):
                    'suppress-author': directives.flag}
 
     def run(self):
-        global item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
+        global zotero_thing, cite_list, verbose_flag, started_recording_ids
         check_zotero_thing()
 
         if verbose_flag == 1 and not started_recording_ids:
@@ -373,7 +372,7 @@ class ZoteroDirective(Directive):
                                      label=self.options['label'],
                                      prefix=self.options['prefix'],
                                      suffix=self.options['suffix'])
-        item_array[details.id] = True
+        zotero_thing.track_item(details)
         cite_list.append([details])
         pending = nodes.pending(ZoteroTransform)
         pending.details.update(self.options)
@@ -397,7 +396,7 @@ class ZoteroTransform(Transform):
     #   http://stackoverflow.com/questions/300445/how-to-unquote-a-urlencoded-unicode-string-in-python
 
     def apply(self):
-        global note_number, cite_pos, cite_list, verbose_flag, started_transforming_cites
+        global zotero_thing, note_number, cite_pos, cite_list, verbose_flag, started_transforming_cites
         if not self.startnode.details.has_key('zoteroCitation'):
             self.startnode.parent.remove(self.startnode)
             if verbose_flag == 1:
@@ -417,7 +416,10 @@ class ZoteroTransform(Transform):
             res = zotero_thing.methods.getCitationBlock(citation)
             cite_pos += 1
             mystr = unquote_u(res)
-            newnode = nodes.paragraph('', '', *html2rst(mystr))
+            newnode = html2rst(mystr)
+            # wrap in a paragraph if it is a note
+            if not(zotero_thing.methods.isInTextStyle()):
+                newnode = nodes.paragraph('', '', *newnode)
             if verbose_flag == 1:
                 sys.stderr.write(".")
                 sys.stderr.flush()
@@ -534,14 +536,14 @@ Returns an array of hashes with information."""
 
 def zot_cite_role(role, rawtext, text, lineno, inliner,
                   options={}, content=[]):
-    global item_array, cite_list
+    global cite_list, zotero_thing
     check_zotero_thing()
 
     pending_list = []
     cites = zot_parse_cite_string(text)
     for cite_info in cites:
         cite_list.append([cite_info])
-        item_array[cite_info.id] = True
+        zotero_thing.track_item(cite_info)
         pending = nodes.pending(ZoteroTransform)
         pending.details['zoteroCitation'] = True
         inliner.document.note_pending(pending)
