@@ -416,7 +416,7 @@ class ZoteroTransform(Transform):
             res = zotero_thing.methods.getCitationBlock(citation)
             cite_pos += 1
             mystr = unquote_u(res)
-            newnode = html2rst(mystr)
+            newnode = nodes.paragraph('', '', *html2rst(mystr))
             if verbose_flag == 1:
                 sys.stderr.write(".")
                 sys.stderr.flush()
