@@ -22,7 +22,7 @@ from urllib import unquote
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
 
-citation_format = "http://www.zotero.org/styles/chicago-author-date"
+DEFAULT_CITATION_FORMAT = "http://www.zotero.org/styles/chicago-author-date"
 
 ### How to set up custom text role in zotero.py?
 
@@ -172,7 +172,7 @@ def isZoteroCite(node):
 
 class ZoteroConnection(object):
     def __init__(self, **kwargs):
-        self.bibType = kwargs.get('bibType', citation_format)
+        self.bibType = kwargs.get('bibType', DEFAULT_CITATION_FORMAT)
         self.firefox_connect()
         self.zotero_resource()
 
@@ -272,11 +272,9 @@ class ZoteroSetupDirective(Directive):
     has_content = False
     option_spec = {'format': directives.unchanged}
     def run(self):
-        global citation_format, zotero_thing
+        global zotero_thing
         z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
-        if self.options.has_key('format'):
-            citation_format = self.options['format']
-        zotero_thing.instantiateCiteProc(citation_format);
+        zotero_thing.instantiateCiteProc(self.options.get('format', DEFAULT_CITATION_FORMAT))
         pending = nodes.pending(ZoteroSetupTransform)
         pending.details.update(self.options)
         self.state_machine.document.note_pending(pending)
@@ -335,7 +333,7 @@ class ZoteroDirective(Directive):
                    'suppress-author': directives.flag}
 
     def run(self):
-        global citation_format, item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
+        global item_array, zotero_thing, cite_list, verbose_flag, started_recording_ids
         check_zotero_thing()
 
         if verbose_flag == 1 and not started_recording_ids:
@@ -532,7 +530,7 @@ Returns an array of hashes with information."""
 
 def zot_cite_role(role, rawtext, text, lineno, inliner,
                   options={}, content=[]):
-    global citation_format, item_array, cite_list
+    global item_array, cite_list
     check_zotero_thing()
 
     pending_list = []
