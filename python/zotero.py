@@ -55,6 +55,11 @@ footnodes = []
 footnode_pos = 0
 autonomous_mobile_footnode_indexes = []
 
+def z4r_debug(str):
+    global verbose_flag
+    if verbose_flag == 1:
+        print str
+
 def check_zotero_thing():
     global zotero_thing
     if not zotero_thing:
@@ -243,9 +248,8 @@ class ZoteroSetupDirective(Directive, ZoteroConnection):
     has_content = False
     option_spec = {'format': unchanged}
     def run(self):
-        global citation_format, zotero_thing, verbose_flag
-        if verbose_flag == 1:
-            print "=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ==="
+        global citation_format, zotero_thing
+        z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
         if self.options.has_key('format'):
             citation_format = self.options['format']
         zotero_thing.instantiateCiteProc(citation_format);
@@ -263,9 +267,8 @@ class ZoteroSetupDirective(Directive, ZoteroConnection):
 class ZoteroSetupTransform(Transform):
     default_priority = 500
     def apply(self):
-        global zotero_thing, cite_pos, verbose_flag
-        if verbose_flag == 1:
-            print "\n=== Zotero4reST: Setup run #2 (load IDs to processor) ==="
+        global zotero_thing, cite_pos
+        z4r_debug("\n=== Zotero4reST: Setup run #2 (load IDs to processor) ===")
         zotero_thing.registerItemIds(item_array.keys())
         self.startnode.parent.remove(self.startnode)
         visitor = NoteIndexVisitor(self.document)
@@ -418,8 +421,7 @@ class ZoteroBibliographyDirective(Directive):
     optional_arguments = 1
     has_content = False
     def run(self):
-        if verbose_flag == 1:
-            print "\n--- Zotero4reST: Bibliography #1 (placeholder set) ---"
+        z4r_debug("\n--- Zotero4reST: Bibliography #1 (placeholder set) ---")
         pending = nodes.pending(ZoteroBibliographyTransform)
         pending.details.update(self.options)
         self.state_machine.document.note_pending(pending)
@@ -430,8 +432,7 @@ class ZoteroBibliographyTransform(Transform):
     default_priority = 530
 
     def apply(self):
-        if verbose_flag == 1:
-            print "\n--- Zotero4reST: Bibliography #2 (inserting content) ---"
+        z4r_debug("\n--- Zotero4reST: Bibliography #2 (inserting content) ---")
         rawbibdata = zotero_thing.getBibliographyData();
         bibdata = json.loads(rawbibdata)
         bibdata[0]["bibstart"] = unquote_u(bibdata[0]["bibstart"])
