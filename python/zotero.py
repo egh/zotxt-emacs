@@ -453,8 +453,8 @@ class ZoteroBibliographyTransform(Transform):
         for entry in bibdata[1]:
             s += entry
         #s += bibdata[0]["bibend"]
-        newnode = nodes.paragraph("", "", *html2rst(s))
-        self.startnode.replace_self(nodes.generated('', *newnode.children))
+        newnode = html2rst(s)
+        self.startnode.replace_self(newnode)
 
 class ZoteroJSONEncoder(jsbridge.network.JSObjectEncoder):
     """An encoder for our JSON objects."""
