@@ -315,7 +315,6 @@ class ZoteroDirective(Directive):
         if verbose_flag == 1 and not started_recording_ids:
             print "--- Zotero4reST: Citation run #1 (record ID) ---"
             started_recording_ids = True
-        itemID = int(zotero_thing.getItemId(self.arguments[0]))
         for key in ['locator', 'label', 'prefix', 'suffix']:
             if not self.options.has_key(key):
                 self.options[key] = ''
@@ -330,7 +329,7 @@ class ZoteroDirective(Directive):
                                      label=self.options['label'],
                                      prefix=self.options['prefix'],
                                      suffix=self.options['suffix'])
-        item_array[itemID] = True
+        item_array[details.id] = True
         cite_list.append([details])
         pending = nodes.pending(ZoteroTransform)
         pending.details.update(self.options)
@@ -522,8 +521,7 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
     cites = zot_parse_cite_string(text)
     for cite_info in cites:
         cite_list.append([cite_info])
-        itemID = cite_info.id
-        item_array[itemID] = True
+        item_array[cite_info.id] = True
         pending = nodes.pending(ZoteroTransform)
         pending.details['zoteroCitation'] = True
         inliner.document.note_pending(pending)
