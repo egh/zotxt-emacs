@@ -183,6 +183,25 @@ class ZoteroConnection(object):
     def zotero_resource(self):
         self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
 
+    def generate_rest_bibliography(self):
+        """Generate a bibliography of reST nodes."""
+        bibdata = json.loads(self.methods.getBibliographyData())
+        bibdata[0]["bibstart"] = unquote_u(bibdata[0]["bibstart"])
+        bibdata[0]["bibend"] = unquote_u(bibdata[0]["bibend"])
+        for i in range(0, len(bibdata[1])):
+            bibdata[1][i] = unquote_u(bibdata[1][i])
+
+        # XXX There is some nasty business here.
+        #
+        # Some nested nodes come out serialized when run through html2rst, so something
+        # needs to be fixed there.
+        #
+        # More important, we need to figure out how to control formatting
+        # in the bib -- hanging indents especially. Probably the simplest thing
+        # is just to set some off-the-shelf named style blocks in style.odt, and
+        # apply them as more or less appropriate.
+        #
+        return html2rst("%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"]))
 
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
     def visit_pending(self, node):
@@ -455,23 +474,7 @@ class ZoteroBibliographyTransform(Transform):
 
     def apply(self):
         z4r_debug("\n--- Zotero4reST: Bibliography #2 (inserting content) ---")
-        bibdata = json.loads(zotero_thing.methods.getBibliographyData())
-        bibdata[0]["bibstart"] = unquote_u(bibdata[0]["bibstart"])
-        bibdata[0]["bibend"] = unquote_u(bibdata[0]["bibend"])
-        for i in range(0, len(bibdata[1])):
-            bibdata[1][i] = unquote_u(bibdata[1][i])
-
-        # XXX There is some nasty business here.
-        #
-        # Some nested nodes come out serialized when run through html2rst, so something
-        # needs to be fixed there.
-        #
-        # More important, we need to figure out how to control formatting
-        # in the bib -- hanging indents especially. Probably the simplest thing
-        # is just to set some off-the-shelf named style blocks in style.odt, and
-        # apply them as more or less appropriate.
-        #
-        newnode = html2rst("%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"]))
+        newnode = zotero_thing.generate_rest_bibliography()
         self.startnode.replace_self(newnode)
 
 class ZoteroJSONEncoder(jsbridge.network.JSObjectEncoder):
