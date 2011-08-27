@@ -16,8 +16,7 @@ from docutils.utils import ExtensionOptionError
 
 from itertools import chain, dropwhile, islice, takewhile
 
-from urllib import unquote
-
+import urllib
 
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
@@ -146,11 +145,18 @@ def html2rst (html):
     ret = compact([ walk(c) for c in doc.contents ])
     return ret
 
-def unquote_u(source):
-    res = unquote(source)
-    if '%u' in res:
-        res = res.replace('%u','\\u').decode('unicode_escape')
-    return res
+def unquote(source):
+    if type(source) == list:
+        return [ unquote(x) for x in source ]
+    elif type(source) == dict:
+        return dict([ (k, unquote(v)) for (k,v) in source.items()])
+    elif (type(source) == unicode) or (type(source) == str) or (type(source) == jsbridge.jsobjects.JSString):
+        res = urllib.unquote(source)
+        if '%u' in res:
+            res = res.replace('%u','\\u').decode('unicode_escape')
+        return res
+    else:
+        return source
 
 def isZoteroCite(node):
     ret = False
@@ -180,12 +186,7 @@ class ZoteroConnection(object):
     def generate_rest_bibliography(self):
         """Generate a bibliography of reST nodes."""
         self.methods.registerItemIds([ item.id for item in self.tracked_items ])
-        bibdata = json.loads(self.methods.getBibliographyData())
-        bibdata[0]["bibstart"] = unquote_u(bibdata[0]["bibstart"])
-        bibdata[0]["bibend"] = unquote_u(bibdata[0]["bibend"])
-        for i in range(0, len(bibdata[1])):
-            bibdata[1][i] = unquote_u(bibdata[1][i])
-
+        bibdata = unquote(json.loads(self.methods.getBibliographyData()))
         # XXX There is some nasty business here.
         #
         # Some nested nodes come out serialized when run through html2rst, so something
@@ -239,6 +240,7 @@ class NoteIndexVisitor(nodes.SparseNodeVisitor):
             if self.in_note:
                 cite_list[cite_pos][0].noteIndex = self.note_count
             cite_pos += 1
+
     def depart_pending(self, node):
         pass
 
@@ -415,8 +417,7 @@ class ZoteroTransform(Transform):
             }
             res = zotero_thing.methods.getCitationBlock(citation)
             cite_pos += 1
-            mystr = unquote_u(res)
-            newnode = html2rst(mystr)
+            newnode = html2rst(unquote(res))
             # wrap in a paragraph if it is a note
             if not(zotero_thing.methods.isInTextStyle()):
                 newnode = nodes.paragraph('', '', *newnode)

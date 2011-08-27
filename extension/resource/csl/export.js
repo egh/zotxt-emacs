@@ -8,7 +8,7 @@ function getItemId (idStr) {
         idStr = "0_" + idStr;
 	}
 	var lkh = zotero.Items.parseLibraryKeyHash(idStr);
-    var item = zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);
+	var item = zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);
 	return item.id;
 };
 
@@ -51,23 +51,34 @@ function getCitationBlock (citation) {
 	return retme
 };
 
+function escapeStringValues (o) {
+    if (o instanceof Array) {
+        return o.map(function (x) { return escapeStringValues(x); });
+    } else if (typeof o === "string") {
+        return escape(o);
+    } else if (typeof o === "object") {
+        var retval = new Object();
+        for (var k in o) {
+            retval[k] = escapeStringValues(o[k]);
+        }
+        return retval;
+    } else {
+        return o;
+    }
+};
+
 function getBibliographyData (arg) {
 	var ret;
-	zotero.debug("XXX WTF?")
+	zotero.debug("XXX WTF?");
 	try {
-		zotero.debug("XXX WTF? part two")
+		zotero.debug("XXX WTF? part two");
 		ret = zotero.reStructuredCSL.makeBibliography(arg);
-		zotero.debug("XXX WTF? part three")
+		zotero.debug("XXX WTF? part three");
 		if (ret) {
-			zotero.debug("XXX WTF? part four")
-			ret[0].bibstart = escape( ret[0].bibstart );
-			ret[0].bibend = escape( ret[0].bibend );
-			for (var i = 0, ilen = ret[1].length; i < ilen; i += 1) {
-				ret[1][i] = escape( ret[1][i] );
-			}
+			zotero.debug("XXX WTF? part four");
+                	ret = escapeStringValues(ret);
 			ret = JSON.stringify(ret);
-			zotero.debug("XXX WTF? part five")
-			
+			zotero.debug("XXX WTF? part five");
 		}
 	} catch (e) {
 		zotero.debug("XXX oops: "+e);
