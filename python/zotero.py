@@ -258,26 +258,6 @@ class NoteIndexVisitor(nodes.SparseNodeVisitor):
         footnodes.append(node)
         self.in_note = False
 
-class MobileFootNodeVisitor(nodes.SparseNodeVisitor):
-    def visit_footnote_reference(self, node):
-        global footnodes, footnode_pos, autonomous_mobile_footnode_indexes
-        if footnodes[footnode_pos].attributes.has_key('onlyZotero'):
-            parent = footnodes[footnode_pos].parent
-            footnote = footnodes[footnode_pos]
-            # Only footnotes consisting entirely of Zotero notes are affected
-            # by this transform. These are always wrapped in a single paragraph,
-            # which is the sole child of the footnote.
-            node.replace_self(nodes.generated('', '', *footnote.children[0].children))
-            parent.remove(footnote)
-            autonomous_mobile_footnode_indexes.append(footnode_pos)
-    def depart_footnote_reference(self, node):
-        global footnode_pos
-        footnode_pos += 1
-    def visit_smallcaps(self, node):
-        pass
-    def depart_smallcaps(self, node):
-        pass
-
 class ZoteroSetupDirective(Directive):
     def __init__(self, *args, **kwargs):
         global zotero_thing, verbose_flag
@@ -322,8 +302,6 @@ class ZoteroSetupTransform(Transform):
 class ZoteroCleanupTransform(Transform):
     default_priority = 520
     def apply(self):
-        visitor = MobileFootNodeVisitor(self.document)
-        self.document.walkabout(visitor)
         for i in range(len(autonomous_mobile_footnode_indexes)-1, -1, -1):
             pos = autonomous_mobile_footnode_indexes[i]
             self.document.autofootnotes.pop(pos)
