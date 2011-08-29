@@ -26,7 +26,6 @@ DEFAULT_CITATION_FORMAT = "http://www.zotero.org/styles/chicago-author-date"
 ### How to set up custom text role in zotero.py?
 
 # everything, in sequence
-cite_list = []
 cite_pos = 0
 
 # placeholder for global bridge to Zotero
@@ -172,6 +171,7 @@ class ZoteroConnection(object):
         self.firefox_connect()
         self.zotero_resource()
         self.tracked_items = []
+        self.cite_list = []
 
     def track_item(self, item):
         self.tracked_items.append(item)
@@ -201,7 +201,7 @@ class ZoteroConnection(object):
 
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
     def visit_pending(self, node):
-        global cite_list, cite_pos
+        global zotero_thing, cite_pos
         children = node.parent.children
         # Start at THIS child's offset.
         for start in range(0, len(children), 1):
@@ -220,8 +220,8 @@ class MultipleCitationVisitor(nodes.SparseNodeVisitor):
                         break
                     nextIsZoteroCite = isZoteroCite(children[pos + offset])
                     children[pos + offset].details.pop('zoteroCitation')
-                    cite_list[cite_pos].append(cite_list[cite_pos + 1][0])
-                    cite_list.pop(cite_pos + 1)
+                    zotero_thing.cite_list[cite_pos].append(zotero_thing.cite_list[cite_pos + 1][0])
+                    zotero_thing.cite_list.pop(cite_pos + 1)
         if isZoteroCite(node):
             cite_pos += 1
     def depart_pending(self, node):
@@ -234,11 +234,11 @@ class NoteIndexVisitor(nodes.SparseNodeVisitor):
         nodes.SparseNodeVisitor.__init__(self, *args, **kwargs)
 
     def visit_pending(self, node):
-        global cite_list, cite_pos
+        global zotero_thing, cite_pos
         if node.details.has_key('zoteroCitation'):
             # Do something about the number
             if self.in_note:
-                cite_list[cite_pos][0].noteIndex = self.note_count
+                zotero_thing.cite_list[cite_pos][0].noteIndex = self.note_count
             cite_pos += 1
 
     def depart_pending(self, node):
@@ -354,7 +354,7 @@ class ZoteroDirective(Directive):
                    'suppress-author': directives.flag}
 
     def run(self):
-        global zotero_thing, cite_list, verbose_flag, started_recording_ids
+        global zotero_thing, verbose_flag, started_recording_ids
         check_zotero_thing()
 
         if verbose_flag == 1 and not started_recording_ids:
@@ -369,13 +369,13 @@ class ZoteroDirective(Directive):
         # the cluster in the composition pass.
 
         details = ZoteroCitationInfo(key=self.arguments[0],
-                                     indexNumber=len(cite_list),
+                                     indexNumber=len(zotero_thing.cite_list),
                                      locator=self.options['locator'],
                                      label=self.options['label'],
                                      prefix=self.options['prefix'],
                                      suffix=self.options['suffix'])
         zotero_thing.track_item(details)
-        cite_list.append([details])
+        zotero_thing.cite_list.append([details])
         pending = nodes.pending(ZoteroTransform)
         pending.details.update(self.options)
         pending.details['zoteroCitation'] = True
@@ -398,7 +398,7 @@ class ZoteroTransform(Transform):
     #   http://stackoverflow.com/questions/300445/how-to-unquote-a-urlencoded-unicode-string-in-python
 
     def apply(self):
-        global zotero_thing, note_number, cite_pos, cite_list, verbose_flag, started_transforming_cites
+        global zotero_thing, note_number, cite_pos, verbose_flag, started_transforming_cites
         if not self.startnode.details.has_key('zoteroCitation'):
             self.startnode.parent.remove(self.startnode)
             if verbose_flag == 1:
@@ -409,10 +409,10 @@ class ZoteroTransform(Transform):
                 sys.stderr.write("--- Zotero4reST: Citation run #2 (render cite and insert) ---\n")
                 started_transforming_cites = True
             citation = {
-                'citationItems':cite_list[cite_pos],
+                'citationItems':zotero_thing.cite_list[cite_pos],
                 'properties': {
                     'index': cite_pos,
-                    'noteIndex': cite_list[cite_pos][0].noteIndex
+                    'noteIndex': zotero_thing.cite_list[cite_pos][0].noteIndex
                 }
             }
             res = zotero_thing.methods.getCitationBlock(citation)
@@ -513,7 +513,7 @@ def zot_parse_cite_string(cite_string):
     """Parse a citation string. This is inteded to be "pandoc-like".
 Examples: `see @Doe2008; also c.f. @Doe2010`
 Returns an array of hashes with information."""
-    global cite_list
+    global zotero_thing
 
     KEY_RE = r'-?@([A-Z0-9]+)'
     def is_key(s): return re.match(KEY_RE, s)
@@ -530,20 +530,20 @@ Returns an array of hashes with information."""
             raise ExtensionOptionError("Too many keys in citation: '%s'."%(cite_string))
         else:
             retval.append(ZoteroCitationInfo(key=re.match(KEY_RE, raw_keys[0]).group(1),
-                                             indexNumber=len(cite_list), 
+                                             indexNumber=len(zotero_thing.cite_list), 
                                              prefix=" ".join(takewhile(not_is_key, words)),
                                              suffix=" ".join(islice(dropwhile(not_is_key, words), 1, None))))
     return retval
 
 def zot_cite_role(role, rawtext, text, lineno, inliner,
                   options={}, content=[]):
-    global cite_list, zotero_thing
+    global zotero_thing
     check_zotero_thing()
 
     pending_list = []
     cites = zot_parse_cite_string(text)
     for cite_info in cites:
-        cite_list.append([cite_info])
+        zotero_thing.cite_list.append([cite_info])
         zotero_thing.track_item(cite_info)
         pending = nodes.pending(ZoteroTransform)
         pending.details['zoteroCitation'] = True
