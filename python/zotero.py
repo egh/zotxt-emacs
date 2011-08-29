@@ -25,9 +25,6 @@ DEFAULT_CITATION_FORMAT = "http://www.zotero.org/styles/chicago-author-date"
 
 ### How to set up custom text role in zotero.py?
 
-# everything, in sequence
-cite_pos = 0
-
 # placeholder for global bridge to Zotero
 zotero_thing = None;
 
@@ -172,6 +169,7 @@ class ZoteroConnection(object):
         self.zotero_resource()
         self.tracked_items = []
         self.cite_list = []
+        self.cite_pos = 0
 
     def track_item(self, item):
         self.tracked_items.append(item)
@@ -201,14 +199,14 @@ class ZoteroConnection(object):
 
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
     def visit_pending(self, node):
-        global zotero_thing, cite_pos
+        global zotero_thing
         children = node.parent.children
         # Start at THIS child's offset.
         for start in range(0, len(children), 1):
             if children[start] == node:
                 break
             elif isZoteroCite(node):
-                cite_pos += 1
+                zotero_thing.cite_pos += 1
         for pos in range(start, len(children) - 1, 1):
             
             if isZoteroCite(children[pos]) and isZoteroCite(children[pos + 1]):
@@ -220,10 +218,10 @@ class MultipleCitationVisitor(nodes.SparseNodeVisitor):
                         break
                     nextIsZoteroCite = isZoteroCite(children[pos + offset])
                     children[pos + offset].details.pop('zoteroCitation')
-                    zotero_thing.cite_list[cite_pos].append(zotero_thing.cite_list[cite_pos + 1][0])
-                    zotero_thing.cite_list.pop(cite_pos + 1)
+                    zotero_thing.cite_list[zotero_thing.cite_pos].append(zotero_thing.cite_list[zotero_thing.cite_pos + 1][0])
+                    zotero_thing.cite_list.pop(zotero_thing.cite_pos + 1)
         if isZoteroCite(node):
-            cite_pos += 1
+            zotero_thing.cite_pos += 1
     def depart_pending(self, node):
         pass
 
@@ -234,12 +232,12 @@ class NoteIndexVisitor(nodes.SparseNodeVisitor):
         nodes.SparseNodeVisitor.__init__(self, *args, **kwargs)
 
     def visit_pending(self, node):
-        global zotero_thing, cite_pos
+        global zotero_thing
         if node.details.has_key('zoteroCitation'):
             # Do something about the number
             if self.in_note:
-                zotero_thing.cite_list[cite_pos][0].noteIndex = self.note_count
-            cite_pos += 1
+                zotero_thing.cite_list[zotero_thing.cite_pos][0].noteIndex = self.note_count
+            zotero_thing.cite_pos += 1
 
     def depart_pending(self, node):
         pass
@@ -311,15 +309,15 @@ class ZoteroSetupDirective(Directive):
 class ZoteroSetupTransform(Transform):
     default_priority = 500
     def apply(self):
-        global cite_pos
+        global zotero_thing
         z4r_debug("\n=== Zotero4reST: Setup run #2 (load IDs to processor) ===")
         self.startnode.parent.remove(self.startnode)
         visitor = NoteIndexVisitor(self.document)
         self.document.walkabout(visitor)
-        cite_pos = 0
+        zotero_thing.cite_pos = 0
         visitor = MultipleCitationVisitor(self.document)
         self.document.walkabout(visitor)
-        cite_pos = 0
+        zotero_thing.cite_pos = 0
 
 class ZoteroCleanupTransform(Transform):
     default_priority = 520
@@ -398,7 +396,7 @@ class ZoteroTransform(Transform):
     #   http://stackoverflow.com/questions/300445/how-to-unquote-a-urlencoded-unicode-string-in-python
 
     def apply(self):
-        global zotero_thing, note_number, cite_pos, verbose_flag, started_transforming_cites
+        global zotero_thing, note_number, verbose_flag, started_transforming_cites
         if not self.startnode.details.has_key('zoteroCitation'):
             self.startnode.parent.remove(self.startnode)
             if verbose_flag == 1:
@@ -409,14 +407,14 @@ class ZoteroTransform(Transform):
                 sys.stderr.write("--- Zotero4reST: Citation run #2 (render cite and insert) ---\n")
                 started_transforming_cites = True
             citation = {
-                'citationItems':zotero_thing.cite_list[cite_pos],
+                'citationItems':zotero_thing.cite_list[zotero_thing.cite_pos],
                 'properties': {
-                    'index': cite_pos,
-                    'noteIndex': zotero_thing.cite_list[cite_pos][0].noteIndex
+                    'index': zotero_thing.cite_pos,
+                    'noteIndex': zotero_thing.cite_list[zotero_thing.cite_pos][0].noteIndex
                 }
             }
             res = zotero_thing.methods.getCitationBlock(citation)
-            cite_pos += 1
+            zotero_thing.cite_pos += 1
             newnode = html2rst(unquote(res))
             # wrap in a paragraph if it is a note
             if not(zotero_thing.methods.isInTextStyle()):
