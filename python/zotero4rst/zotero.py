@@ -20,6 +20,8 @@ from itertools import chain, dropwhile, islice, takewhile
 
 import urllib
 
+import zotero4rst.json
+
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
 
@@ -455,21 +457,6 @@ class ZoteroBibliographyTransform(Transform):
         z4r_debug("\n--- Zotero4reST: Bibliography #2 (inserting content) ---")
         newnode = zotero_thing.generate_rest_bibliography()
         self.startnode.replace_self(newnode)
-
-class ZoteroJSONEncoder(jsbridge.network.JSObjectEncoder):
-    """An encoder for our JSON objects."""
-    def default(self, obj):
-        if isinstance(obj, ZoteroCitationInfo):
-            return { 'id'          : obj.id,
-                     'indexNumber' : obj.indexNumber,
-                     'label'       : obj.label,
-                     'locator'     : obj.locator,
-                     'noteIndex'   : obj.noteIndex,
-                     'prefix'      : obj.prefix,
-                     'suffix'      : obj.suffix }
-        else: return json.JSONEncoder.default(self, obj)
-
-jsbridge.network.encoder = ZoteroJSONEncoder()
 
 class ZoteroCitationInfo(object):
     """Class to hold information about a citation for passing to Zotero."""
