@@ -289,6 +289,7 @@ class ZoteroSetupDirective(Directive):
         global zotero_thing
         if self.options.has_key('keyfile'):
             zotero_thing.load_keyfile(self.options['keyfile'])
+
         z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
         zotero_thing.methods.instantiateCiteProc(self.options.get('format', DEFAULT_CITATION_FORMAT))
         pending = nodes.pending(ZoteroSetupTransform)
@@ -395,7 +396,6 @@ class ZoteroTransform(Transform):
             res = zotero_thing.methods.getCitationBlock(citation)
             zotero_thing.cite_pos += 1
             newnode = html2rst(unquote(res))
-            # wrap in a paragraph if it is a note
             if verbose_flag == 1:
                 sys.stderr.write(".")
                 sys.stderr.flush()
@@ -489,29 +489,35 @@ class ZoteroCitationInfo(object):
 
 def zot_parse_cite_string(cite_string):
     """Parse a citation string. This is inteded to be "pandoc-like".
-Examples: `see @Doe2008; also c.f. @Doe2010`
+Examples: `see @Doe2008` `also c.f. @Doe2010`
 Returns an array of hashes with information."""
     global zotero_thing
 
-    KEY_RE = r'-?@([A-Z0-9]+)'
+    KEY_RE = r'-?@([A-Za-z0-9_-]+),?'
     def is_key(s): return re.match(KEY_RE, s)
     def not_is_key(s): return not(is_key(s))
+    def not_is_sc(s): return s != ';'
 
-    cite_string_list = re.split(r'; *', cite_string)
-    retval = []
-    for cite in cite_string_list:
-        words = re.split(r' ', cite)
-        raw_keys = [ word for word in words if is_key(word) ]
-        if len(raw_keys) == 0:
-            raise ExtensionOptionError("No key found in citation: '%s'."%(cite_string))
-        elif len(raw_keys) > 1:
-            raise ExtensionOptionError("Too many keys in citation: '%s'."%(cite_string))
-        else:
-            retval.append(ZoteroCitationInfo(key=re.match(KEY_RE, raw_keys[0]).group(1),
-                                             indexNumber=len(zotero_thing.cite_list), 
-                                             prefix=" ".join(takewhile(not_is_key, words)),
-                                             suffix=" ".join(islice(dropwhile(not_is_key, words), 1, None))))
-    return retval
+    words = [ n for n in re.split(r"( |;)", cite_string) if n != ' ' and n != '' ]
+    raw_keys = [ word for word in words if is_key(word) ]
+    if len(raw_keys) == 0:
+        raise ExtensionOptionError("No key found in citation: '%s'."%(cite_string))
+    elif len(raw_keys) > 1:
+        raise ExtensionOptionError("Too many keys in citation: '%s'."%(cite_string))
+    else:
+        key = re.match(KEY_RE, raw_keys[0]).group(1)
+        prefix = " ".join(takewhile(not_is_key, words))
+        after_cite = tuple(islice(dropwhile(not_is_key, words), 1, None))
+        suffix=None
+        locator=None
+        # suffix is separate by ;, for now
+        locator = " ".join(takewhile(not_is_sc, after_cite))
+        suffix = " ".join(islice(dropwhile(not_is_sc, after_cite), 1, None))
+        return ZoteroCitationInfo(key=key,
+                                  indexNumber=len(zotero_thing.cite_list),
+                                  prefix=prefix,
+                                  suffix=suffix,
+                                  locator=locator)
 
 def zot_cite_role(role, rawtext, text, lineno, inliner,
                   options={}, content=[]):
@@ -519,14 +525,13 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
     check_zotero_thing()
 
     pending_list = []
-    cites = zot_parse_cite_string(text)
-    for cite_info in cites:
-        zotero_thing.cite_list.append([cite_info])
-        zotero_thing.track_item(cite_info)
-        pending = nodes.pending(ZoteroTransform)
-        pending.details['zoteroCitation'] = True
-        inliner.document.note_pending(pending)
-        pending_list.append(pending)
+    cite_info = zot_parse_cite_string(text)
+    zotero_thing.cite_list.append([cite_info])
+    zotero_thing.track_item(cite_info)
+    pending = nodes.pending(ZoteroTransform)
+    pending.details['zoteroCitation'] = True
+    inliner.document.note_pending(pending)
+    pending_list.append(pending)
     return pending_list, []
 
 # setup zotero directives
