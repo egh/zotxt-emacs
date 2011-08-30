@@ -478,7 +478,7 @@ class ZoteroCitationInfo(object):
     def __init__(self, **kwargs):
         global zotero_thing
         self.key = kwargs['key']
-o        newkey = zotero_thing.lookup_key(self.key)
+        newkey = zotero_thing.lookup_key(self.key)
         if newkey is not None:
             self.key = newkey
         self.id = int(zotero_thing.methods.getItemId(self.key))
