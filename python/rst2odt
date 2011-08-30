@@ -41,8 +41,6 @@ class ODFTranslatorWithSmallCaps(ODFTranslator):
         if len(node.children) and isinstance(node.children[0], nodes.Text):
             el1 = SubElement(el, 'text:span',
                      attrib={'text:style-name': self.rststyle('strong')})
-#            print dir(node)
-#            print dir(node.children[0])
             el1.text = node.children[0].astext()
             node.children.pop(0)
         return el
@@ -63,4 +61,4 @@ writer = WriterWithSmallCaps()
 reader = Reader()
 output = publish_cmdline_to_binary(reader=reader, writer=writer,
     description=description)
-print ""
+
