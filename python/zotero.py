@@ -396,8 +396,6 @@ class ZoteroTransform(Transform):
             zotero_thing.cite_pos += 1
             newnode = html2rst(unquote(res))
             # wrap in a paragraph if it is a note
-            if not(zotero_thing.methods.isInTextStyle()):
-                newnode = nodes.paragraph('', '', *newnode)
             if verbose_flag == 1:
                 sys.stderr.write(".")
                 sys.stderr.flush()
