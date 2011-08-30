@@ -524,15 +524,13 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
     global zotero_thing
     check_zotero_thing()
 
-    pending_list = []
     cite_info = zot_parse_cite_string(text)
     zotero_thing.cite_list.append([cite_info])
     zotero_thing.track_item(cite_info)
     pending = nodes.pending(ZoteroTransform)
     pending.details['zoteroCitation'] = True
     inliner.document.note_pending(pending)
-    pending_list.append(pending)
-    return pending_list, []
+    return [pending], []
 
 # setup zotero directives
 directives.register_directive('zotero-setup', ZoteroSetupDirective)
