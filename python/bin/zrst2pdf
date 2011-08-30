@@ -4,7 +4,7 @@ __requires__ = 'rst2pdf==0.16'
 import sys
 from pkg_resources import load_entry_point
 
-import zotero
+import zotero4rst
 
 if __name__ == '__main__':
     sys.exit(
