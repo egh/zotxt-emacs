@@ -3,7 +3,9 @@
 """
 # -*- coding: utf-8 -*-
 import BeautifulSoup
+import ConfigParser
 import json
+import os
 import re
 import sys
 
@@ -170,6 +172,11 @@ class ZoteroConnection(object):
         self.tracked_items = []
         self.cite_list = []
         self.cite_pos = 0
+        self.keys = ConfigParser.SafeConfigParser()
+        self.keys.optionxform = str
+
+    def load_keyfile(self, path):
+        self.keys.read(os.path.relpath(path))
 
     def track_item(self, item):
         self.tracked_items.append(item)
@@ -196,6 +203,12 @@ class ZoteroConnection(object):
         # apply them as more or less appropriate.
         #
         return html2rst("%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"]))
+
+    def lookup_key(self, key):
+        if self.keys.has_option('keys', key):
+            return self.keys.get('keys', key)
+        else:
+            return None
 
 class MultipleCitationVisitor(nodes.SparseNodeVisitor):
     def visit_pending(self, node):
@@ -270,9 +283,12 @@ class ZoteroSetupDirective(Directive):
     required_arguments = 0
     optional_arguments = 0
     has_content = False
-    option_spec = {'format': directives.unchanged}
+    option_spec = {'format' : directives.unchanged,
+                   'keyfile': directives.unchanged }
     def run(self):
         global zotero_thing
+        if self.options.has_key('keyfile'):
+            zotero_thing.load_keyfile(self.options['keyfile'])
         z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
         zotero_thing.methods.instantiateCiteProc(self.options.get('format', DEFAULT_CITATION_FORMAT))
         pending = nodes.pending(ZoteroSetupTransform)
@@ -477,6 +493,9 @@ class ZoteroCitationInfo(object):
     def __init__(self, **kwargs):
         global zotero_thing
         self.key = kwargs['key']
+o        newkey = zotero_thing.lookup_key(self.key)
+        if newkey is not None:
+            self.key = newkey
         self.id = int(zotero_thing.methods.getItemId(self.key))
         self.indexNumber = kwargs.get('indexNumber', None)
         self.label = kwargs.get('label', None)
