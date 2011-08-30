@@ -294,13 +294,7 @@ class ZoteroSetupDirective(Directive):
         pending = nodes.pending(ZoteroSetupTransform)
         pending.details.update(self.options)
         self.state_machine.document.note_pending(pending)
-        ret = [pending]
-        if zotero_thing.methods.isInTextStyle():
-            pending2 = nodes.pending(ZoteroCleanupTransform)
-            pending2.details.update(self.options)
-            self.state_machine.document.note_pending(pending2)
-            ret.append(pending2)
-        return ret
+        return [pending]
 
 class ZoteroSetupTransform(Transform):
     default_priority = 500
@@ -314,15 +308,6 @@ class ZoteroSetupTransform(Transform):
         visitor = MultipleCitationVisitor(self.document)
         self.document.walkabout(visitor)
         zotero_thing.cite_pos = 0
-
-class ZoteroCleanupTransform(Transform):
-    default_priority = 520
-    def apply(self):
-        for i in range(len(autonomous_mobile_footnode_indexes)-1, -1, -1):
-            pos = autonomous_mobile_footnode_indexes[i]
-            self.document.autofootnotes.pop(pos)
-            self.document.autofootnote_refs.pop(pos)
-        self.startnode.parent.remove(self.startnode)
 
 class ZoteroDirective(Directive):
     """
