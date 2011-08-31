@@ -37,11 +37,6 @@ verbose_flag = False
 started_recording_ids = False
 started_transforming_cites = False
 
-# for tracking mobile nodes
-footnodes = []
-footnode_pos = 0
-autonomous_mobile_footnode_indexes = []
-
 def z4r_debug(what):
     global verbose_flag
     if verbose_flag == 1:
@@ -163,7 +158,6 @@ class NoteIndexVisitor(nodes.SparseNodeVisitor):
         self.note_count += 1
 
     def depart_footnote(self, node):
-        global footnodes
         onlyZotero = True
         for child in node.children:
             if not isZoteroCite(child):
@@ -171,7 +165,6 @@ class NoteIndexVisitor(nodes.SparseNodeVisitor):
         if onlyZotero:
             ## Abuse attributes segment
             node.attributes['onlyZotero'] = True
-        footnodes.append(node)
         self.in_note = False
 
 class ZoteroSetupDirective(Directive):
