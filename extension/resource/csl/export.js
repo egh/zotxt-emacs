@@ -39,17 +39,19 @@ function registerItemIds (ids) {
 };
 
 function getCitationBlock (citation) {
-	try {
-            zotero.debug(citation);
-		var ret = zotero.reStructuredCSL.appendCitationCluster(citation, true);
-	} catch (e) {
-		zotero.debug("XXX  oops: "+e);
-	}
-	zotero.debug("XXX ret[0][1]: " + ret[0][1]);
-	var retme = "" + ret[0][1];
-	// This should be binary Unicode now
-	retme = escape( retme );
-	return retme
+    var results;
+    try {
+	results = zotero.reStructuredCSL.appendCitationCluster(citation);
+    } catch (e) {
+	zotero.debug("XXX  oops: "+e);
+    }
+    var index = citation['properties']['index'];
+    for (var i = 0 ; i <= results.length ; i++) {
+        if (results[i][0] == index) {
+            return escape("" + results[i][1]);
+        }
+    }
+    return "";
 };
 
 function escapeStringValues (o) {
