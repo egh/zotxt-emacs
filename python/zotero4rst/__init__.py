@@ -105,7 +105,7 @@ class ZoteroConnection(object):
     def get_citation(self, cite_info):
         self.register_items()
         citation = { 'citationItems' : [cite_info],
-                     'properties'    : { # 'index'    : zotero_conn.get_index(cite_info),
+                     'properties'    : { 'index'    : zotero_conn.get_index(cite_info),
                                          'noteIndex': cite_info.note_index } }
         res = self.methods.getCitationBlock(citation)
         return html2rst(unquote(res))
