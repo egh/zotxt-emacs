@@ -2,7 +2,7 @@ docutils with Zotero
 ====================
 
 .. zotero-setup::
-   :keyfile: example.keys
+   :keymap: example.keys
    :format: chicago-author-date
 
 .. -   :zc:`[@nonexistent]`
