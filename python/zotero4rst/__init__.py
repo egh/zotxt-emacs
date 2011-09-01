@@ -97,8 +97,8 @@ class ZoteroConnection(object):
         return html2rst("%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"]))
 
     def lookup_key(self, key):
-        if self.keys.has_option('keys', key):
-            return self.keys.get('keys', key)
+        if self.keys.has_option('keymap', key):
+            return self.keys.get('keymap', key)
         else:
             return None
 
@@ -122,10 +122,10 @@ class ZoteroSetupDirective(Directive):
     optional_arguments = 0
     has_content = False
     option_spec = {'format' : directives.unchanged,
-                   'keyfile': directives.unchanged }
+                   'keymap': directives.unchanged }
     def run(self):
-        if self.options.has_key('keyfile'):
-            zotero_conn.load_keyfile(self.options['keyfile'])
+        if self.options.has_key('keymap'):
+            zotero_conn.load_keyfile(self.options['keymap'])
         z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
         zotero_conn.methods.instantiateCiteProc(self.options.get('format', DEFAULT_CITATION_FORMAT))
         return []
@@ -202,7 +202,7 @@ Returns an array of hashes with information."""
     def not_is_key(s): return not(is_key(s))
     def not_is_pipe(s): return s != '|'
 
-    words = [ n for n in re.split(r"( |\|)", cite_string) if n != ' ' and n != '' ]
+    words = [ n for n in re.split(r"(\s|\|)", cite_string) if n != ' ' and n != '' ]
     raw_keys = [ word for word in words if is_key(word) ]
     if len(raw_keys) == 0:
         raise ExtensionOptionError("No key found in citation: '%s'."%(cite_string))
