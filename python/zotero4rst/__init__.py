@@ -57,7 +57,8 @@ class ZoteroConnection(object):
         self.cite_pos = 0
         self.keys = ConfigParser.SafeConfigParser()
         self.keys.optionxform = str
-        self.items_registered = False
+        self.registered_items = []
+        self.in_text_style = self.methods.isInTextStyle()
 
     def load_keyfile(self, path):
         self.keys.read(os.path.relpath(path))
@@ -73,9 +74,10 @@ class ZoteroConnection(object):
         self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
 
     def register_items(self):
-        if not(self.items_registered):
-            uniq_ids = list(set([ item.id for item in self.tracked_items ]))
-            self.methods.registerItemIds(uniq_ids)
+        uniq_ids = set([ item.id for item in self.tracked_items ])
+        if (uniq_ids != self.registered_items):
+            self.methods.registerItemIds(list(uniq_ids))
+            self.registered_items = uniq_ids
 
     def get_index(self, cite_info):
         return self.tracked_items.index(cite_info)
@@ -233,8 +235,8 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
     check_zotero_conn()
 
     cite_info = zot_parse_cite_string(text)
-    zotero4rst.zotero_conn.track_item(cite_info)
-    if not(zotero4rst.zotero_conn.methods.isInTextStyle()):
+    zotero_conn.track_item(cite_info)
+    if not(zotero_conn.in_text_style):
         if type(inliner.parent) == nodes.footnote:
             # already in a footnote, just add a pending
             pending = nodes.pending(ZoteroTransform)
