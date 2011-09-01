@@ -1,35 +1,47 @@
-===================================
- ``zotero-plain`` example document
-===================================
+docutils with Zotero
+====================
 
 .. zotero-setup::
-   :format: bluebook-19th
-
-..
+   :keyfile: example.keys
    :format: chicago-author-date
 
-This is an example document which cites using footnotes [#]_ and
-another [#]_ and another [#]_.
+.. -   :zc:`[@nonexistent]`
 
-..
-   And here we cite via ``zc``: :zc:`see @3A8VMRJ5, ch. 1`; :zc:`also @46SVHHG4`...
+.. -   :zc:`@nonexistent`
+
+- :zc:`@item1` says blah.
+
+- :zc:`@item1 p. 30` says blah.
+
+- :zc:`@item1 p. 30| with suffix` says blah.
+
+.. - :zc:`@item1; -@item2 p. 30; see also @item3` says blah.
+
+- In a note. [#]_
+
+.. - A citation group :zc:`see @item1 p. 34-35; also @item3 chap. 3`.
+
+- Another one :zc:`see @item1 p. 34-35`.
+
+- And another one in a note. [#]_
+
+- Citation with a suffix and locator :zc:`@item1 pp. 33, 35-37| and nowhere else`.
+
+- Citation with suffix only :zc:`@item1|and nowhere else`.
+
+- Now some modifiers. [#]_
+
+.. - With some markup :zc:`*see* @item1 p. **32**`.
 
 .. [#]
-   :zc:`@3A8VMRJ5 851`
-  
-.. [#]
-   :zc:`@46SVHHG4 11`
+   A citation without locators :zc:`@item3`.
 
-.. [#] I have taken the liberty of associating Posner's juxtaposition
-   of the pyramids and hypertrophy in the anthropological sense with
-   :zc:`@3A8VMRJ5`, in which the burial customs of the Pharaohs are
-   given as an illustration of hypertrophy in the anthropological
-   sense. :zc:`@46SVHHG4 851 $ suffix`
-   
 .. [#]
-   Hello world.
+..    Some citations :zc:`see @item2 chap. 3; @item3; @item1`.
 
-..
-   Bibliography
-   ------------
-   .. zotero-bibliography::
+.. [#]
+   Like a citation without author: :zc:`-@item1`, and now Doe with a locator :zc:`-@item2 p. 44`.
+
+References
+==========
+.. zotero-bibliography::

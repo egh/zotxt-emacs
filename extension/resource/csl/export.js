@@ -40,7 +40,8 @@ function registerItemIds (ids) {
 
 function getCitationBlock (citation) {
 	try {
-		var ret = zotero.reStructuredCSL.appendCitationCluster(citation);
+            zotero.debug(citation);
+		var ret = zotero.reStructuredCSL.appendCitationCluster(citation, true);
 	} catch (e) {
 		zotero.debug("XXX  oops: "+e);
 	}
@@ -52,7 +53,7 @@ function getCitationBlock (citation) {
 };
 
 function escapeStringValues (o) {
-    if (o instanceof Array) {
+    if (Object.prototype.toString.call(o) === '[object Array]') {
         return o.map(function (x) { return escapeStringValues(x); });
     } else if (typeof o === "string") {
         return escape(o);
