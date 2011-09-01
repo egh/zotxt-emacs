@@ -53,7 +53,7 @@ class ZoteroConnection(object):
         self.bibType = kwargs.get('bibType', DEFAULT_CITATION_FORMAT)
         self.firefox_connect()
         self.zotero_resource()
-        self.tracked_items = []
+        self.tracked_clusters = []
         self.cite_pos = 0
         self.keys = ConfigParser.SafeConfigParser()
         self.keys.optionxform = str
@@ -63,8 +63,8 @@ class ZoteroConnection(object):
     def load_keyfile(self, path):
         self.keys.read(os.path.relpath(path))
 
-    def track_item(self, item):
-        self.tracked_items.append(item)
+    def track_cluster(self, cluster):
+        self.tracked_clusters.append(cluster)
 
     def firefox_connect(self):
         self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
@@ -74,13 +74,16 @@ class ZoteroConnection(object):
         self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
 
     def register_items(self):
-        uniq_ids = set([ item.id for item in self.tracked_items ])
+        def flatten(listoflists):
+            return chain.from_iterable(listoflists)
+
+        uniq_ids = set([ item.id for item in flatten(self.tracked_clusters) ])
         if (uniq_ids != self.registered_items):
             self.methods.registerItemIds(list(uniq_ids))
             self.registered_items = uniq_ids
 
-    def get_index(self, cite_info):
-        return self.tracked_items.index(cite_info)
+    def get_index(self, cluster):
+        return self.tracked_clusters.index(cluster)
 
     def generate_rest_bibliography(self):
         """Generate a bibliography of reST nodes."""
@@ -104,11 +107,11 @@ class ZoteroConnection(object):
         else:
             return None
 
-    def get_citation(self, cite_info):
+    def get_citation(self, cluster, note_index):
         self.register_items()
-        citation = { 'citationItems' : [cite_info],
-                     'properties'    : { 'index'    : zotero_conn.get_index(cite_info),
-                                         'noteIndex': cite_info.note_index } }
+        citation = { 'citationItems' : cluster,
+                     'properties'    : { 'index'    : zotero_conn.get_index(cluster),
+                                         'noteIndex': note_index } }
         res = self.methods.getCitationBlock(citation)
         return html2rst(unquote(res))
 
@@ -145,12 +148,13 @@ class ZoteroTransform(Transform):
     #   http://stackoverflow.com/questions/300445/how-to-unquote-a-urlencoded-unicode-string-in-python
 
     def apply(self):
-        cite_info = self.startnode.details['cite_info']
+        cite_cluster = self.startnode.details['cite_cluster']
         # get the footnote label
         footnote_node = self.startnode.parent.parent
+        note_index = 0
         if type(footnote_node) == nodes.footnote:
-            cite_info.note_index = int(str(footnote_node.children[0].children[0]))
-        newnode = zotero_conn.get_citation(cite_info)
+            note_index = int(str(footnote_node.children[0].children[0]))
+        newnode = zotero_conn.get_citation(cite_cluster, note_index)
         self.startnode.replace_self(newnode)
 
 class ZoteroBibliographyDirective(Directive):
@@ -181,20 +185,21 @@ class ZoteroBibliographyTransform(Transform):
 class ZoteroCitationInfo(object):
     """Class to hold information about a citation for passing to Zotero."""
     def __init__(self, **kwargs):
-        self.key = kwargs['key']
-        newkey = zotero4rst.zotero_conn.lookup_key(self.key)
-        if newkey is not None:
-            self.origkey = self.key
-            self.key = newkey
+        self.key = self.map_key(kwargs['key'])
         self.id = int(zotero4rst.zotero_conn.methods.getItemId(self.key))
         self.label = kwargs.get('label', None)
         self.locator = kwargs.get('locator', None)
         self.suppress_author = kwargs.get('suppress_author', False)
         self.prefix = kwargs.get('prefix', None)
         self.suffix = kwargs.get('suffix', None)
-        self.note_index = 0
+    
+    def map_key(self, key):
+        newkey = zotero4rst.zotero_conn.lookup_key(key)
+        if newkey is not None:
+            return newkey
+        return key
 
-def zot_parse_cite_string(cite_string):
+def zot_parse_cite_string(cite_string_all):
     """Parse a citation string. This is inteded to be "pandoc-like".
 Examples: `see @Doe2008` `also c.f. @Doe2010`
 Returns an array of hashes with information."""
@@ -204,28 +209,31 @@ Returns an array of hashes with information."""
     def not_is_key(s): return not(is_key(s))
     def not_is_pipe(s): return s != '|'
 
-    words = [ n for n in re.split(r"(\s|\|)", cite_string) if n != ' ' and n != '' ]
-    raw_keys = [ word for word in words if is_key(word) ]
-    if len(raw_keys) == 0:
-        raise ExtensionOptionError("No key found in citation: '%s'."%(cite_string))
-    elif len(raw_keys) > 1:
-        raise ExtensionOptionError("Too many keys in citation: '%s'."%(cite_string))
-    else:
-        m = re.match(KEY_RE, raw_keys[0])
-        key = m.group(2)
-        suppress_author = (m.group(1) == '-')
-        prefix = " ".join(takewhile(not_is_key, words))
-        after_cite = tuple(islice(dropwhile(not_is_key, words), 1, None))
-        suffix=None
-        locator=None
-        # suffix is separated by | for now
-        locator = " ".join(takewhile(not_is_pipe, after_cite))
-        suffix = " ".join(islice(dropwhile(not_is_pipe, after_cite), 1, None))
-        return ZoteroCitationInfo(key=key,
-                                  prefix=prefix,
-                                  suffix=suffix,
-                                  suppress_author=suppress_author,
-                                  locator=locator)
+    retval = []
+    for cite_string in re.split(r";", cite_string_all):
+        words = [ n for n in re.split(r"(\s|\|)", cite_string) if n != ' ' and n != '' ]
+        raw_keys = [ word for word in words if is_key(word) ]
+        if len(raw_keys) == 0:
+            raise ExtensionOptionError("No key found in citation: '%s'."%(cite_string))
+        elif len(raw_keys) > 1:
+            raise ExtensionOptionError("Too many keys in citation: '%s'."%(cite_string))
+        else:
+            m = re.match(KEY_RE, raw_keys[0])
+            key = m.group(2)
+            suppress_author = (m.group(1) == '-')
+            prefix = " ".join(takewhile(not_is_key, words))
+            after_cite = tuple(islice(dropwhile(not_is_key, words), 1, None))
+            suffix=None
+            locator=None
+            # suffix is separated by | for now
+            locator = " ".join(takewhile(not_is_pipe, after_cite))
+            suffix = " ".join(islice(dropwhile(not_is_pipe, after_cite), 1, None))
+            retval.append(ZoteroCitationInfo(key=key,
+                                             prefix=prefix,
+                                             suffix=suffix,
+                                             suppress_author=suppress_author,
+                                             locator=locator))
+    return retval
 
 def random_label():
     return "".join(random.choice(string.digits) for x in range(20))
@@ -234,13 +242,13 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
                   options={}, content=[]):
     check_zotero_conn()
 
-    cite_info = zot_parse_cite_string(text)
-    zotero_conn.track_item(cite_info)
+    cite_cluster = zot_parse_cite_string(text)
+    zotero_conn.track_cluster(cite_cluster)
     if not(zotero_conn.in_text_style):
         if type(inliner.parent) == nodes.footnote:
             # already in a footnote, just add a pending
             pending = nodes.pending(ZoteroTransform)
-            pending.details['cite_info'] = cite_info
+            pending.details['cite_cluster'] = cite_cluster
             inliner.document.note_pending(pending)
             return [pending], []
         else:
@@ -248,12 +256,6 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
             # to the end
 
             label = random_label()
-            #refname = normalize_name(label)
-
-            #pending = nodes.pending(ZoteroAppendFootnoteTransform)
-            #pending.details['cite_info'] = cite_info
-            #pending.details['label'] = label
-            #inliner.document.note_pending(pending)
 
             refnode = nodes.footnote_reference('[%s]_' % label)
             refnode['auto'] = 1
@@ -265,7 +267,7 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
             footnote['auto'] = 1
             footnote['names'].append(label)
             pending = nodes.pending(ZoteroTransform)
-            pending.details['cite_info'] = cite_info
+            pending.details['cite_cluster'] = cite_cluster
             footnote += nodes.paragraph("", "", pending)
             inliner.document.note_pending(pending)
             inliner.document.note_autofootnote(footnote)
@@ -278,7 +280,7 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
             return [refnode], []
     else:
         pending = nodes.pending(ZoteroTransform)
-        pending.details['cite_info'] = cite_info
+        pending.details['cite_cluster'] = cite_cluster
         inliner.document.note_pending(pending)
         return [pending], []
 
