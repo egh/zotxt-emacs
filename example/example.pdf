@@ -179,7 +179,7 @@ endobj
 % 'R13': class PDFInfo 
 13 0 obj
 << /Author ()
- /CreationDate (D:20110831192453+08'00')
+ /CreationDate (D:20110831194432+08'00')
  /Creator (\(unspecified\))
  /Keywords ()
  /Producer (ReportLab PDF Library - www.reportlab.com)
@@ -225,7 +225,7 @@ endobj
 % 'R18': class PDFStream 
 18 0 obj
 % page stream
-<< /Length 5209 >>
+<< /Length 5302 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
 q
@@ -279,7 +279,7 @@ q
 1 0 0 1 23 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (\(Doe 2005\) says blah.) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (\(Doe 2005, p. 30\) says blah.) Tj T* ET
 Q
 Q
 q
@@ -303,7 +303,7 @@ q
 1 0 0 1 23 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (\(Doe 2005\) says blah.) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (\(Doe 2005, p. 30 with suffix\) says blah.) Tj T* ET
 Q
 Q
 q
@@ -362,7 +362,7 @@ q
 1 0 0 1 23 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Another one \(Doe 2005\).) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Another one \(see Doe 2005, p. 34-35\).) Tj T* ET
 Q
 Q
 q
@@ -409,7 +409,7 @@ q
 1 0 0 1 23 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Citation with a suffix and locator \(Doe 2005\).) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Citation with a suffix and locator \(Doe 2005, pp. 33, 35-37 and nowhere else\).) Tj T* ET
 Q
 Q
 q
@@ -433,7 +433,7 @@ q
 1 0 0 1 23 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Citation with suffix only \(Doe 2005\).) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Citation with suffix only \(Doe 2005 and nowhere else\).) Tj T* ET
 Q
 Q
 q
@@ -510,7 +510,7 @@ q
 1 0 0 1 91.03937 0 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (A citation without locators \(Doe 2005\).) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (A citation without locators \(Doe and Roe 2007\).) Tj T* ET
 Q
 Q
 q
@@ -543,7 +543,7 @@ q
 1 0 0 1 91.03937 0 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Like a citation without author: \(Doe 2005\), and now Doe with a locator \(2006, p. 44\).) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Like a citation without author: \(2005\), and now Doe with a locator \(2006, p. 44\).) Tj T* ET
 Q
 Q
 q
@@ -585,16 +585,16 @@ xref
 0000003254 00000 n
 0000003409 00000 n
 0000003517 00000 n
-0000008829 00000 n
 0000008922 00000 n
+0000009015 00000 n
 trailer
 << /ID 
  % ReportLab generated PDF document -- digest (http://www.reportlab.com) 
- [(\207"#\364\203v\366\265\205\003\250\227[3\007.) (\207"#\364\203v\366\265\205\003\250\227[3\007.)] 
+ [(\037~I+\011\245H?\263\247#y\025\323Q\252) (\037~I+\011\245H?\263\247#y\025\323Q\252)] 
 
  /Info 13 0 R
  /Root 12 0 R
  /Size 21 >>
 startxref
-8969
+9062
 %%EOF
