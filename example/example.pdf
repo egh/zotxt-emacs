@@ -34,12 +34,12 @@ endobj
  /Dest [ 11 0 R
  /XYZ
  68.69291
- 393.9843
+ 357.9843
  0 ]
  /Rect [ 130.1729
- 663.7736
+ 645.7736
  134.6209
- 675.7736 ]
+ 657.7736 ]
  /Subtype /Link
  /Type /Annot >>
 endobj
@@ -52,12 +52,12 @@ endobj
  /Dest [ 11 0 R
  /XYZ
  68.69291
- 381.9843
+ 345.9843
  0 ]
  /Rect [ 206.3329
- 627.7736
+ 591.7736
  210.7809
- 639.7736 ]
+ 603.7736 ]
  /Subtype /Link
  /Type /Annot >>
 endobj
@@ -70,12 +70,12 @@ endobj
  /Dest [ 11 0 R
  /XYZ
  68.69291
- 369.9843
+ 333.9843
  0 ]
  /Rect [ 181.8229
- 573.7736
+ 537.7736
  186.2709
- 585.7736 ]
+ 549.7736 ]
  /Subtype /Link
  /Type /Annot >>
 endobj
@@ -97,12 +97,12 @@ endobj
  /Dest [ 11 0 R
  /XYZ
  130.1729
- 677.0236
+ 659.0236
  0 ]
  /Rect [ 68.69291
- 380.7343
+ 344.7343
  74.25291
- 392.7343 ]
+ 356.7343 ]
  /Subtype /Link
  /Type /Annot >>
 endobj
@@ -115,12 +115,12 @@ endobj
  /Dest [ 11 0 R
  /XYZ
  206.3329
- 641.0236
+ 605.0236
  0 ]
  /Rect [ 68.69291
- 368.7343
+ 332.7343
  74.25291
- 380.7343 ]
+ 344.7343 ]
  /Subtype /Link
  /Type /Annot >>
 endobj
@@ -133,12 +133,12 @@ endobj
  /Dest [ 11 0 R
  /XYZ
  181.8229
- 587.0236
+ 551.0236
  0 ]
  /Rect [ 68.69291
- 356.7343
+ 320.7343
  74.25291
- 368.7343 ]
+ 332.7343 ]
  /Subtype /Link
  /Type /Annot >>
 endobj
@@ -179,7 +179,7 @@ endobj
 % 'R13': class PDFInfo 
 13 0 obj
 << /Author ()
- /CreationDate (D:20110831194432+08'00')
+ /CreationDate (D:20110901101019+08'00')
  /Creator (\(unspecified\))
  /Keywords ()
  /Producer (ReportLab PDF Library - www.reportlab.com)
@@ -209,7 +209,7 @@ endobj
 << /Dest [ 11 0 R
  /XYZ
  62.69291
- 564.0236
+ 528.0236
  0 ]
  /Parent 14 0 R
  /Prev 15 0 R
@@ -225,7 +225,7 @@ endobj
 % 'R18': class PDFStream 
 18 0 obj
 % page stream
-<< /Length 5302 >>
+<< /Length 6076 >>
 stream
 1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
 q
@@ -310,12 +310,6 @@ q
 Q
 Q
 q
-1 0 0 1 62.69291 684.0236 cm
-Q
-q
-1 0 0 1 62.69291 678.0236 cm
-Q
-q
 1 0 0 1 62.69291 678.0236 cm
 Q
 q
@@ -332,17 +326,12 @@ Q
 q
 1 0 0 1 23 -3 cm
 q
-BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 0 rg (In a note. ) Tj /F1 8 Tf 0 0 .501961 rg 5 Ts (1) Tj T* ET
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (\(Doe 2005; 2006, p. 30; see also Doe and Roe 2007\) says blah.) Tj T* ET
 Q
 Q
 q
 Q
-Q
-q
-1 0 0 1 62.69291 666.0236 cm
-Q
-q
-1 0 0 1 62.69291 660.0236 cm
 Q
 q
 1 0 0 1 62.69291 660.0236 cm
@@ -361,8 +350,7 @@ Q
 q
 1 0 0 1 23 -3 cm
 q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Another one \(see Doe 2005, p. 34-35\).) Tj T* ET
+BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 0 rg (In a note. ) Tj /F1 8 Tf 0 0 .501961 rg 5 Ts (1) Tj T* ET
 Q
 Q
 q
@@ -385,7 +373,8 @@ Q
 q
 1 0 0 1 23 -3 cm
 q
-BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 0 rg (And another one in a note. ) Tj /F1 8 Tf 0 0 .501961 rg 5 Ts (2) Tj T* ET
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (A citation group \(see Doe 2005, p. 34-35; also Doe and Roe 2007, chap. 3\).) Tj T* ET
 Q
 Q
 q
@@ -409,7 +398,7 @@ q
 1 0 0 1 23 -3 cm
 q
 0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Citation with a suffix and locator \(Doe 2005, pp. 33, 35-37 and nowhere else\).) Tj T* ET
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Another one \(see Doe 2005, p. 34-35\).) Tj T* ET
 Q
 Q
 q
@@ -432,8 +421,7 @@ Q
 q
 1 0 0 1 23 -3 cm
 q
-0 0 0 rg
-BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Citation with suffix only \(Doe 2005 and nowhere else\).) Tj T* ET
+BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 0 rg (And another one in a note. ) Tj /F1 8 Tf 0 0 .501961 rg 5 Ts (2) Tj T* ET
 Q
 Q
 q
@@ -456,6 +444,54 @@ Q
 q
 1 0 0 1 23 -3 cm
 q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Citation with a suffix and locator \(Doe 2005, pp. 33, 35-37 and nowhere else\).) Tj T* ET
+Q
+Q
+q
+Q
+Q
+q
+1 0 0 1 62.69291 570.0236 cm
+Q
+q
+1 0 0 1 62.69291 558.0236 cm
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 10.5 0 Td (\177) Tj T* -10.5 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Citation with suffix only \(Doe 2005 and nowhere else\).) Tj T* ET
+Q
+Q
+q
+Q
+Q
+q
+1 0 0 1 62.69291 552.0236 cm
+Q
+q
+1 0 0 1 62.69291 540.0236 cm
+0 0 0 rg
+BT /F1 10 Tf 12 TL ET
+q
+1 0 0 1 6 -3 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL 10.5 0 Td (\177) Tj T* -10.5 0 Td ET
+Q
+Q
+q
+1 0 0 1 23 -3 cm
+q
 BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 0 rg (Now some modifiers. ) Tj /F1 8 Tf 0 0 .501961 rg 5 Ts (3) Tj T* ET
 Q
 Q
@@ -463,41 +499,41 @@ q
 Q
 Q
 q
-1 0 0 1 62.69291 576.0236 cm
+1 0 0 1 62.69291 540.0236 cm
 Q
 q
-1 0 0 1 62.69291 543.0236 cm
+1 0 0 1 62.69291 507.0236 cm
 q
 BT 1 0 0 1 0 3.5 Tm 21 TL /F2 17.5 Tf 0 0 0 rg (References) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 525.0236 cm
+1 0 0 1 62.69291 489.0236 cm
 q
 BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 0 rg (Doe, John. 2005. ) Tj /F3 10 Tf (First Book) Tj /F1 10 Tf (. Cambridge: Cambridge University Press.) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 507.0236 cm
+1 0 0 1 62.69291 471.0236 cm
 q
 BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 0 rg (\227\227\227. 2006. \223Article.\224 ) Tj /F3 10 Tf (Journal of Generic Studies ) Tj /F1 10 Tf (6: 33-34.) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 477.0236 cm
+1 0 0 1 62.69291 441.0236 cm
 q
 BT 1 0 0 1 0 14 Tm 1.779398 Tw 12 TL /F1 10 Tf 0 0 0 rg (Doe, John, and Jenny Roe. 2007. Why Water Is Wet. In ) Tj /F3 10 Tf (Third Book) Tj /F1 10 Tf (, ed. Sam Smith. Oxford: Oxford) Tj T* 0 Tw (University Press.) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 420.3307 cm
+1 0 0 1 62.69291 384.3307 cm
 Q
 q
-1 0 0 1 62.69291 391.9843 cm
+1 0 0 1 62.69291 355.9843 cm
 n 0 14.17323 m 469.8898 14.17323 l S
 Q
 q
-1 0 0 1 62.69291 379.9843 cm
+1 0 0 1 62.69291 343.9843 cm
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 q
@@ -517,7 +553,7 @@ q
 Q
 Q
 q
-1 0 0 1 62.69291 367.9843 cm
+1 0 0 1 62.69291 331.9843 cm
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 q
@@ -527,10 +563,17 @@ BT 1 0 0 1 0 2 Tm 12 TL /F1 10 Tf 0 0 .501961 rg (2) Tj T* ET
 Q
 Q
 q
+1 0 0 1 91.03937 0 cm
+q
+0 0 0 rg
+BT 1 0 0 1 0 2 Tm /F1 10 Tf 12 TL (Some citations \(see Doe 2006, chap. 3; Doe and Roe 2007; Doe 2005\).) Tj T* ET
 Q
 Q
 q
-1 0 0 1 62.69291 355.9843 cm
+Q
+Q
+q
+1 0 0 1 62.69291 319.9843 cm
 0 0 0 rg
 BT /F1 10 Tf 12 TL ET
 q
@@ -585,16 +628,16 @@ xref
 0000003254 00000 n
 0000003409 00000 n
 0000003517 00000 n
-0000008922 00000 n
-0000009015 00000 n
+0000009696 00000 n
+0000009789 00000 n
 trailer
 << /ID 
  % ReportLab generated PDF document -- digest (http://www.reportlab.com) 
- [(\037~I+\011\245H?\263\247#y\025\323Q\252) (\037~I+\011\245H?\263\247#y\025\323Q\252)] 
+ [(\031\272\362K\374Wj\257\3052\301\262\237z\262c) (\031\272\362K\374Wj\257\3052\301\262\237z\262c)] 
 
  /Info 13 0 R
  /Root 12 0 R
  /Size 21 >>
 startxref
-9062
+9836
 %%EOF

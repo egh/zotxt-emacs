@@ -1,6 +1,9 @@
 docutils with Zotero
 ====================
 
+Shamelessly stolen from the pandoc example:
+http://johnmacfarlane.net/pandoc/demo/CITATIONS
+
 .. zotero-setup::
    :keymap: example.keys
    :format: chicago-author-date
@@ -15,11 +18,11 @@ docutils with Zotero
 
 - :zc:`@item1 p. 30| with suffix` says blah.
 
-.. - :zc:`@item1; -@item2 p. 30; see also @item3` says blah.
+- :zc:`@item1; -@item2 p. 30; see also @item3` says blah.
 
 - In a note. [#]_
 
-.. - A citation group :zc:`see @item1 p. 34-35; also @item3 chap. 3`.
+- A citation group :zc:`see @item1 p. 34-35; also @item3 chap. 3`.
 
 - Another one :zc:`see @item1 p. 34-35`.
 
@@ -37,7 +40,7 @@ docutils with Zotero
    A citation without locators :zc:`@item3`.
 
 .. [#]
-..    Some citations :zc:`see @item2 chap. 3; @item3; @item1`.
+   Some citations :zc:`see @item2 chap. 3; @item3; @item1`.
 
 .. [#]
    Like a citation without author: :zc:`-@item1`, and now Doe with a locator :zc:`-@item2 p. 44`.
