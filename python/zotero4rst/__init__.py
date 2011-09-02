@@ -16,7 +16,6 @@ from docutils import nodes
 from docutils.parsers.rst import Directive, directives, roles
 from docutils.transforms import TransformError, Transform
 from docutils.utils import ExtensionOptionError
-from docutils.nodes import fully_normalize_name as normalize_name
 
 from itertools import chain, dropwhile, islice, takewhile
 
@@ -54,14 +53,13 @@ class ZoteroConnection(object):
         self.firefox_connect()
         self.zotero_resource()
         self.tracked_clusters = []
-        self.cite_pos = 0
-        self.keys = ConfigParser.SafeConfigParser()
-        self.keys.optionxform = str
+        self.keymap = ConfigParser.SafeConfigParser()
+        self.keymap.optionxform = str
         self.registered_items = []
         self.in_text_style = self.methods.isInTextStyle()
 
-    def load_keyfile(self, path):
-        self.keys.read(os.path.relpath(path))
+    def load_keymap(self, path):
+        self.keymap.read(os.path.relpath(path))
 
     def track_cluster(self, cluster):
         self.tracked_clusters.append(cluster)
@@ -102,8 +100,8 @@ class ZoteroConnection(object):
         return html2rst("%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"]))
 
     def lookup_key(self, key):
-        if self.keys.has_option('keymap', key):
-            return self.keys.get('keymap', key)
+        if self.keymap.has_option('keymap', key):
+            return self.keymap.get('keymap', key)
         else:
             return None
 
@@ -130,7 +128,7 @@ class ZoteroSetupDirective(Directive):
                    'keymap': directives.unchanged }
     def run(self):
         if self.options.has_key('keymap'):
-            zotero_conn.load_keyfile(self.options['keymap'])
+            zotero_conn.load_keymap(self.options['keymap'])
         z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
         zotero_conn.methods.instantiateCiteProc(self.options.get('format', DEFAULT_CITATION_FORMAT))
         return []
@@ -244,45 +242,40 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
 
     cite_cluster = zot_parse_cite_string(text)
     zotero_conn.track_cluster(cite_cluster)
-    if not(zotero_conn.in_text_style):
-        if type(inliner.parent) == nodes.footnote:
-            # already in a footnote, just add a pending
-            pending = nodes.pending(ZoteroTransform)
-            pending.details['cite_cluster'] = cite_cluster
-            inliner.document.note_pending(pending)
-            return [pending], []
-        else:
-            # not in a footnote; insert a reference and add a footnote
-            # to the end
-
-            label = random_label()
-
-            refnode = nodes.footnote_reference('[%s]_' % label)
-            refnode['auto'] = 1
-            refnode['refname'] = label
-            inliner.document.note_footnote_ref(refnode)
-            inliner.document.note_autofootnote_ref(refnode)
-
-            footnote = nodes.footnote("")
-            footnote['auto'] = 1
-            footnote['names'].append(label)
-            pending = nodes.pending(ZoteroTransform)
-            pending.details['cite_cluster'] = cite_cluster
-            footnote += nodes.paragraph("", "", pending)
-            inliner.document.note_pending(pending)
-            inliner.document.note_autofootnote(footnote)
-            where_to_add = inliner.parent
-            while where_to_add is not None and \
-                    not(isinstance(where_to_add, nodes.Structural)):
-                where_to_add = where_to_add.parent
-            if where_to_add is None: where_to_add = inliner.document
-            where_to_add += footnote
-            return [refnode], []
-    else:
+    if zotero_conn.in_text_style or \
+            (type(inliner.parent) == nodes.footnote):
+        # already in a footnote, or in-text style: just add a pending
         pending = nodes.pending(ZoteroTransform)
         pending.details['cite_cluster'] = cite_cluster
         inliner.document.note_pending(pending)
         return [pending], []
+    else:
+        # not in a footnote & this is a footnote style; insert a
+        # reference & add a footnote to the end
+
+        label = random_label()
+
+        refnode = nodes.footnote_reference('[%s]_' % label)
+        refnode['auto'] = 1
+        refnode['refname'] = label
+        inliner.document.note_footnote_ref(refnode)
+        inliner.document.note_autofootnote_ref(refnode)
+
+        footnote = nodes.footnote("")
+        footnote['auto'] = 1
+        footnote['names'].append(label)
+        pending = nodes.pending(ZoteroTransform)
+        pending.details['cite_cluster'] = cite_cluster
+        footnote += nodes.paragraph("", "", pending)
+        inliner.document.note_pending(pending)
+        inliner.document.note_autofootnote(footnote)
+        where_to_add = inliner.parent
+        while where_to_add is not None and \
+                not(isinstance(where_to_add, nodes.Structural)):
+            where_to_add = where_to_add.parent
+        if where_to_add is None: where_to_add = inliner.document
+        where_to_add += footnote
+        return [refnode], []
 
 # setup zotero directives
 directives.register_directive('zotero-setup', ZoteroSetupDirective)
