@@ -7,68 +7,85 @@ Background
 
 Zotero_ is a useful tool for managing citations.
 
-``zotero-plain`` consists of two parts (so far): an extension to the Python
-docutils for including citations in reStructuredText_ documents, and
-elisp code for accessing Zotero from emacs_. Both tools interact with Zotero_ 
-via the jsbridge_ module, which we borrow from the mozmill_ project.
+``zotero-plain`` consists of two parts: an extension to the Python
+docutils_ package for including citations in reStructuredText_
+documents (zotero2rst), and elisp code for accessing Zotero from
+emacs_.
+
+zotrero4st
+----------
 
 Installation
-------------
+~~~~~~~~~~~~
 
 1. Install Zotero_.
-2. Install mozrepl_
-3. Download the `mozmill source`_.
-4. Enter the mozmill source subdir `jsbridge/jsbridge/extension`, and say::
+2. Install zotero4rst (from the ``python`` directory::
 
-      ./build.sh jsbridge.xpi *
+     sudo python setup.py install
 
-5. Install the jsbridge XPI in Firefox and restart.
-6. Enter the mozmill source subdir `jsbridge`, and say::
+3. Build the Firefox extension (from the ``extension`` directory::
 
-      python ./setup.py install
+     sh build.sh
 
+4. Install the extension built (``zotero-for-restructured-text.xpi``)
 
-reStructuredText
-----------------
+Quickstart
+~~~~~~~~~~
 
-reStructuredText support depends on:
+See ``example/example.rst``, and the generated ``example/example.pdf``
+and ``example/example.html``.
 
-1. docutils_.
+For the time being (...)  zotero4rst depends on the rather obscure
+zotero library key. See ``example/example.keys`` for the mapping
+between the human-readable key and the zotero library key.
 
-Zotero_ citations may be added to a reStructuredText document using the
-following syntax::
+There are at least two ways to determine the library key for an item
+in your own collection. The first is to right click on an item, and
+choose “Generate report from selected item”. You will then be visiting
+a page whose URL resembles::
 
-  .. zotero:: xxxxxxxx
+  zotero://report/items/0_MRCENTE5/html/report.html
 
-When processing using Zotero_ aware ReST tools (see the ``rst2pdf``
-and ``rst2html`` executables included in ``python/``), this directive
-will be replaced with a properly formatted citation.
+In this URL, the string ``MRCENTE5`` is the library key. Use this
+in your ``.keys`` mapping file.
 
-Where ``xxxxxxxx`` is the key as reported by Zotero_ in the “Generate
-report from selected item” menu, or as in an item’s URI, e.g.::
+The other way is to view an item on zotero.org, in this case the URL
+will look like::
 
-  http://www.zotero.org/egh/items/xxxxxxxx
+  http://www.zotero.org/egh/items/MRCENTE5
+
+where the key is again ``MRCENTE5``.
 
 (See below for information about easier management using emacs.)
 
-Anything after the first argument (the item key) is ignored by the
-parser. This allows you to insert more descriptive information about
-the item, e.g.::
-
-  .. zotero:: xxxxxxxx Doe, John. (1999) A history.
-
-It is recommended that this reStructuredText directive be combined
-with the cite directive. For instance::
-
-  Foo bar [Baz]_.
-
-  .. [Baz]
-    .. zotero:: xxxxxxxx
-
 To include Zotero_ citations in a reStructuredText_ document, you must
-use the bundled rst2pdf or rst2html scripts, which have been modified
-to include support for ``zotero`` directives. These executables can be
-found inside the ``python/`` directory in the source distribution.
+use the bundled ``zrst2*`` scripts, which have been modified to
+include support for ``zotero`` directives. These executables are
+installed using ``setup.py`` above. Currently, they are:
+
+- ``zrst2html``
+- ``zrst2odt``
+- ``zrst2pdf``
+- ``zrst2pseudoxml``
+
+Details
+~~~~~~~
+
+Some details, in no particular order.
+
+If you use a footnote citation format, zotero4rst will insert
+footnotes for you.
+
+However, if you also use regular autonumbered footnotes in the same
+section or paragraph, the ordering will be wrong. So if you want to do
+this, you will need to put your citations in a footnote
+explicitly. For example::
+
+  Water is wet. [#]_ But there are those who dispute it. [#]_
+
+  .. [#] :zc:`See @item3`.
+
+  .. [#] These people are wrong.
 
 Emacs integration
 -----------------
@@ -116,12 +133,10 @@ zotero link with descriptive link text.
 To update the link text to reflect changed metadata from Zotero_, use
 ``C-c z u`` over the link.
 
-.. _`mozmill source`: https://github.com/mozautomation/mozmill
 .. _Zotero: http://www.zotero.org/
 .. _mozrepl: https://github.com/bard/mozrepl/wiki
 .. _emacs: http://www.gnu.org/software/emacs/
 .. _`org-mode`: http://orgmode.org/
 .. _reStructuredText: http://docutils.sourceforge.net/rst.html
-.. _`Beautiful soup`: http://www.crummy.com/software/BeautifulSoup/
 .. _docutils: http://docutils.sourceforge.net/
 
