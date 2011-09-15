@@ -1,3 +1,4 @@
+(require 'org)
 (require 'zotero)
 
 (defun org-zotero-update-reference-link-at-point ()
