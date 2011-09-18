@@ -1,15 +1,24 @@
-
 var EXPORTED_SYMBOLS = ["instantiateCiteProc", "getItemId", "registerItemIds", "getCitationBlock", "getBibliographyData"];
 
 var zotero = Components.classes["@zotero.org/Zotero;1"].getService().wrappedJSObject;
 
 function getItemId (idStr) {
+    var libraryId = null;
+    var key = null;
     if (!idStr.match(/^[0-9]+_/)) {
         idStr = "0_" + idStr;
-	}
+    }
+    var md = idStr.match(/^0_(.*)$/);
+    if (md) {
+        /* avoid looking things up, local library */
+        key = md[1];
+    } else {
 	var lkh = zotero.Items.parseLibraryKeyHash(idStr);
-	var item = zotero.Items.getByLibraryAndKey(lkh.libraryID, lkh.key);
-	return item.id;
+        libraryId = lkh.libraryId;
+        key = lkh.key;
+    }
+    var item = zotero.Items.getByLibraryAndKey(libraryId, key);
+    return item.id;
 };
 
 /*
@@ -91,9 +100,5 @@ function getBibliographyData (arg) {
 };
 
 function isInTextStyle() {
-	var ret = false;
-	if ('in-text' === zotero.reStructuredCSL.opt.xclass) {
-		ret = true;
-	}
-	return ret;
+	return ('in-text' === zotero.reStructuredCSL.opt.xclass);
 };
