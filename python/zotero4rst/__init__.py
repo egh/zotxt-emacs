@@ -49,16 +49,23 @@ def check_zotero_conn():
 
 class ZoteroConnection(object):
     def __init__(self, format, **kwargs):
+        # connect & setup
         self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
         self.back_channel.timeout = self.bridge.timeout = 60
         self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
         self.methods.instantiateCiteProc(format)
-        self.tracked_clusters = []
+        self.in_text_style = self.methods.isInTextStyle()
+
+        # setup key mapping
         self.keymap = ConfigParser.SafeConfigParser()
         self.keymap.optionxform = str
+
+        self.tracked_clusters = []
         self.registered_items = []
         self.key2id = {}
-        self.in_text_style = self.methods.isInTextStyle()
+
+    def set_format(self, format):
+        self.methods.instantiateCiteProc(format)
 
     def get_item_id(self, key):
         if not(self.key2id.has_key(key)):
@@ -118,7 +125,10 @@ class ZoteroSetupDirective(Directive):
         Directive.__init__(self, *args)
         # This is necessary: connection hangs if created outside of an instantiated
         # directive class.
-        zotero4rst.zotero_conn = ZoteroConnection(self.options.get('format', DEFAULT_CITATION_FORMAT))
+        if zotero4rst.zotero_conn is None:
+            zotero4rst.zotero_conn = ZoteroConnection(self.options.get('format', DEFAULT_CITATION_FORMAT))
+        else:
+            zotero4rst.zotero_conn.set_format(self.options.get('format', DEFAULT_CITATION_FORMAT))
         zotero4rst.verbose_flag = self.state_machine.reporter.report_level
 
     required_arguments = 0
