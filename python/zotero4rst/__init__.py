@@ -48,28 +48,28 @@ def check_zotero_conn():
         raise ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
 
 class ZoteroConnection(object):
-    def __init__(self, **kwargs):
-        self.bibType = kwargs.get('bibType', DEFAULT_CITATION_FORMAT)
-        self.firefox_connect()
-        self.zotero_resource()
+    def __init__(self, format, **kwargs):
+        self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
+        self.back_channel.timeout = self.bridge.timeout = 60
+        self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
+        self.methods.instantiateCiteProc(format)
         self.tracked_clusters = []
         self.keymap = ConfigParser.SafeConfigParser()
         self.keymap.optionxform = str
         self.registered_items = []
+        self.key2id = {}
         self.in_text_style = self.methods.isInTextStyle()
+
+    def get_item_id(self, key):
+        if not(self.key2id.has_key(key)):
+            self.key2id[key] = int(zotero4rst.zotero_conn.methods.getItemId(key))
+        return self.key2id[key]
 
     def load_keymap(self, path):
         self.keymap.read(os.path.relpath(path))
 
     def track_cluster(self, cluster):
         self.tracked_clusters.append(cluster)
-
-    def firefox_connect(self):
-        self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
-        self.back_channel.timeout = self.bridge.timeout = 60
-
-    def zotero_resource(self):
-        self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
 
     def register_items(self):
         def flatten(listoflists):
@@ -118,7 +118,7 @@ class ZoteroSetupDirective(Directive):
         Directive.__init__(self, *args)
         # This is necessary: connection hangs if created outside of an instantiated
         # directive class.
-        zotero4rst.zotero_conn = ZoteroConnection()
+        zotero4rst.zotero_conn = ZoteroConnection(self.options.get('format', DEFAULT_CITATION_FORMAT))
         zotero4rst.verbose_flag = self.state_machine.reporter.report_level
 
     required_arguments = 0
@@ -130,7 +130,6 @@ class ZoteroSetupDirective(Directive):
         if self.options.has_key('keymap'):
             zotero_conn.load_keymap(self.options['keymap'])
         z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
-        zotero_conn.methods.instantiateCiteProc(self.options.get('format', DEFAULT_CITATION_FORMAT))
         return []
 
 class ZoteroTransform(Transform):
@@ -184,7 +183,7 @@ class ZoteroCitationInfo(object):
     """Class to hold information about a citation for passing to Zotero."""
     def __init__(self, **kwargs):
         self.key = self.map_key(kwargs['key'])
-        self.id = int(zotero4rst.zotero_conn.methods.getItemId(self.key))
+        self.id = zotero_conn.get_item_id(self.key)
         self.label = kwargs.get('label', None)
         self.locator = kwargs.get('locator', None)
         self.suppress_author = kwargs.get('suppress_author', False)
