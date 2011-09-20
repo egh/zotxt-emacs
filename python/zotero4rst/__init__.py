@@ -215,7 +215,7 @@ def zot_parse_cite_string(cite_string_all):
 Examples: `see @Doe2008` `also c.f. @Doe2010`
 Returns an array of hashes with information."""
 
-    CITE_RE = r'^(?P<prefix>.*?)(?P<suppress>-?)@((?P<key>[A-Za-z0-9_-]+)),?(\s+\[(?P<locator>[^\]]+)\])?(\s+(?P<suffix>.*))?$'
+    CITE_RE = r'^(?P<prefix>.*?)(?P<suppress>-?)@((?P<key>[A-Za-z0-9_-]+))(,?\s*(?P<locator>[\w.]+\s+[0-9][0-9,\s-]*))?(\s+(?P<suffix>.*))?$'
 
     def is_key(s): return re.match(KEY_RE, s)
     def not_is_key(s): return not(is_key(s))
