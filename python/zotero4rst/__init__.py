@@ -93,18 +93,22 @@ class ZoteroConnection(object):
     def generate_rest_bibliography(self):
         """Generate a bibliography of reST nodes."""
         self.register_items()
-        bibdata = unquote(json.loads(self.methods.getBibliographyData()))
-        # XXX There is some nasty business here.
-        #
-        # Some nested nodes come out serialized when run through html2rst, so something
-        # needs to be fixed there.
-        #
-        # More important, we need to figure out how to control formatting
-        # in the bib -- hanging indents especially. Probably the simplest thing
-        # is just to set some off-the-shelf named style blocks in style.odt, and
-        # apply them as more or less appropriate.
-        #
-        return html2rst("%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"]))
+        data = self.methods.getBibliographyData()
+        if not(data):
+            return html2rst("")
+        else:
+            # XXX There is some nasty business here.
+            #
+            # Some nested nodes come out serialized when run through html2rst, so something
+            # needs to be fixed there.
+            #
+            # More important, we need to figure out how to control formatting
+            # in the bib -- hanging indents especially. Probably the simplest thing
+            # is just to set some off-the-shelf named style blocks in style.odt, and
+            # apply them as more or less appropriate.
+            #
+            bibdata = unquote(json.loads(self.methods.getBibliographyData()))
+            return html2rst("%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"]))
 
     def lookup_key(self, key):
         if self.keymap.has_option('keymap', key):
@@ -211,35 +215,30 @@ def zot_parse_cite_string(cite_string_all):
 Examples: `see @Doe2008` `also c.f. @Doe2010`
 Returns an array of hashes with information."""
 
-    KEY_RE = r'(-?)@([A-Za-z0-9_-]+),?'
+    CITE_RE = r'^(?P<prefix>.*?)(?P<suppress>-?)@((?P<key>[A-Za-z0-9_-]+)),?(\s+\[(?P<locator>[^\]]+)\])?(\s+(?P<suffix>.*))?$'
+
     def is_key(s): return re.match(KEY_RE, s)
     def not_is_key(s): return not(is_key(s))
     def not_is_pipe(s): return s != '|'
 
     retval = []
+    # split citations by ;
     for cite_string in re.split(r";", cite_string_all):
-        words = [ n for n in re.split(r"(\s|\|)", cite_string) if n != ' ' and n != '' ]
-        raw_keys = [ word for word in words if is_key(word) ]
-        if len(raw_keys) == 0:
-            raise ExtensionOptionError("No key found in citation: '%s'."%(cite_string))
-        elif len(raw_keys) > 1:
-            raise ExtensionOptionError("Too many keys in citation: '%s'."%(cite_string))
-        else:
-            m = re.match(KEY_RE, raw_keys[0])
-            key = m.group(2)
-            suppress_author = (m.group(1) == '-')
-            prefix = " ".join(takewhile(not_is_key, words))
-            after_cite = tuple(islice(dropwhile(not_is_key, words), 1, None))
-            suffix=None
-            locator=None
-            # suffix is separated by | for now
-            locator = " ".join(takewhile(not_is_pipe, after_cite))
-            suffix = " ".join(islice(dropwhile(not_is_pipe, after_cite), 1, None))
-            retval.append(ZoteroCitationInfo(key=key,
-                                             prefix=prefix,
-                                             suffix=suffix,
-                                             suppress_author=suppress_author,
-                                             locator=locator))
+        md = re.match(CITE_RE, cite_string)
+        if md is None: raise ExtensionOptionError("Not a valid cite? '%s'"%(cite_string))
+        prefix = md.group('prefix')
+        if prefix is not None: prefix = prefix.strip()
+        suppress_author = (md.group('suppress') == '-')
+        key = md.group('key')
+        locator = md.group('locator')
+        if locator is not None: locator = locator.strip()
+        suffix = md.group('suffix')
+        if suffix is not None: suffix = suffix.strip()
+        retval.append(ZoteroCitationInfo(key=key,
+                                         prefix=prefix,
+                                         suffix=suffix,
+                                         suppress_author=suppress_author,
+                                         locator=locator))
     return retval
 
 def random_label():
