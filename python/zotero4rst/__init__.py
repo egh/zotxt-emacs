@@ -21,6 +21,7 @@ from itertools import chain, dropwhile, islice, takewhile
 
 import zotero4rst.jsonencoder
 from zotero4rst.util import html2rst, unquote
+from zotero4rst.parser import CiteParser
 
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
@@ -203,6 +204,7 @@ class ZoteroCitationInfo(object):
         self.suppress_author = kwargs.get('suppress_author', False)
         self.prefix = kwargs.get('prefix', None)
         self.suffix = kwargs.get('suffix', None)
+        self.author_only = kwargs.get('author_only', False)
     
     def map_key(self, key):
         newkey = zotero4rst.zotero_conn.lookup_key(key)
@@ -210,53 +212,18 @@ class ZoteroCitationInfo(object):
             return newkey
         return key
 
-def zot_parse_cite_string(cite_string_all):
-    """Parse a citation string. This is inteded to be "pandoc-like".
-Examples: `see @Doe2008` `also c.f. @Doe2010`
-Returns an array of hashes with information."""
-
-    CITE_RE = r'^(?P<prefix>.*?)(?P<suppress>-?)@((?P<key>[A-Za-z0-9_-]+))(,?\s*(?P<locator>[\w.]+\s+[0-9][0-9,\s-]*))?(\s+(?P<suffix>.*))?$'
-
-    def is_key(s): return re.match(KEY_RE, s)
-    def not_is_key(s): return not(is_key(s))
-    def not_is_pipe(s): return s != '|'
-
-    retval = []
-    # split citations by ;
-    for cite_string in re.split(r";", cite_string_all):
-        md = re.match(CITE_RE, cite_string)
-        if md is None: raise ExtensionOptionError("Not a valid cite? '%s'"%(cite_string))
-        prefix = md.group('prefix')
-        if prefix is not None: prefix = prefix.strip()
-        suppress_author = (md.group('suppress') == '-')
-        key = md.group('key')
-        locator = md.group('locator')
-        if locator is not None: locator = locator.strip()
-        suffix = md.group('suffix')
-        if suffix is not None: suffix = suffix.strip()
-        retval.append(ZoteroCitationInfo(key=key,
-                                         prefix=prefix,
-                                         suffix=suffix,
-                                         suppress_author=suppress_author,
-                                         locator=locator))
-    return retval
-
 def random_label():
     return "".join(random.choice(string.digits) for x in range(20))
 
-def zot_cite_role(role, rawtext, text, lineno, inliner,
-                  options={}, content=[]):
-    check_zotero_conn()
-
-    cite_cluster = zot_parse_cite_string(text)
+def handle_cite_cluster(parent, document, cite_cluster):
     zotero_conn.track_cluster(cite_cluster)
     if zotero_conn.in_text_style or \
-            (type(inliner.parent) == nodes.footnote):
+            (type(parent) == nodes.footnote):
         # already in a footnote, or in-text style: just add a pending
         pending = nodes.pending(ZoteroTransform)
         pending.details['cite_cluster'] = cite_cluster
-        inliner.document.note_pending(pending)
-        return [pending], []
+        document.note_pending(pending)
+        return pending
     else:
         # not in a footnote & this is a footnote style; insert a
         # reference & add a footnote to the end
@@ -266,8 +233,8 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
         refnode = nodes.footnote_reference('[%s]_' % label)
         refnode['auto'] = 1
         refnode['refname'] = label
-        inliner.document.note_footnote_ref(refnode)
-        inliner.document.note_autofootnote_ref(refnode)
+        document.note_footnote_ref(refnode)
+        document.note_autofootnote_ref(refnode)
 
         footnote = nodes.footnote("")
         footnote['auto'] = 1
@@ -275,15 +242,28 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
         pending = nodes.pending(ZoteroTransform)
         pending.details['cite_cluster'] = cite_cluster
         footnote += nodes.paragraph("", "", pending)
-        inliner.document.note_pending(pending)
-        inliner.document.note_autofootnote(footnote)
-        where_to_add = inliner.parent
+        document.note_pending(pending)
+        document.note_autofootnote(footnote)
+        where_to_add = parent
         while where_to_add is not None and \
                 not(isinstance(where_to_add, nodes.Structural)):
             where_to_add = where_to_add.parent
-        if where_to_add is None: where_to_add = inliner.document
+        if where_to_add is None: where_to_add = document
         where_to_add += footnote
-        return [refnode], []
+        return refnode
+
+def zot_cite_role(role, rawtext, text, lineno, inliner,
+                  options={}, content=[]):
+    check_zotero_conn()
+
+    cite_clusters = CiteParser().parse(text)
+    # returns [[...], ...]
+    retval = []
+    if len(cite_clusters[0]) > 0:
+        retval.append(handle_cite_cluster(inliner.parent, inliner.document, cite_clusters[0]))
+        retval.append(nodes.Text(" ", rawsource=" "))
+    retval.append(handle_cite_cluster(inliner.parent, inliner.document, cite_clusters[1]))
+    return retval, []
 
 # setup zotero directives
 directives.register_directive('zotero-setup', ZoteroSetupDirective)
