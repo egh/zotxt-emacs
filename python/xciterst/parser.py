@@ -80,17 +80,28 @@ class CiteParser(object):
         return cites
 
     def parse(self, what):
-        WORD_CHAR_RE = r'[\w.,-]'
+        WORD_CHAR_RE = r'[\w.,</>-]'
         
         greedyToken = Regex(r'%s+'%(WORD_CHAR_RE))
         wordWithDigits = Regex(r'%s*[0-9]%s*'%(WORD_CHAR_RE, WORD_CHAR_RE))
+
+        # translate embedded emph & strong RST to HTML
+        emText = '*' + OneOrMore(greedyToken) + '*'
+        emText.setParseAction(lambda s,l,t:
+                                  "<i>%s</i>"%(" ".join(t[1:-1])))
+        strongText = '**' + OneOrMore(greedyToken) + '**'
+        strongText.setParseAction(lambda s,l,t: 
+                                  "<b>%s</b>"%(" ".join(t[1:-1])))
+
+        text = strongText | emText | greedyToken
+
         locator = OneOrMore(wordWithDigits) ^ (Optional(greedyToken) + OneOrMore(wordWithDigits))
         locator.setParseAction(lambda s,l,t: CiteParser.Locator(" ".join(t)))
         citeKey = Optional('-') + '@' + Regex(r'[\w-]+')
         citeKey.setParseAction(lambda s,l,t: CiteParser.CiteKey(t))
-        suffix = OneOrMore(greedyToken)
+        suffix = OneOrMore(text)
         suffix.setParseAction(lambda s,l,t: CiteParser.Suffix(" ".join(t)))
-        prefix = OneOrMore(greedyToken)
+        prefix = OneOrMore(text)
         prefix.setParseAction(lambda s,l,t: CiteParser.Prefix(" ".join(t)))
 
         # a short cite, author + (date)
