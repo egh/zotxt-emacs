@@ -83,7 +83,8 @@ class ZoteroConnection(object):
         def flatten(listoflists):
             return chain.from_iterable(listoflists)
 
-        uniq_ids = set([ item.id for item in flatten(self.tracked_clusters) ])
+        uniq_ids = set([ self.get_item_id(item.key)
+                         for item in flatten(self.tracked_clusters) ])
         if (uniq_ids != self.registered_items):
             self.methods.registerItemIds(list(uniq_ids))
             self.registered_items = uniq_ids
@@ -197,25 +198,27 @@ class ZoteroBibliographyTransform(Transform):
 class ZoteroCitationInfo(object):
     """Class to hold information about a citation for passing to Zotero."""
     def __init__(self, **kwargs):
-        self.key = self.map_key(kwargs['key'])
-        self.id = zotero_conn.get_item_id(self.key)
+        self.key = key
         self.label = kwargs.get('label', None)
         self.locator = kwargs.get('locator', None)
         self.suppress_author = kwargs.get('suppress_author', False)
         self.prefix = kwargs.get('prefix', None)
         self.suffix = kwargs.get('suffix', None)
         self.author_only = kwargs.get('author_only', False)
-    
-    def map_key(self, key):
-        newkey = zotero4rst.zotero_conn.lookup_key(key)
-        if newkey is not None:
-            return newkey
-        return key
 
 def random_label():
     return "".join(random.choice(string.digits) for x in range(20))
 
+def map_key(self, key):
+    newkey = zotero4rst.zotero_conn.lookup_key(key)
+    if newkey is not None:
+        return newkey
+    return key
+
 def handle_cite_cluster(parent, document, cite_cluster):
+    for cite in cite_cluster:
+        cite.key = map_key(kwargs['key'])
+    
     zotero_conn.track_cluster(cite_cluster)
     if zotero_conn.in_text_style or \
             (type(parent) == nodes.footnote):
