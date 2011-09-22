@@ -2,7 +2,7 @@ import BeautifulSoup
 import jsbridge
 import re
 import urllib
-import zotero4rst
+import zot4rst
 
 from docutils import nodes
 
@@ -71,7 +71,7 @@ def html2rst (html):
                 if (html_node.has_key('style') and (html_node['style'] == "font-style:italic;")):
                     return nodes.emphasis(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
                 elif (html_node.has_key('style') and (html_node['style'] == "font-variant:small-caps;")):
-                    return zotero4rst.smallcaps(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
+                    return zot4rst.smallcaps(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
                 else:
                     return compact(walk("".join([ str(c) for c in html_node.contents ])))
             if (html_node.name == 'i'):

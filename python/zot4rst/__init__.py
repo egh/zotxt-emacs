@@ -19,9 +19,9 @@ from docutils.utils import ExtensionOptionError
 
 from itertools import chain, dropwhile, islice, takewhile
 
-import zotero4rst.jsonencoder
-from zotero4rst.util import html2rst, unquote
-from zotero4rst.parser import CiteParser
+import zot4rst.jsonencoder
+from zot4rst.util import html2rst, unquote
+from zot4rst.parser import CiteParser
 
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
@@ -39,7 +39,7 @@ def z4r_debug(what):
         sys.stderr.write("%s\n"%(what))
 
 def check_zotero_conn():
-    if not zotero4rst.zotero_conn:
+    if not zot4rst.zotero_conn:
         ## A kludge, but makes a big noise about the extension syntax for clarity.
         sys.stderr.write("#####\n")
         sys.stderr.write("##\n")
@@ -70,7 +70,7 @@ class ZoteroConnection(object):
 
     def get_item_id(self, key):
         if not(self.key2id.has_key(key)):
-            self.key2id[key] = int(zotero4rst.zotero_conn.methods.getItemId(key))
+            self.key2id[key] = int(zot4rst.zotero_conn.methods.getItemId(key))
         return self.key2id[key]
 
     def load_keymap(self, path):
@@ -131,11 +131,11 @@ class ZoteroSetupDirective(Directive):
         Directive.__init__(self, *args)
         # This is necessary: connection hangs if created outside of an instantiated
         # directive class.
-        if zotero4rst.zotero_conn is None:
-            zotero4rst.zotero_conn = ZoteroConnection(self.options.get('format', DEFAULT_CITATION_FORMAT))
+        if zot4rst.zotero_conn is None:
+            zot4rst.zotero_conn = ZoteroConnection(self.options.get('format', DEFAULT_CITATION_FORMAT))
         else:
-            zotero4rst.zotero_conn.set_format(self.options.get('format', DEFAULT_CITATION_FORMAT))
-        zotero4rst.verbose_flag = self.state_machine.reporter.report_level
+            zot4rst.zotero_conn.set_format(self.options.get('format', DEFAULT_CITATION_FORMAT))
+        zot4rst.verbose_flag = self.state_machine.reporter.report_level
 
     required_arguments = 0
     optional_arguments = 0
@@ -192,7 +192,7 @@ class ZoteroBibliographyTransform(Transform):
 
     def apply(self):
         z4r_debug("\n--- Zotero4reST: Bibliography #2 (inserting content) ---")
-        newnode = zotero4rst.zotero_conn.generate_rest_bibliography()
+        newnode = zot4rst.zotero_conn.generate_rest_bibliography()
         self.startnode.replace_self(newnode)
 
 class ZoteroCitationInfo(object):
@@ -210,7 +210,7 @@ def random_label():
     return "".join(random.choice(string.digits) for x in range(20))
 
 def map_key(self, key):
-    newkey = zotero4rst.zotero_conn.lookup_key(key)
+    newkey = zot4rst.zotero_conn.lookup_key(key)
     if newkey is not None:
         return newkey
     return key

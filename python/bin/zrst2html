@@ -19,7 +19,7 @@ from docutils.writers.html4css1 import Writer, HTMLTranslator
 from docutils.readers.standalone import Reader
 from docutils.writers import Writer as WriterBase
 
-import zotero4rst
+import zot4rst
 
 description = ('Generates HTML with small-caps support from '
                'standalone reStructuredText sources.  ' + default_description)

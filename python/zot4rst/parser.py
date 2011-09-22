@@ -1,4 +1,4 @@
-import zotero4rst
+import zot4rst
 
 import sys
 from pyparsing import Group, OneOrMore, Optional, Regex, Word, ZeroOrMore
@@ -56,14 +56,14 @@ class CiteParser(object):
         for piece in pieces:
             if isinstance(piece, CiteParser.ShortCite):
                 # actually 2 cites, first author-only, then suppress-author
-                first = zotero4rst.ZoteroCitationInfo(key=piece.key,
+                first = zot4rst.ZoteroCitationInfo(key=piece.key,
                                                       author_only=True)
-                current_cite = zotero4rst.ZoteroCitationInfo(key=piece.key,
+                current_cite = zot4rst.ZoteroCitationInfo(key=piece.key,
                                                              suppress_author=True)
                 cites[0] = [first]
                 cites[1].append(current_cite)
             elif isinstance(piece, CiteParser.CiteKey):
-                current_cite = zotero4rst.ZoteroCitationInfo(key=piece.key,
+                current_cite = zot4rst.ZoteroCitationInfo(key=piece.key,
                                                              suppress_author=piece.suppress_author,
                                                              prefix=prefix)
                 cites[1].append(current_cite)

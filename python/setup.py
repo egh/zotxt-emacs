@@ -2,13 +2,13 @@
 
 from setuptools import setup
 
-setup(name             = 'zotero4rst',
+setup(name             = 'zot4rst',
       version          = '0.1',
       description      = 'Zotero for reStructuredText',
       author           = 'Erik Hetzner',
       author_email     = 'egh@e6h.org',
       url              = 'http://bitbucket.org/egh/zotero-plain/',
-      packages         = ['zotero4rst'],
+      packages         = ['zot4rst'],
       install_requires = ["BeautifulSoup>=3.2.0",
                           "docutils==0.8.1",
                           "jsbridge>=2.4.4",

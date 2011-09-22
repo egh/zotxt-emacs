@@ -15,7 +15,7 @@ except:
     pass
 
 from docutils.core import publish_cmdline, default_description
-import zotero4rst
+import zot4rst
 
 description = ('Generates pseudo-XML from standalone reStructuredText '
                'sources (for testing purposes).  ' + default_description)
