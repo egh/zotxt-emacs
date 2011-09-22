@@ -198,18 +198,19 @@ class ZoteroBibliographyTransform(Transform):
 class ZoteroCitationInfo(object):
     """Class to hold information about a citation for passing to Zotero."""
     def __init__(self, **kwargs):
-        self.key = key
+        self.key = kwargs.get('key')
         self.label = kwargs.get('label', None)
         self.locator = kwargs.get('locator', None)
         self.suppress_author = kwargs.get('suppress_author', False)
         self.prefix = kwargs.get('prefix', None)
         self.suffix = kwargs.get('suffix', None)
         self.author_only = kwargs.get('author_only', False)
+        self.id = None
 
 def random_label():
     return "".join(random.choice(string.digits) for x in range(20))
 
-def map_key(self, key):
+def map_key(key):
     newkey = zot4rst.zotero_conn.lookup_key(key)
     if newkey is not None:
         return newkey
@@ -217,8 +218,9 @@ def map_key(self, key):
 
 def handle_cite_cluster(parent, document, cite_cluster):
     for cite in cite_cluster:
-        cite.key = map_key(kwargs['key'])
-    
+        cite.key = map_key(cite.key)
+        cite.id = zotero_conn.get_item_id(cite.key)
+
     zotero_conn.track_cluster(cite_cluster)
     if zotero_conn.in_text_style or \
             (type(parent) == nodes.footnote):

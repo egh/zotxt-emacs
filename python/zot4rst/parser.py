@@ -51,7 +51,8 @@ class CiteParser(object):
         def __init__(self, toks):
             CiteParser.Base.__init__(self, "ShortCiteExtra", toks.asList())
 
-    def _results2cites(self, pieces, cites=[None, []], current_cite=None):
+    def _results2cites(self, pieces, cites=None, current_cite=None):
+        if cites is None: cites = [None, []]
         prefix = None
         for piece in pieces:
             if isinstance(piece, CiteParser.ShortCite):
@@ -77,7 +78,8 @@ class CiteParser(object):
                 self._results2cites(piece.content, cites, current_cite)
             elif isinstance(piece, CiteParser.FullCite):
                 self._results2cites(piece.content, cites)
-        
+        return cites
+
     def parse(self, what):
         WORD_CHAR_RE = r'[\w.,-]'
         
@@ -110,5 +112,4 @@ class CiteParser(object):
         topCite = bracketedCite ^ shortCite + shortCiteExtra ^ shortCite + bracketedCite ^ shortCite
 
         raw = topCite.parseString(what, True)
-        self._results2cites(list(raw))
-        return cites
+        return self._results2cites(list(raw))
