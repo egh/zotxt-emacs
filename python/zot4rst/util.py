@@ -76,6 +76,8 @@ def html2rst (html):
                     return compact(walk("".join([ str(c) for c in html_node.contents ])))
             if (html_node.name == 'i'):
                 return nodes.emphasis(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
+            elif (html_node.name == 'b'):
+                return nodes.strong(text="".join([ unicode(walk(c)) for c in html_node.contents ]))
             elif (html_node.name == 'p'):
                 children = compact([ walk(c) for c in html_node.contents ])
                 return nodes.paragraph("", "", *children)
