@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # EASY-INSTALL-ENTRY-SCRIPT: 'rst2pdf==0.16','console_scripts','rst2pdf'
-__requires__ = 'rst2pdf==0.16'
+__requires__ = 'rst2pdf'
 import sys
 from pkg_resources import load_entry_point
 
@@ -8,5 +8,5 @@ import zot4rst
 
 if __name__ == '__main__':
     sys.exit(
-        load_entry_point('rst2pdf==0.16', 'console_scripts', 'rst2pdf')()
+        load_entry_point('rst2pdf', 'console_scripts', 'rst2pdf')()
     )
