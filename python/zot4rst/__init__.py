@@ -261,4 +261,4 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
 # setup zotero directives
 directives.register_directive('zotero-setup', ZoteroSetupDirective)
 directives.register_directive('zotero-bibliography', ZoteroBibliographyDirective)
-roles.register_canonical_role('zc', zot_cite_role)
+roles.register_canonical_role('xcite', zot_cite_role)

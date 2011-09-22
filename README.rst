@@ -33,7 +33,7 @@ Quickstart
 ~~~~~~~~~~
 
 See ``example/example.rst``, and the generated ``example/example.pdf``
-and ``example/example.html``.
+and ``example/example.html``. Citation syntax is identical to pandoc.
 
 For the time being (...)  zotero4rst depends on the rather obscure
 zotero library key. See ``example/example.keys`` for the mapping
@@ -83,7 +83,7 @@ explicitly. For example::
 
   Water is wet. [#]_ But there are those who dispute it. [#]_
 
-  .. [#] :zc:`See @item3`.
+  .. [#] :xcite:`[See @item3]`.
 
   .. [#] These people are wrong.
 
