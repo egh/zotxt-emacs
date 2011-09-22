@@ -6,8 +6,8 @@ class ZoteroJSONEncoder(jsbridge.network.JSObjectEncoder):
     def default(self, obj):
         if isinstance(obj, CitationInfo):
             retval = { 'id': obj.id}
-            if obj.prefix: retval['prefix'] = obj.prefix
-            if obj.suffix: retval['suffix'] = obj.suffix
+            if obj.prefix: retval['prefix'] = "%s "%(obj.prefix) # ensure spaces in prefix, suffix
+            if obj.suffix: retval['suffix'] = " %s"%(obj.suffix)
             if obj.label: retval['label'] = obj.label
             if obj.locator: retval['locator'] = obj.locator
             if obj.suppress_author: retval['suppress-author'] = obj.suppress_author
