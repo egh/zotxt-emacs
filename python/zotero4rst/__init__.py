@@ -256,13 +256,13 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
                   options={}, content=[]):
     check_zotero_conn()
 
-    cite_clusters = CiteParser().parse(text)
-    # returns [[...], ...]
+    [first_cluster, second_cluster] = CiteParser().parse(text)
+    # returns [citecluster, ...]
     retval = []
-    if len(cite_clusters[0]) > 0:
-        retval.append(handle_cite_cluster(inliner.parent, inliner.document, cite_clusters[0]))
+    if first_cluster is not None:
+        retval.append(handle_cite_cluster(inliner.parent, inliner.document, first_cluster))
         retval.append(nodes.Text(" ", rawsource=" "))
-    retval.append(handle_cite_cluster(inliner.parent, inliner.document, cite_clusters[1]))
+    retval.append(handle_cite_cluster(inliner.parent, inliner.document, second_cluster))
     return retval, []
 
 # setup zotero directives
