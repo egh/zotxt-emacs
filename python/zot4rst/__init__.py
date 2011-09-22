@@ -21,7 +21,7 @@ from itertools import chain, dropwhile, islice, takewhile
 
 import zot4rst.jsonencoder
 from zot4rst.util import html2rst, unquote
-from zot4rst.parser import CiteParser
+from xciterst.parser import CiteParser
 
 class smallcaps(nodes.Inline, nodes.TextElement): pass
 roles.register_local_role("smallcaps", smallcaps)
@@ -194,18 +194,6 @@ class ZoteroBibliographyTransform(Transform):
         z4r_debug("\n--- Zotero4reST: Bibliography #2 (inserting content) ---")
         newnode = zot4rst.zotero_conn.generate_rest_bibliography()
         self.startnode.replace_self(newnode)
-
-class ZoteroCitationInfo(object):
-    """Class to hold information about a citation for passing to Zotero."""
-    def __init__(self, **kwargs):
-        self.key = kwargs.get('key')
-        self.label = kwargs.get('label', None)
-        self.locator = kwargs.get('locator', None)
-        self.suppress_author = kwargs.get('suppress_author', False)
-        self.prefix = kwargs.get('prefix', None)
-        self.suffix = kwargs.get('suffix', None)
-        self.author_only = kwargs.get('author_only', False)
-        self.id = None
 
 def random_label():
     return "".join(random.choice(string.digits) for x in range(20))

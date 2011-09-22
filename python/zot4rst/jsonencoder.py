@@ -1,10 +1,10 @@
 import jsbridge
-import zot4rst
+from xciterst import CitationInfo
 
 class ZoteroJSONEncoder(jsbridge.network.JSObjectEncoder):
     """An encoder for our JSON objects."""
     def default(self, obj):
-        if isinstance(obj, zot4rst.ZoteroCitationInfo):
+        if isinstance(obj, CitationInfo):
             retval = { 'id': obj.id}
             if obj.prefix: retval['prefix'] = obj.prefix
             if obj.suffix: retval['suffix'] = obj.suffix
