@@ -114,33 +114,17 @@ explicitly. For example::
 Emacs integration
 -----------------
 
-Emacs integration has 3 parts: a core library (``zotero.el``),
-`org-mode`_ integration (``org-zotero.el``), and reStructuredText_
-integration (``zotero-rst.el``). Emacs integration depends on the
-``moz.el`` file from the mozrepl_ project, which can be retrieved at
+Emacs integration has 2 parts: a core library (``zotero.el``),
+`org-mode`_ integration (``org-zotero.el``). Emacs integration depends
+on the ``moz.el`` file from the mozrepl_ project, which can be
+retrieved at
 https://github.com/bard/mozrepl/blob/master/chrome/content/moz.el.
 
 To install, add the following to your ``.emacs`` file::
 
   (add-to-list 'load-path "/path/to/moz.el")
   (add-to-list 'load-path "/path/to/zotero-plain/elisp/")
-  (autoload 'zotero-rst-mode "zotero-rst" "" t)
   (autoload 'org-zotero-mode "org-zotero" "" t)
-  
-zotero + emacs + reStructuredText
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-To insert a citation into a ReST document, first enable the
-``zotero-rst`` minor mode::
-
-  M-x zotero-rst-mode
-
-Then select one or more items in a Zotero_ pane. Finally, in emacs_,
-use: ``C-c z i`` to insert these items as citations.
-
-To update a citation’s descriptive information from Zotero_ (remember,
-rst2xxx tools will ignore this information, so you may do what you
-wish with it), use ``C-c z u``.
 
 zotero + org-mode
 ~~~~~~~~~~~~~~~~~
