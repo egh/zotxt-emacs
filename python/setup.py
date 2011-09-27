@@ -18,5 +18,6 @@ setup(name             = 'zot4rst',
       scripts          = ['bin/zrst2html',
                           'bin/zrst2odt', 
                           'bin/zrst2pdf',
-                          'bin/zrst2pseudoxml']
+                          'bin/zrst2pseudoxml',
+                          'bin/zrst2rst']
       )
