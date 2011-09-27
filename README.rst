@@ -12,14 +12,14 @@ docutils_ package for including citations in reStructuredText_
 documents (zotero2rst), and elisp code for accessing Zotero from
 emacs_.
 
-zotrero4st
-----------
+zot4rst
+-------
 
 Installation
 ~~~~~~~~~~~~
 
 1. Install Zotero_.
-2. Install zotero4rst (from the ``python`` directory::
+2. Install zot4rst (from the ``python`` directory::
 
      sudo python setup.py install
 
@@ -35,28 +35,38 @@ Quickstart
 See ``example/example.rst``, and the generated ``example/example.pdf``
 and ``example/example.html``. Citation syntax is identical to pandoc.
 
-For the time being (...)  zotero4rst depends on the rather obscure
-zotero library key. See ``example/example.keys`` for the mapping
-between the human-readable key and the zotero library key.
+For the time being (...) zot4rst depends on the rather obscure zotero
+library key. To make this work, we use a mapping file to map between a
+human-readable key and the Zotero key. This will map, for instance,
+from ``Doe2011`` to ``0_MRCENTE5``. See ``example/example.keys`` for
+the mapping between the human-readable key and the zotero library key.
 
-There are at least two ways to determine the library key for an item
-in your own collection. The first is to right click on an item, and
-choose “Generate report from selected item”. You will then be visiting
-a page whose URL resembles::
+You can use the bundled ``zupdatekeymap`` script to generate this
+keymap file from an existing Zotero collection. To do this, you need
+to an API key, available at http://www.zotero.org/settings/keys/new
 
-  zotero://report/items/0_MRCENTE5/html/report.html
+After you have your userid and key, run::
 
-In this URL, the string ``MRCENTE5`` is the library key. Use this
-in your ``.keys`` mapping file.
+  zupdatekeymap -u USERID -k KEY KEYMAPFILE
 
-The other way is to view an item on zotero.org, in this case the URL
-will look like::
+where ``USERID`` is your *numeric* userid, ``KEY`` is your API key,
+and ``KEYMAPFILE`` is the file you want to use to hold a mapping from
+human keys to Zotero keys. The script will prompt you for a collection
+to use; select one. The file should then be generated.
 
-  http://www.zotero.org/egh/items/MRCENTE5
+You can then edit the file, choosing keys that are more to your
+liking.
 
-where the key is again ``MRCENTE5``.
+After generating this mapping file, you can run::
 
-(See below for information about easier management using emacs.)
+  zupdatekeymap KEYMAPFILE
+
+to keep it up to date with any new items in the collection. Your API
+key is stored in the file, so if it is a write key, you will not want
+to distribute this key file.
+
+Updating the keymap should *not* change any keys you have changed, but
+a backup is always made then ``zupdatekeymap`` is run.
 
 To include Zotero_ citations in a reStructuredText_ document, you must
 use the bundled ``zrst2*`` scripts, which have been modified to
@@ -67,14 +77,28 @@ installed using ``setup.py`` above. Currently, they are:
 - ``zrst2odt``
 - ``zrst2pdf``
 - ``zrst2pseudoxml``
+- ``zrst2rst``
+
+Note that ``zrst2rst`` will transform your citations into plain
+reStructuredText files without the Zotero extension. For example::
+
+  A citation group :xcite:`[see @item1 p. 34-35; also @item3 chap. 3]`.
+
+will become::
+
+  A citation group (see Doe 2005, p. 34–35; also Doe and Roe 2007, chap. 3).
+
+and the bibliography will be fully expanded. This can be used to
+create RST files that will work without your Zotero library.
+
 
 Details
 ~~~~~~~
 
 Some details, in no particular order.
 
-If you use a footnote citation format, zotero4rst will insert
-footnotes for you.
+If you use a footnote citation format, zot4rst will insert footnotes
+for you.
 
 However, if you also use regular autonumbered footnotes in the same
 section or paragraph, the ordering will be wrong. So if you want to do

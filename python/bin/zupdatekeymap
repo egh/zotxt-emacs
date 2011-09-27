@@ -1,0 +1,101 @@
+#!/usr/bin/python
+
+from pyzotero import zotero
+import ConfigParser, optparse, os, re, shutil, sys, unicodedata
+
+# turn unicode strings into ascii
+clean_re = re.compile(u'[^A-Za-z]+')
+def clean(s):
+    # strip unicode accents
+    s2 = ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn'))
+    return clean_re.sub('', s2)
+
+# option parsing
+usage = "usage: %prog [options] keymap"
+parser = optparse.OptionParser(usage=usage)
+parser.add_option("-u", "--userid", dest="userid", metavar="USERID")
+parser.add_option("-k", "--key", dest="key", metavar="KEY")
+(options, args) = parser.parse_args()
+
+if len(args) == 0:
+    parser.error("Please supply a keymap file!")
+
+
+# set up existing keymap
+keymapfile = os.path.abspath(args[0])
+keymap = ConfigParser.SafeConfigParser()
+keymap.optionxform = str
+keymap.read(keymapfile)
+if not(keymap.has_section('keymap')):
+    keymap.add_section('keymap')
+if not(keymap.has_section('meta')):
+    keymap.add_section('meta')
+
+if (not(os.path.exists(keymapfile)) and
+    (options.userid is None or options.key is None)):
+    parser.error("When creating a new keymap file, you must supply a USERID and KEY")
+
+userid = options.userid or keymap.get('meta', 'userid')
+key    = options.key    or keymap.get('meta', 'key')
+keymap.set('meta', 'userid', userid)
+keymap.set('meta', 'key', key)
+
+# keys we already know about, do not change the ezkey
+known_keys = {}
+for k, v in keymap.items('keymap'): 
+    # use only the key itself
+    zotkey = re.match(r"^([0-9A-Z_]+)", v).group(1)
+    known_keys[zotkey] = True
+
+zot = zotero.Zotero(userid, key)
+    
+collid = None
+if keymap.has_option('meta', 'collectionid'):
+    collid = keymap.get('meta', 'collectionid')
+else:
+    collections = zot.collections()
+    collstr = "".join([ "%d. %s\n"%(i + 1, coll['name']) for i, coll in enumerate(collections) ])
+    choice = raw_input("Which collection?\n\n%s> "%(collstr))
+    collid =  collections[int(choice) - 1]['key']
+keymap.set('meta', 'collectionid', collid)
+
+start = 0
+
+zot.add_parameters(start=0, limit=10)
+items = zot.collection_items(collid)
+while len(items) > 0:
+    for item in items:
+        key = item['key']
+        if known_keys.has_key(key): continue
+
+        date = "XXXX"
+        md = re.match(r'([0-9]{4})', item['date'])
+        if md is not None: date = md.group(1)
+
+        title = clean(item['title'])
+
+        creator = "Unknown"
+        if item.has_key('creators') and len(item['creators']) > 0:
+            creator = clean(item['creators'][0].get('lastName', 'Unknown'))
+
+        ezkey = "%s%s"%(creator, date)
+        # ensure we don't already have an ezkey CreatorDate
+        if (keymap.has_option('keymap', ezkey)):
+            extra = "a"
+            while keymap.has_option('keymap', "%s%s"%(ezkey, extra)):
+                extra = chr(ord(extra) + 1)
+            ezkey = "%s%s"%(ezkey, extra)
+        keymap.set('keymap', ezkey, "%s %s"%(key, title))
+    start = start + len(items)
+    zot.add_parameters(start=start, limit=10)
+    items = zot.collection_items(collid)
+
+if (os.path.exists(keymapfile)):
+    backupnum = 1
+    backupfile = "%s~%d"%(keymapfile, backupnum)
+    while (os.path.exists(backupfile)):
+        backupnum = backupnum + 1
+        backupfile = "%s~%d"%(keymapfile, backupnum)
+
+    shutil.copy2(keymapfile, backupfile)
+keymap.write(open(keymapfile, 'w'))

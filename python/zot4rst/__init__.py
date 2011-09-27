@@ -114,7 +114,8 @@ class ZoteroConnection(object):
 
     def lookup_key(self, key):
         if self.keymap.has_option('keymap', key):
-            return self.keymap.get('keymap', key)
+            # return only the first part, the real key - rest is comment
+            return re.match("^([0-9A-Z_]+)", self.keymap.get('keymap', key)).group(1)
         else:
             return None
 
