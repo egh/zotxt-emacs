@@ -7,7 +7,7 @@
 import docutils.core,docutils.nodes,sys,re
 from urlparse import urlparse
 
-import sourcecode
+import zot4rst
 
 marks="#=-_*^>%&|"
 lowerroman=['i','ii','iii','iv','v','vi','vii','viii','ix','x','xi']
@@ -314,12 +314,22 @@ def gen_rst(node, depth, in_line_block=False):
                 node.rst=""
 
         elif isinstance (node, docutils.nodes.footnote_reference):
+                sibs=node.parent.children
+                head=""
+                try:
+                        prevsib=sibs[sibs.index(node)-1]
+                        if prevsib.__class__==docutils.nodes.Text \
+                                    and (not(prevsib.astext()[-1].isspace())):
+                                head="\\ "
+                except:
+                        pass
+
                 if node.get("refid") and (node.get("auto")==1):
-                        node.rst="[#"+node.get('refid')+"]_"
+                        node.rst=head+"[#"+node.get('refid')+"]_"
                 elif node.get("auto")=="*":
-                        node.rst="[*]_"
+                        node.rst=head+"[*]_"
                 else:
-                        node.rst="["+node.astext()+"]_"
+                        node.rst=head+"["+node.astext()+"]_"
 
         elif isinstance (node, docutils.nodes.reference):
                 #FIXME: maybe de-anonymizing anonymous references is
@@ -525,11 +535,8 @@ def gen_rst(node, depth, in_line_block=False):
                         print node
                         sys.exit(1)
 
-        else:
-                print "Unkn. node: ", node.__class__
-                print node
-                #print node.transform
-                sys.exit(1)
+        elif isinstance(node, zot4rst.smallcaps):
+                node.rst=":smallcaps:`"+gather_rst(node,depth)+"`"+inlinemarkuptail(node)
 
         return node.rst
 
@@ -586,7 +593,6 @@ def inlinemarkuptail(node):
         except:
                 pass
         return tail
-
 
 def captable (text,top=True,capwith="-"):
         t=""
@@ -760,6 +766,5 @@ if __name__ == "__main__":
     input=open(sys.argv[1]).read()
     import docutils.core
     doc=docutils.core.publish_doctree(input)
+    print ".. role:: smallcaps\n"
     print (gen_rst(doc,0)+decoration).encode("utf-8")
-
-
