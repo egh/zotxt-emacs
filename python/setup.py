@@ -1,9 +1,8 @@
 #!/usr/bin/env python
-
-from setuptools import setup
+from distutils.core import setup
 
 setup(name             = 'zot4rst',
-      version          = '0.1',
+      version          = '0.1dev',
       description      = 'Zotero for reStructuredText',
       author           = 'Erik Hetzner',
       author_email     = 'egh@e6h.org',
@@ -19,5 +18,6 @@ setup(name             = 'zot4rst',
                           'bin/zrst2odt', 
                           'bin/zrst2pdf',
                           'bin/zrst2pseudoxml',
-                          'bin/zrst2rst']
+                          'bin/zrst2rst',
+                          'bin/zupdatekeymap']
       )
