@@ -50,7 +50,7 @@ function registerItemIds (ids) {
 function getCitationBlock (citation) {
     var results;
     try {
-	results = zotero.reStructuredCSL.appendCitationCluster(citation);
+	results = zotero.reStructuredCSL.appendCitationCluster(citation, true);
     } catch (e) {
 	zotero.debug("XXX  oops: "+e);
     }
