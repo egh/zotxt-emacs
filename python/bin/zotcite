@@ -1,0 +1,72 @@
+# -*- coding: utf-8 -*-
+import ConfigParser
+import json
+import os
+
+# Workaround for crashes seen with localename setting
+os.environ["LANG"] = "C.UTF-8"
+
+import string
+import sys
+
+import jsbridge
+from zot4rst.util import unquote
+
+CITATION_FORMAT_BASE = "http://www.zotero.org/styles/%s"
+
+# placeholder for global bridge to Zotero
+zotero_conn = None;
+
+class ZoteroConn(object):
+    def __init__(self, format, **kwargs):
+        # connect & setup
+        self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
+        self.back_channel.timeout = self.bridge.timeout = 60
+        self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
+
+from optparse import OptionParser
+opt_parser = OptionParser("usage: %prog [options] item ...")
+opt_parser.add_option("-s", "--style", 
+                      dest="style",
+                      default="chicago-author-date",
+                      help="citation style")
+opt_parser.add_option("-f", "--format",
+                      dest="format",
+                      type="choice",
+                      choices=["rtf", "html", "text"],
+                      help="format (rtf, html, text)")
+opt_parser.add_option("-b", "--biblio",
+                      action="store_true",
+                      dest="biblio",
+                      default=False,
+                      help="Print a bibliography, not a citation")
+
+(options, args) = opt_parser.parse_args()
+if (len(args) == 0):
+    opt_parser.error("Please supply some items!")
+
+if zotero_conn is None:
+    zotero_conn = ZoteroConn(CITATION_FORMAT_BASE%(options.style))
+
+zotero_conn.methods.instantiateCiteProc(CITATION_FORMAT_BASE%(options.style))
+
+itemids = [ int(zotero_conn.methods.getItemId(key)) for key in args ]
+
+zotero_conn.methods.registerItemIds(itemids)
+
+if options.biblio:
+    bibdata = unquote(json.loads(zotero_conn.methods.getBibliographyData()))
+    print "".join(bibdata[1])
+else:
+    from xciterst import CitationInfo
+    n = 1
+    for key in args:
+        citation = CitationInfo();
+        citation.id = int(zotero_conn.methods.getItemId(key))
+        #citation.prefix="This";
+        #citation.suffix="That";
+        res = zotero_conn.methods.getCitationBlock({ 'citationItems' : [citation],
+                                                     'properties'    : { 'index'    : n,
+                                                                         'noteIndex': n }})
+        n = n + 1
+        print unquote(res)
