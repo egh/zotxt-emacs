@@ -19,15 +19,16 @@ Installation
 ~~~~~~~~~~~~
 
 1. Install Zotero_.
-2. Install zot4rst (from the ``python`` directory::
+2. Install docutils from a `docutils snapshot`_ release.
+3. Install zot4rst (from the ``python`` directory::
 
      sudo python setup.py install
 
-3. Build the Firefox extension (from the ``extension`` directory::
+4. Build the Firefox extension (from the ``extension`` directory::
 
      sh build.sh
 
-4. Install the extension built (``zotero-for-restructured-text.xpi``)
+5. Install the extension built (``zotero-for-restructured-text.xpi``)
 
 Quickstart
 ~~~~~~~~~~
@@ -147,4 +148,4 @@ To update the link text to reflect changed metadata from Zotero_, use
 .. _`org-mode`: http://orgmode.org/
 .. _reStructuredText: http://docutils.sourceforge.net/rst.html
 .. _docutils: http://docutils.sourceforge.net/
-
+.. _`docutils snapshot`: http://docutils.sourceforge.net/docutils-snapshot.tgz
