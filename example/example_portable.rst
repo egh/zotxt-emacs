@@ -5,8 +5,8 @@ Shamelessly stolen from the pandoc example:
 http://johnmacfarlane.net/pandoc/demo/CITATIONS
 
 .. zotero-setup::
-   :keymap: example.keys
    :format: chicago-author-date
+   :biblio: example.csljson
 
 - :xcite:`@item1` says blah.
 
