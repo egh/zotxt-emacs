@@ -64,14 +64,18 @@ class ZoteroConnection(object):
         self.tracked_clusters = []
         self.registered_items = []
         self.key2id = {}
+        self.local_items = {}
 
     def set_format(self, format):
         self.methods.instantiateCiteProc(format)
 
     def get_item_id(self, key):
-        if not(self.key2id.has_key(key)):
-            self.key2id[key] = int(zot4rst.zotero_conn.methods.getItemId(key))
-        return self.key2id[key]
+        if self.local_items.has_key(key):
+            return "MY-%s"%(key)
+        else:            
+            if not(self.key2id.has_key(key)):
+                self.key2id[key] = int(zot4rst.zotero_conn.methods.getItemId(key))
+            return self.key2id[key]
 
     def load_keymap(self, path):
         self.keymap.read(os.path.relpath(path))
@@ -127,6 +131,18 @@ class ZoteroConnection(object):
         res = self.methods.getCitationBlock(citation)
         return html2rst(unquote(res))
 
+    def prefix_items(self, items):
+        prefixed = {}
+        for k in items.keys():
+            v = items[k]
+            prefixed["MY-%s"%(k)] = v
+            v['id'] = "MY-%s"%(v['id'])
+        return prefixed
+
+    def load_biblio(self, path):
+        self.local_items = json.load(open(path))
+        self.methods.loadItems(self.prefix_items(self.local_items));
+    
 class ZoteroSetupDirective(Directive):
     def __init__(self, *args, **kwargs):
         Directive.__init__(self, *args)
@@ -142,10 +158,13 @@ class ZoteroSetupDirective(Directive):
     optional_arguments = 0
     has_content = False
     option_spec = {'format' : directives.unchanged,
-                   'keymap': directives.unchanged }
+                   'keymap': directives.unchanged,
+                   'biblio' : directives.unchanged }
     def run(self):
         if self.options.has_key('keymap'):
             zotero_conn.load_keymap(self.options['keymap'])
+        if self.options.has_key('biblio'):
+            zotero_conn.load_biblio(self.options['biblio'])
         z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
         return []
 
@@ -203,13 +222,13 @@ def map_key(key):
     newkey = zot4rst.zotero_conn.lookup_key(key)
     if newkey is not None:
         return newkey
-    return key
+    else:
+        return key
 
 def handle_cite_cluster(parent, document, cite_cluster):
     for cite in cite_cluster:
         cite.key = map_key(cite.key)
         cite.id = zotero_conn.get_item_id(cite.key)
-
     zotero_conn.track_cluster(cite_cluster)
     if zotero_conn.in_text_style or \
             (type(parent) == nodes.footnote):

@@ -6,7 +6,7 @@ http://johnmacfarlane.net/pandoc/demo/CITATIONS
 
 .. zotero-setup::
    :format: chicago-author-date
-   :biblio: example.csljson
+   :biblio: example.json
 
 - :xcite:`@item1` says blah.
 

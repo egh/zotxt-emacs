@@ -1,7 +1,24 @@
 #!/usr/bin/python
 
 from pyzotero import zotero
-import ConfigParser, optparse, os, re, shutil, sys, unicodedata
+import ConfigParser, feedparser, json, optparse, os, re, shutil, sys, unicodedata
+
+def ib64_patched(self, attrsD, contentparams):
+    """Patch isBase64 to prevent Base64 encoding of JSON content"""
+    return False
+
+# Override feedparser's buggy isBase64 method until they fix it
+feedparser._FeedParserMixin._isBase64 = ib64_patched
+
+def backup_file(path):
+    if (os.path.exists(path)):
+        backupnum = 1
+        backupfile = "%s~%d"%(path, backupnum)
+        while (os.path.exists(backupfile)):
+            backupnum = backupnum + 1
+            backupfile = "%s~%d"%(path, backupnum)
+
+        shutil.copy2(path, backupfile)
 
 # turn unicode strings into ascii
 clean_re = re.compile(u'[^A-Za-z]+')
@@ -20,7 +37,6 @@ parser.add_option("-k", "--key", dest="key", metavar="KEY")
 if len(args) == 0:
     parser.error("Please supply a keymap file!")
 
-
 # set up existing keymap
 keymapfile = os.path.abspath(args[0])
 keymap = ConfigParser.SafeConfigParser()
@@ -36,18 +52,18 @@ if (not(os.path.exists(keymapfile)) and
     parser.error("When creating a new keymap file, you must supply a USERID and KEY")
 
 userid = options.userid or keymap.get('meta', 'userid')
-key    = options.key    or keymap.get('meta', 'key')
+apikey = options.key    or keymap.get('meta', 'key')
 keymap.set('meta', 'userid', userid)
-keymap.set('meta', 'key', key)
+keymap.set('meta', 'key', apikey)
 
 # keys we already know about, do not change the ezkey
 known_keys = {}
 for k, v in keymap.items('keymap'): 
     # use only the key itself
     zotkey = re.match(r"^([0-9A-Z_]+)", v).group(1)
-    known_keys[zotkey] = True
+    known_keys[zotkey] = k
 
-zot = zotero.Zotero(userid, key)
+zot = zotero.Zotero(userid, apikey)
     
 collid = None
 if keymap.has_option('meta', 'collectionid'):
@@ -86,16 +102,30 @@ while len(items) > 0:
                 extra = chr(ord(extra) + 1)
             ezkey = "%s%s"%(ezkey, extra)
         keymap.set('keymap', ezkey, "%s %s"%(key, title))
+        known_keys[key] = ezkey
+
     start = start + len(items)
     zot.add_parameters(start=start, limit=10)
     items = zot.collection_items(collid)
 
-if (os.path.exists(keymapfile)):
-    backupnum = 1
-    backupfile = "%s~%d"%(keymapfile, backupnum)
-    while (os.path.exists(backupfile)):
-        backupnum = backupnum + 1
-        backupfile = "%s~%d"%(keymapfile, backupnum)
-
-    shutil.copy2(keymapfile, backupfile)
+backup_file(keymapfile)
 keymap.write(open(keymapfile, 'w'))
+
+if (len(args) > 1):
+    ## write json file
+    jsonfile = os.path.abspath(args[1])
+    backup_file(jsonfile)
+
+    items = {}
+    for k, v in keymap.items('keymap'): 
+        # use only the key itself
+        zotkey = re.match(r"^([0-9A-Z_]+)", v).group(1)
+        url = "https://api.zotero.org/users/%s/items/%s?key=%s&content=csljson"%(userid, zotkey, apikey)
+        d = feedparser.parse(url)
+        jsond = json.loads(d['entries'][0]['content'][0]['value'])
+        ezkey = known_keys[jsond['id']]
+        jsond['id'] = ezkey
+        items[ezkey] = jsond
+    fd = open(jsonfile, 'w')
+    json.dump(items, fd, sort_keys=True, indent=4)
+    fd.close()
