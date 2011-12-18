@@ -113,7 +113,7 @@ class ZoteroConnection(object):
             # is just to set some off-the-shelf named style blocks in style.odt, and
             # apply them as more or less appropriate.
             #
-            bibdata = unquote(json.loads(self.methods.getBibliographyData()))
+            bibdata = unquote(json.loads(data))
             return html2rst("%s%s%s"%(bibdata[0]["bibstart"], "".join(bibdata[1]), bibdata[0]["bibend"]))
 
     def lookup_key(self, key):
@@ -121,7 +121,7 @@ class ZoteroConnection(object):
             # return only the first part, the real key - rest is comment
             return re.match("^([0-9A-Z_]+)", self.keymap.get('keymap', key)).group(1)
         else:
-            return None
+            return key
 
     def get_citation(self, cluster, note_index):
         self.register_items()
@@ -215,19 +215,14 @@ class ZoteroBibliographyTransform(Transform):
         newnode = zot4rst.zotero_conn.generate_rest_bibliography()
         self.startnode.replace_self(newnode)
 
-def random_label():
-    return "".join(random.choice(string.digits) for x in range(20))
+def handle_cite_cluster(inliner, cite_cluster):
+    def random_label():
+        return "".join(random.choice(string.digits) for x in range(20))
 
-def map_key(key):
-    newkey = zot4rst.zotero_conn.lookup_key(key)
-    if newkey is not None:
-        return newkey
-    else:
-        return key
-
-def handle_cite_cluster(parent, document, cite_cluster):
+    parent = inliner.parent
+    document = inliner.document
     for cite in cite_cluster:
-        cite.key = map_key(cite.key)
+        cite.key = zotero_conn.lookup_key(cite.key)
         cite.id = zotero_conn.get_item_id(cite.key)
     zotero_conn.track_cluster(cite_cluster)
     if zotero_conn.in_text_style or \
@@ -271,12 +266,12 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
 
     [first_cluster, second_cluster] = CiteParser().parse(text)
     # returns [citecluster, ...]
-    retval = []
+    nodes = []
     if first_cluster is not None:
-        retval.append(handle_cite_cluster(inliner.parent, inliner.document, first_cluster))
-        retval.append(nodes.Text(" ", rawsource=" "))
-    retval.append(handle_cite_cluster(inliner.parent, inliner.document, second_cluster))
-    return retval, []
+        nodes.append(handle_cite_cluster(inliner, first_cluster))
+        nodes.append(nodes.Text(" ", rawsource=" "))
+    nodes.append(handle_cite_cluster(inliner, second_cluster))
+    return nodes, []
 
 # setup zotero directives
 directives.register_directive('zotero-setup', ZoteroSetupDirective)
