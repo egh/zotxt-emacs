@@ -34,10 +34,6 @@ zotero_conn = None;
 # verbose flag
 verbose_flag = False
 
-def z4r_debug(what):
-    if verbose_flag == 1:
-        sys.stderr.write("%s\n"%(what))
-
 def check_zotero_conn():
     if not zot4rst.zotero_conn:
         ## A kludge, but makes a big noise about the extension syntax for clarity.
@@ -70,6 +66,9 @@ class ZoteroConnection(object):
         self.methods.instantiateCiteProc(format)
 
     def get_item_id(self, key):
+        """Returns the id of an item with a given key. Key will be
+        looked up in the local keymap before the id is looked up."""
+
         if self.local_items.has_key(key):
             return "MY-%s"%(key)
         else:            
@@ -165,7 +164,6 @@ class ZoteroSetupDirective(Directive):
             zotero_conn.load_keymap(self.options['keymap'])
         if self.options.has_key('biblio'):
             zotero_conn.load_biblio(self.options['biblio'])
-        z4r_debug("=== Zotero4reST: Setup run #1 (establish connection, spin up processor) ===")
         return []
 
 class ZoteroTransform(Transform):
@@ -200,7 +198,6 @@ class ZoteroBibliographyDirective(Directive):
     optional_arguments = 1
     has_content = False
     def run(self):
-        z4r_debug("\n--- Zotero4reST: Bibliography #1 (placeholder set) ---")
         pending = nodes.pending(ZoteroBibliographyTransform)
         pending.details.update(self.options)
         self.state_machine.document.note_pending(pending)
@@ -211,7 +208,6 @@ class ZoteroBibliographyTransform(Transform):
     default_priority = 700
 
     def apply(self):
-        z4r_debug("\n--- Zotero4reST: Bibliography #2 (inserting content) ---")
         newnode = zot4rst.zotero_conn.generate_rest_bibliography()
         self.startnode.replace_self(newnode)
 
@@ -262,6 +258,7 @@ def handle_cite_cluster(inliner, cite_cluster):
 
 def zot_cite_role(role, rawtext, text, lineno, inliner,
                   options={}, content=[]):
+    """Text role for citations."""
     check_zotero_conn()
 
     [first_cluster, second_cluster] = CiteParser().parse(text)
