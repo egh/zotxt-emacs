@@ -49,7 +49,7 @@ class ZoteroConnection(object):
         # connect & setup
         self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
         self.back_channel.timeout = self.bridge.timeout = 60
-        self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://csl/export.js')")
+        self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://citeproc/citeproc.js')")
         self.methods.instantiateCiteProc(format)
         self.in_text_style = self.methods.isInTextStyle()
 
@@ -263,12 +263,12 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
 
     [first_cluster, second_cluster] = CiteParser().parse(text)
     # returns [citecluster, ...]
-    nodes = []
+    nodeset = []
     if first_cluster is not None:
-        nodes.append(handle_cite_cluster(inliner, first_cluster))
-        nodes.append(nodes.Text(" ", rawsource=" "))
-    nodes.append(handle_cite_cluster(inliner, second_cluster))
-    return nodes, []
+        nodeset.append(handle_cite_cluster(inliner, first_cluster))
+        nodeset.append(nodes.Text(" ", rawsource=" "))
+    nodeset.append(handle_cite_cluster(inliner, second_cluster))
+    return nodeset, []
 
 # setup zotero directives
 directives.register_directive('zotero-setup', ZoteroSetupDirective)
