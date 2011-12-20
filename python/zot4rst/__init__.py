@@ -2,6 +2,7 @@
   Module
 """
 # -*- coding: utf-8 -*-
+import docutils
 import ConfigParser
 import itertools
 import jsbridge
@@ -14,7 +15,7 @@ import string
 import sys
 import zot4rst.jsonencoder
 
-from docutils import nodes
+
 from docutils.parsers.rst import Directive, directives, roles
 from docutils.transforms import TransformError, Transform
 from docutils.utils import ExtensionOptionError
@@ -202,10 +203,10 @@ class ZoteroCitationTransform(Transform):
         # get the footnote label
         footnote_node = self.startnode.parent.parent
         note_index = 0
-        if type(footnote_node) == nodes.footnote:
+        if type(footnote_node) == docutils.nodes.footnote:
             note_index = int(str(footnote_node.children[0].children[0]))
         zotero_conn.note_indexes[zotero_conn.get_index(cite_cluster)] = note_index
-        next_pending = nodes.pending(ZoteroCitationSecondTransform)
+        next_pending = docutils.nodes.pending(ZoteroCitationSecondTransform)
         next_pending.details['cite_cluster'] = cite_cluster
         self.document.note_pending(next_pending)
         self.startnode.replace_self(next_pending)
@@ -232,7 +233,7 @@ class ZoteroBibliographyDirective(Directive):
     has_content = False
 
     def run(self):
-        pending = nodes.pending(ZoteroBibliographyTransform)
+        pending = docutils.nodes.pending(ZoteroBibliographyTransform)
         pending.details.update(self.options)
         self.state_machine.document.note_pending(pending)
         return [pending]
@@ -255,9 +256,9 @@ def handle_cite_cluster(inliner, cite_cluster):
         cite.key = zotero_conn.lookup_key(cite.key)
     zotero_conn.track_cluster(cite_cluster)
     if zotero_conn.in_text_style or \
-            (type(parent) == nodes.footnote):
+            (type(parent) == docutils.nodes.footnote):
         # already in a footnote, or in-text style: just add a pending
-        pending = nodes.pending(ZoteroCitationTransform)
+        pending = docutils.nodes.pending(ZoteroCitationTransform)
         pending.details['cite_cluster'] = cite_cluster
         document.note_pending(pending)
         return pending
@@ -267,23 +268,23 @@ def handle_cite_cluster(inliner, cite_cluster):
 
         label = random_label()
 
-        refnode = nodes.footnote_reference('[%s]_' % label)
+        refnode = docutils.nodes.footnote_reference('[%s]_' % label)
         refnode['auto'] = 1
         refnode['refname'] = label
         document.note_footnote_ref(refnode)
         document.note_autofootnote_ref(refnode)
 
-        footnote = nodes.footnote("")
+        footnote = docutils.nodes.footnote("")
         footnote['auto'] = 1
         footnote['names'].append(label)
-        pending = nodes.pending(ZoteroCitationTransform)
+        pending = docutils.nodes.pending(ZoteroCitationTransform)
         pending.details['cite_cluster'] = cite_cluster
-        footnote += nodes.paragraph("", "", pending)
+        footnote += docutils.nodes.paragraph("", "", pending)
         document.note_pending(pending)
         document.note_autofootnote(footnote)
         where_to_add = parent
         while where_to_add is not None and \
-                not(isinstance(where_to_add, nodes.Structural)):
+                not(isinstance(where_to_add, docutils.nodes.Structural)):
             where_to_add = where_to_add.parent
         if where_to_add is None: where_to_add = document
         where_to_add += footnote
@@ -298,11 +299,11 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
     nodeset = []
     if first_cluster is not None:
         nodeset.append(handle_cite_cluster(inliner, first_cluster))
-        nodeset.append(nodes.Text(" ", rawsource=" "))
+        nodeset.append(docutils.nodes.Text(" ", rawsource=" "))
     nodeset.append(handle_cite_cluster(inliner, second_cluster))
     return nodeset, []
 
-class smallcaps(nodes.Inline, nodes.TextElement): pass
+class smallcaps(docutils.nodes.Inline, docutils.nodes.TextElement): pass
 
 # setup zotero directives, roles
 directives.register_directive('zotero-setup', ZoteroSetupDirective)
