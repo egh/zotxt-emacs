@@ -7,6 +7,7 @@ import json
 import os
 import random
 import re
+import socket
 import string
 import sys
 
@@ -46,9 +47,10 @@ def check_zotero_conn():
 
 class ZoteroConnection(object):
     def __init__(self, format, **kwargs):
+        socket.setdefaulttimeout(99999)
         # connect & setup
-        self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
-        self.back_channel.timeout = self.bridge.timeout = 60
+        self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242, 600)
+        self.back_channel.timeout = self.bridge.timeout = 9999999999
         self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://citeproc/citeproc.js')")
         self.methods.instantiateCiteProc(format)
         self.in_text_style = self.methods.isInTextStyle()
@@ -61,6 +63,8 @@ class ZoteroConnection(object):
         self.registered_items = []
         self.key2id = {}
         self.local_items = {}
+        self.note_indexes = []
+        self.citations = None
 
     def set_format(self, format):
         self.methods.instantiateCiteProc(format)
@@ -68,28 +72,37 @@ class ZoteroConnection(object):
     def get_item_id(self, key):
         """Returns the id of an item with a given key. Key will be
         looked up in the local keymap before the id is looked up."""
+        return self.get_item_id_batch([key])[0]
 
-        if self.local_items.has_key(key):
-            return "MY-%s"%(key)
-        else:            
-            if not(self.key2id.has_key(key)):
-                self.key2id[key] = int(zot4rst.zotero_conn.methods.getItemId(key))
-            return self.key2id[key]
+    def get_item_id_batch(self, keys):
+        to_lookup = []
+        for key in keys:
+            if self.local_items.has_key(key):
+                self.key2id[key] = "MY-%s"%(key)
+            else:
+                if not(self.key2id.has_key(key)):
+                    to_lookup.append(key)
+        if len(to_lookup) > 0:
+            ids = json.loads(self.methods.getItemIdBatch(to_lookup))
+            for n, new_id in enumerate(ids):
+                self.key2id[to_lookup[n]] = new_id
+        return [ self.key2id[key] for key in keys ]
 
     def load_keymap(self, path):
         self.keymap.read(os.path.relpath(path))
 
     def track_cluster(self, cluster):
         self.tracked_clusters.append(cluster)
+        self.note_indexes.append(None)
 
     def register_items(self):
         def flatten(listoflists):
             return chain.from_iterable(listoflists)
 
-        uniq_ids = set([ self.get_item_id(item.key)
-                         for item in flatten(self.tracked_clusters) ])
+        uniq_keys = set([ item.key for item in flatten(self.tracked_clusters) ])
+        uniq_ids = set(self.get_item_id_batch(list(uniq_keys)))
         if (uniq_ids != self.registered_items):
-            self.methods.registerItemIds(list(uniq_ids))
+            self.methods.updateItems(list(uniq_ids))
             self.registered_items = uniq_ids
 
     def get_index(self, cluster):
@@ -98,7 +111,7 @@ class ZoteroConnection(object):
     def generate_rest_bibliography(self):
         """Generate a bibliography of reST nodes."""
         self.register_items()
-        data = self.methods.getBibliographyData()
+        data = self.methods.makeBibliography()
         if not(data):
             return html2rst("")
         else:
@@ -122,13 +135,25 @@ class ZoteroConnection(object):
         else:
             return key
 
-    def get_citation(self, cluster, note_index):
-        self.register_items()
-        citation = { 'citationItems' : cluster,
-                     'properties'    : { 'index'    : zotero_conn.get_index(cluster),
-                                         'noteIndex': note_index } }
-        res = self.methods.getCitationBlock(citation)
-        return html2rst(unquote(res))
+    def cache_citations(self):
+        if (self.citations is None):
+            self.register_items()
+            citations = []
+            for cluster in self.tracked_clusters: 
+                index = self.get_index(cluster)
+                citations.append({ 'citationItems' : cluster,
+                                   'properties'    : { 'index'    : index,
+                                                       'noteIndex': self.note_indexes[index] } })
+            for cit in citations:
+                for c in cit['citationItems']:
+                    c.id = self.get_item_id(c.key)
+            raw = self.methods.appendCitationClusterBatch(citations)
+            citation_blocks_html = json.loads(raw)
+            self.citations = [ html2rst(unquote(block)) for block in citation_blocks_html ]
+            
+    def get_citation(self, cluster):
+        self.cache_citations()
+        return self.citations[self.get_index(cluster)]
 
     def prefix_items(self, items):
         prefixed = {}
@@ -140,7 +165,7 @@ class ZoteroConnection(object):
 
     def load_biblio(self, path):
         self.local_items = json.load(open(path))
-        self.methods.loadItems(self.prefix_items(self.local_items));
+        self.methods.registerLocalItems(self.prefix_items(self.local_items));
     
 class ZoteroSetupDirective(Directive):
     def __init__(self, *args, **kwargs):
@@ -185,7 +210,17 @@ class ZoteroTransform(Transform):
         note_index = 0
         if type(footnote_node) == nodes.footnote:
             note_index = int(str(footnote_node.children[0].children[0]))
-        newnode = zotero_conn.get_citation(cite_cluster, note_index)
+        zotero_conn.note_indexes[zotero_conn.get_index(cite_cluster)] = note_index
+        next_pending = nodes.pending(ZoteroSecondTransform)
+        next_pending.details['cite_cluster'] = cite_cluster
+        self.document.note_pending(next_pending)
+        self.startnode.replace_self(next_pending)
+
+class ZoteroSecondTransform(Transform):
+    default_priority = 650
+    def apply(self):
+        cite_cluster = self.startnode.details['cite_cluster']
+        newnode = zotero_conn.get_citation(cite_cluster)
         self.startnode.replace_self(newnode)
 
 class ZoteroBibliographyDirective(Directive):
@@ -219,7 +254,6 @@ def handle_cite_cluster(inliner, cite_cluster):
     document = inliner.document
     for cite in cite_cluster:
         cite.key = zotero_conn.lookup_key(cite.key)
-        cite.id = zotero_conn.get_item_id(cite.key)
     zotero_conn.track_cluster(cite_cluster)
     if zotero_conn.in_text_style or \
             (type(parent) == nodes.footnote):
