@@ -2,7 +2,7 @@
   Module
 """
 # -*- coding: utf-8 -*-
-import docutils
+import docutils, docutils.parsers.rst, docutils.transforms, docutils.utils
 import ConfigParser
 import itertools
 import jsbridge
@@ -14,11 +14,6 @@ import socket
 import string
 import sys
 import zot4rst.jsonencoder
-
-
-from docutils.parsers.rst import Directive, directives, roles
-from docutils.transforms import TransformError, Transform
-from docutils.utils import ExtensionOptionError
 
 from zot4rst.util import html2rst, unquote
 from xciterst.parser import CiteParser
@@ -39,7 +34,7 @@ def check_zotero_conn():
         sys.stderr.write("##  Must set zotero-setup:: directive before zotero:: directive is used.\n")
         sys.stderr.write("##\n")
         sys.stderr.write("#####\n")
-        raise ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
+        raise docutils.utils.ExtensionOptionError("must set zotero-setup:: directive before zotero:: directive is used.")
 
 class ZoteroConnection(object):
     def __init__(self, format, **kwargs):
@@ -162,9 +157,9 @@ class ZoteroConnection(object):
         self.local_items = json.load(open(path))
         self.methods.registerLocalItems(self.prefix_items(self.local_items));
     
-class ZoteroSetupDirective(Directive):
+class ZoteroSetupDirective(docutils.parsers.rst.Directive):
     def __init__(self, *args, **kwargs):
-        Directive.__init__(self, *args)
+        docutils.parsers.rst.Directive.__init__(self, *args)
         # This is necessary: connection hangs if created outside of an instantiated
         # directive class.
         if zot4rst.zotero_conn is None:
@@ -176,9 +171,9 @@ class ZoteroSetupDirective(Directive):
     required_arguments = 0
     optional_arguments = 0
     has_content = False
-    option_spec = {'format' : directives.unchanged,
-                   'keymap': directives.unchanged,
-                   'biblio' : directives.unchanged }
+    option_spec = {'format' : docutils.parsers.rst.directives.unchanged,
+                   'keymap': docutils.parsers.rst.directives.unchanged,
+                   'biblio' : docutils.parsers.rst.directives.unchanged }
     def run(self):
         if self.options.has_key('keymap'):
             zotero_conn.load_keymap(self.options['keymap'])
@@ -186,7 +181,7 @@ class ZoteroSetupDirective(Directive):
             zotero_conn.load_biblio(self.options['biblio'])
         return []
 
-class ZoteroCitationTransform(Transform):
+class ZoteroCitationTransform(docutils.transforms.Transform):
     default_priority = 650
     # Bridge hangs if output contains above-ASCII chars (I guess Telnet kicks into
     # binary mode in that case, leaving us to wait for a null string terminator)
@@ -211,7 +206,7 @@ class ZoteroCitationTransform(Transform):
         self.document.note_pending(next_pending)
         self.startnode.replace_self(next_pending)
 
-class ZoteroCitationSecondTransform(Transform):
+class ZoteroCitationSecondTransform(docutils.transforms.Transform):
     """Second pass transform for a Zotero citation. We use two passes
     because we want to generate all the citations in a batch, and we
     need to get the note indexes first."""
@@ -222,7 +217,7 @@ class ZoteroCitationSecondTransform(Transform):
         newnode = zotero_conn.get_citation(cite_cluster)
         self.startnode.replace_self(newnode)
 
-class ZoteroBibliographyDirective(Directive):
+class ZoteroBibliographyDirective(docutils.parsers.rst.Directive):
     """Directive for bibliographies."""
     ## This could be extended to support selection of
     ## included bibliography entries. The processor has
@@ -238,7 +233,7 @@ class ZoteroBibliographyDirective(Directive):
         self.state_machine.document.note_pending(pending)
         return [pending]
 
-class ZoteroBibliographyTransform(Transform):
+class ZoteroBibliographyTransform(docutils.transforms.Transform):
     """Transform which generates a bibliography. Wait for all items to
     be registered, then we generate a bibliography."""
     default_priority = 700
@@ -306,7 +301,7 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
 class smallcaps(docutils.nodes.Inline, docutils.nodes.TextElement): pass
 
 # setup zotero directives, roles
-directives.register_directive('zotero-setup', ZoteroSetupDirective)
-directives.register_directive('zotero-bibliography', ZoteroBibliographyDirective)
-roles.register_canonical_role('xcite', zot_cite_role)
-roles.register_local_role("smallcaps", smallcaps)
+docutils.parsers.rst.directives.register_directive('zotero-setup', ZoteroSetupDirective)
+docutils.parsers.rst.directives.register_directive('zotero-bibliography', ZoteroBibliographyDirective)
+docutils.parsers.rst.roles.register_canonical_role('xcite', zot_cite_role)
+docutils.parsers.rst.roles.register_local_role("smallcaps", smallcaps)
