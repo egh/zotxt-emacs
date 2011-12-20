@@ -3,6 +3,8 @@
 """
 # -*- coding: utf-8 -*-
 import ConfigParser
+import itertools
+import jsbridge
 import json
 import os
 import random
@@ -10,22 +12,15 @@ import re
 import socket
 import string
 import sys
-
-import jsbridge
+import zot4rst.jsonencoder
 
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives, roles
 from docutils.transforms import TransformError, Transform
 from docutils.utils import ExtensionOptionError
 
-from itertools import chain, dropwhile, islice, takewhile
-
-import zot4rst.jsonencoder
 from zot4rst.util import html2rst, unquote
 from xciterst.parser import CiteParser
-
-class smallcaps(nodes.Inline, nodes.TextElement): pass
-roles.register_local_role("smallcaps", smallcaps)
 
 DEFAULT_CITATION_FORMAT = "http://www.zotero.org/styles/chicago-author-date"
 
@@ -47,10 +42,9 @@ def check_zotero_conn():
 
 class ZoteroConnection(object):
     def __init__(self, format, **kwargs):
-        socket.setdefaulttimeout(99999)
         # connect & setup
-        self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242, 600)
-        self.back_channel.timeout = self.bridge.timeout = 9999999999
+        self.back_channel, self.bridge = jsbridge.wait_and_create_network("127.0.0.1", 24242)
+        self.back_channel.timeout = self.bridge.timeout = 60
         self.methods = jsbridge.JSObject(self.bridge, "Components.utils.import('resource://citeproc/citeproc.js')")
         self.methods.instantiateCiteProc(format)
         self.in_text_style = self.methods.isInTextStyle()
@@ -97,7 +91,7 @@ class ZoteroConnection(object):
 
     def register_items(self):
         def flatten(listoflists):
-            return chain.from_iterable(listoflists)
+            return itertools.chain.from_iterable(listoflists)
 
         uniq_keys = set([ item.key for item in flatten(self.tracked_clusters) ])
         uniq_ids = set(self.get_item_id_batch(list(uniq_keys)))
@@ -191,7 +185,7 @@ class ZoteroSetupDirective(Directive):
             zotero_conn.load_biblio(self.options['biblio'])
         return []
 
-class ZoteroTransform(Transform):
+class ZoteroCitationTransform(Transform):
     default_priority = 650
     # Bridge hangs if output contains above-ASCII chars (I guess Telnet kicks into
     # binary mode in that case, leaving us to wait for a null string terminator)
@@ -211,12 +205,16 @@ class ZoteroTransform(Transform):
         if type(footnote_node) == nodes.footnote:
             note_index = int(str(footnote_node.children[0].children[0]))
         zotero_conn.note_indexes[zotero_conn.get_index(cite_cluster)] = note_index
-        next_pending = nodes.pending(ZoteroSecondTransform)
+        next_pending = nodes.pending(ZoteroCitationSecondTransform)
         next_pending.details['cite_cluster'] = cite_cluster
         self.document.note_pending(next_pending)
         self.startnode.replace_self(next_pending)
 
-class ZoteroSecondTransform(Transform):
+class ZoteroCitationSecondTransform(Transform):
+    """Second pass transform for a Zotero citation. We use two passes
+    because we want to generate all the citations in a batch, and we
+    need to get the note indexes first."""
+
     default_priority = 650
     def apply(self):
         cite_cluster = self.startnode.details['cite_cluster']
@@ -224,7 +222,7 @@ class ZoteroSecondTransform(Transform):
         self.startnode.replace_self(newnode)
 
 class ZoteroBibliographyDirective(Directive):
-
+    """Directive for bibliographies."""
     ## This could be extended to support selection of
     ## included bibliography entries. The processor has
     ## an API to support this, although it hasn't yet been
@@ -232,6 +230,7 @@ class ZoteroBibliographyDirective(Directive):
     required_arguments = 0
     optional_arguments = 1
     has_content = False
+
     def run(self):
         pending = nodes.pending(ZoteroBibliographyTransform)
         pending.details.update(self.options)
@@ -239,12 +238,12 @@ class ZoteroBibliographyDirective(Directive):
         return [pending]
 
 class ZoteroBibliographyTransform(Transform):
-
+    """Transform which generates a bibliography. Wait for all items to
+    be registered, then we generate a bibliography."""
     default_priority = 700
 
     def apply(self):
-        newnode = zot4rst.zotero_conn.generate_rest_bibliography()
-        self.startnode.replace_self(newnode)
+        self.startnode.replace_self(zotero_conn.generate_rest_bibliography())
 
 def handle_cite_cluster(inliner, cite_cluster):
     def random_label():
@@ -258,7 +257,7 @@ def handle_cite_cluster(inliner, cite_cluster):
     if zotero_conn.in_text_style or \
             (type(parent) == nodes.footnote):
         # already in a footnote, or in-text style: just add a pending
-        pending = nodes.pending(ZoteroTransform)
+        pending = nodes.pending(ZoteroCitationTransform)
         pending.details['cite_cluster'] = cite_cluster
         document.note_pending(pending)
         return pending
@@ -277,7 +276,7 @@ def handle_cite_cluster(inliner, cite_cluster):
         footnote = nodes.footnote("")
         footnote['auto'] = 1
         footnote['names'].append(label)
-        pending = nodes.pending(ZoteroTransform)
+        pending = nodes.pending(ZoteroCitationTransform)
         pending.details['cite_cluster'] = cite_cluster
         footnote += nodes.paragraph("", "", pending)
         document.note_pending(pending)
@@ -296,7 +295,6 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
     check_zotero_conn()
 
     [first_cluster, second_cluster] = CiteParser().parse(text)
-    # returns [citecluster, ...]
     nodeset = []
     if first_cluster is not None:
         nodeset.append(handle_cite_cluster(inliner, first_cluster))
@@ -304,7 +302,10 @@ def zot_cite_role(role, rawtext, text, lineno, inliner,
     nodeset.append(handle_cite_cluster(inliner, second_cluster))
     return nodeset, []
 
-# setup zotero directives
+class smallcaps(nodes.Inline, nodes.TextElement): pass
+
+# setup zotero directives, roles
 directives.register_directive('zotero-setup', ZoteroSetupDirective)
 directives.register_directive('zotero-bibliography', ZoteroBibliographyDirective)
 roles.register_canonical_role('xcite', zot_cite_role)
+roles.register_local_role("smallcaps", smallcaps)
