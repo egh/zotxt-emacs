@@ -182,7 +182,10 @@ class ZoteroSetupDirective(docutils.parsers.rst.Directive):
         return []
 
 class ZoteroCitationTransform(docutils.transforms.Transform):
-    default_priority = 650
+    #
+    # Before Footnote
+    #
+    default_priority = 538
     # Bridge hangs if output contains above-ASCII chars (I guess Telnet kicks into
     # binary mode in that case, leaving us to wait for a null string terminator)
     # JS strings are in Unicode, and the JS escaping mechanism for Unicode with
@@ -195,24 +198,40 @@ class ZoteroCitationTransform(docutils.transforms.Transform):
 
     def apply(self):
         cite_cluster = self.startnode.details['cite_cluster']
-        # get the footnote label
-        footnote_node = self.startnode.parent.parent
-        note_index = 0
-        if type(footnote_node) == docutils.nodes.footnote:
-            note_index = int(str(footnote_node.children[0].children[0]))
-        zotero_conn.note_indexes[zotero_conn.get_index(cite_cluster)] = note_index
+                
         next_pending = docutils.nodes.pending(ZoteroCitationSecondTransform)
         next_pending.details['cite_cluster'] = cite_cluster
         self.document.note_pending(next_pending)
         self.startnode.replace_self(next_pending)
 
+        # get the footnote label
+	footnote_node = self.startnode.parent.parent
+        where_to_add = footnote_node.parent
+        while where_to_add is not None and \
+                not(isinstance(where_to_add, docutils.nodes.Structural)):
+            where_to_add = where_to_add.parent
+        if where_to_add is None: where_to_add = document
+        where_to_add += footnote_node
+        where_to_add.setup_child(footnote_node)
+        #footnote_node.parent.remove(footnote_node)
+        print where_to_add
+        
+
 class ZoteroCitationSecondTransform(docutils.transforms.Transform):
     """Second pass transform for a Zotero citation. We use two passes
     because we want to generate all the citations in a batch, and we
     need to get the note indexes first."""
-
+    #
+    # After Footnote (to pick up the note number)
+    #
     default_priority = 650
     def apply(self):
+        cite_cluster = self.startnode.details['cite_cluster']
+        footnote_node = self.startnode.parent.parent
+        note_index = 0
+        if type(footnote_node) == docutils.nodes.footnote:
+            note_index = int(str(footnote_node.children[0].children[0]))
+        zotero_conn.note_indexes[zotero_conn.get_index(cite_cluster)] = note_index
         cite_cluster = self.startnode.details['cite_cluster']
         newnode = zotero_conn.get_citation(cite_cluster)
         self.startnode.replace_self(newnode)
@@ -263,26 +282,30 @@ def handle_cite_cluster(inliner, cite_cluster):
 
         label = random_label()
 
+	# Set up reference
         refnode = docutils.nodes.footnote_reference('[%s]_' % label)
         refnode['auto'] = 1
         refnode['refname'] = label
         document.note_footnote_ref(refnode)
         document.note_autofootnote_ref(refnode)
 
+	# Set up footnote
         footnote = docutils.nodes.footnote("")
         footnote['auto'] = 1
         footnote['names'].append(label)
         pending = docutils.nodes.pending(ZoteroCitationTransform)
         pending.details['cite_cluster'] = cite_cluster
-        footnote += docutils.nodes.paragraph("", "", pending)
+        paragraph = docutils.nodes.paragraph()
+        paragraph.setup_child(pending)
+        paragraph += pending
+        footnote.setup_child(paragraph)
+        footnote += paragraph
         document.note_pending(pending)
         document.note_autofootnote(footnote)
-        where_to_add = parent
-        while where_to_add is not None and \
-                not(isinstance(where_to_add, docutils.nodes.Structural)):
-            where_to_add = where_to_add.parent
-        if where_to_add is None: where_to_add = document
-        where_to_add += footnote
+        
+        # Temporarily stash footnote as a child of the refnode
+        refnode.setup_child(footnote)
+        refnode += footnote
         return refnode
 
 def zot_cite_role(role, rawtext, text, lineno, inliner,
