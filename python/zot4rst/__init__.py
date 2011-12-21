@@ -206,6 +206,8 @@ class ZoteroCitationTransform(docutils.transforms.Transform):
 
         # get the footnote label
 	footnote_node = self.startnode.parent.parent
+        ref_node = footnote_node.parent
+        ref_node.remove(footnote_node)
         where_to_add = footnote_node.parent
         while where_to_add is not None and \
                 not(isinstance(where_to_add, docutils.nodes.Structural)):
@@ -213,8 +215,6 @@ class ZoteroCitationTransform(docutils.transforms.Transform):
         if where_to_add is None: where_to_add = document
         where_to_add += footnote_node
         where_to_add.setup_child(footnote_node)
-        #footnote_node.parent.remove(footnote_node)
-        print where_to_add
         
 
 class ZoteroCitationSecondTransform(docutils.transforms.Transform):
