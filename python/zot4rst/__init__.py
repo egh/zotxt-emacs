@@ -259,7 +259,8 @@ class ZoteroFootnoteSort(docutils.transforms.Transform):
 		zotero_conn.tracked_clusters.append(cluster)
 	        zotero_conn.note_indexes.append(i)
 	    else:
-                pass
+		zotero_conn.tracked_clusters.append([])
+	        zotero_conn.note_indexes.append(i)
 
         empty = docutils.nodes.generated()
         self.startnode.replace_self(empty)
