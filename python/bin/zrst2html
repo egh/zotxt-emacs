@@ -40,5 +40,5 @@ class WriterWithSmallCaps(Writer):
 writer = WriterWithSmallCaps()
 reader = Reader()
 output = publish_cmdline_to_binary(reader=reader, writer=writer,
-    description=description)
+   settings_overrides={'footnotes_at_end': 1}, description=description)
 print ""
