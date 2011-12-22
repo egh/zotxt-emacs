@@ -133,7 +133,7 @@ class ZoteroConnection(object):
                 index = self.get_index(cluster)
                 citations.append({ 'citationItems' : cluster,
                                    'properties'    : { 'index'    : index,
-                                                       'noteIndex': self.note_indexes[index] } })
+                                                       'noteIndex': self.note_indexes[index]} })
             for cit in citations:
                 for c in cit['citationItems']:
                     c.id = self.get_item_id(c.key)
@@ -246,6 +246,20 @@ class ZoteroFootnoteSort(docutils.transforms.Transform):
             oldnum = ref.children[0]
             newnum = docutils.nodes.Text(str(i + 1))
             ref.replace(oldnum, newnum)
+
+        # Reset note numbers
+        zotero_conn.citations = None
+        zotero_conn.tracked_clusters = []
+        zotero_conn.note_indexes = []
+        for i in range(0, len(self.document.autofootnotes), 1):
+            footnote = self.document.autofootnotes[i]
+            content = footnote.children[1].children[0]
+            if isinstance(footnote.children[1].children[0], docutils.nodes.pending):
+            	cluster = content.details['cite_cluster']
+		zotero_conn.tracked_clusters.append(cluster)
+	        zotero_conn.note_indexes.append(i)
+	    else:
+                pass
 
         empty = docutils.nodes.generated()
         self.startnode.replace_self(empty)
