@@ -179,7 +179,76 @@ class ZoteroSetupDirective(docutils.parsers.rst.Directive):
             zotero_conn.load_keymap(self.options['keymap'])
         if self.options.has_key('biblio'):
             zotero_conn.load_biblio(self.options['biblio'])
-        return []
+        pending = docutils.nodes.pending(ZoteroFootnoteSort)
+        self.state_machine.document.note_pending(pending)
+        return [pending]
+
+class ZoteroFootnoteSort(docutils.transforms.Transform):
+    default_priority = 641
+
+    def apply(self):
+        # Footnotes inserted via xcite are numbered before
+        # normal reST auto-numbered footnotes, so we renumber
+        # them as a single set, according to order of appearance
+        # of the refs in text, taking care to keep the
+        # ref and footnote numbering lined up.
+        footnotemap = {}
+        footnotes = self.document.autofootnotes
+        for i in range(0, len(self.document.autofootnotes), 1):
+            footnotemap[footnotes[i]['ids'][0]] = i
+        newlist = []
+        refs = self.document.autofootnote_refs
+        for i in range(0, len(refs), 1):
+            newlist.append(footnotes[footnotemap[refs[i]['refid']]])
+        self.document.autofootnotes = newlist
+
+        # The lists are now congruent and in document order, but the
+        # footnote numbers are screwed up, and the notes themselves
+        # may be in the wrong position.
+
+        # Reassign numbers to the footnotes
+        for i in range(0, len(self.document.autofootnotes), 1):
+            label = self.document.autofootnotes[i].children[0]
+            oldnum = label.children[0]
+            newnum = docutils.nodes.Text(str(i + 1))
+            label.replace(oldnum, newnum)
+
+        # Move the footnotes themselves to a more sensible location
+        # get the footnote label
+        for i in range(0, len(self.document.autofootnotes), 1):
+            footnote_node = self.document.autofootnotes[i]
+            ref_node = self.document.autofootnote_refs[i]
+
+            footnote_node.parent.remove(footnote_node)
+
+            footnotes_at_end = getattr(self.document.settings, 'footnotes_at_end', 0)
+
+            if footnotes_at_end:
+                self.document += footnote_node
+                self.document.setup_child(footnote_node)
+            else:
+                ref_parent = ref_node.parent
+                ref_and_note = docutils.nodes.generated()
+                ref_and_note += ref_node
+                ref_and_note.setup_child(ref_node)
+                ref_and_note += footnote_node
+                ref_and_note.setup_child(footnote_node)
+                ref_parent.replace(ref_node, ref_and_note)
+                ref_parent.setup_child(ref_and_note)
+
+        # Reassign numbers to the refs
+        # (we don't touch these until now because they may contain
+        # trojan footnotes)
+        for i in range(0, len(self.document.autofootnote_refs), 1):
+            ref = self.document.autofootnote_refs[i]
+            if len(ref.children) == 2:
+                ref.children.pop(0)
+            oldnum = ref.children[0]
+            newnum = docutils.nodes.Text(str(i + 1))
+            ref.replace(oldnum, newnum)
+
+        empty = docutils.nodes.generated()
+        self.startnode.replace_self(empty)
 
 class ZoteroCitationTransform(docutils.transforms.Transform):
     #
@@ -203,29 +272,6 @@ class ZoteroCitationTransform(docutils.transforms.Transform):
         next_pending.details['cite_cluster'] = cite_cluster
         self.document.note_pending(next_pending)
 	self.startnode.replace_self(next_pending)
-
-        # get the footnote label
-	footnote_node = self.startnode.parent.parent
-        ref_node = footnote_node.parent
-        ref_node.remove(footnote_node)
-        ref_parent = ref_node.parent
-        tight_footnotes = getattr(self.document.settings, 'tight_footnotes', 0)
-        if tight_footnotes:
-            ref_and_note = docutils.nodes.generated()
-            ref_and_note += ref_node
-            ref_and_note.setup_child(ref_node)
-            ref_and_note += footnote_node
-            ref_and_note.setup_child(footnote_node)
-            ref_parent.replace(ref_node, ref_and_note)
-            ref_parent.setup_child(ref_and_note)
-        else:
-            where_to_add = footnote_node.parent
-            while where_to_add is not None and \
-            	not(isinstance(where_to_add, docutils.nodes.Structural)):
-                where_to_add = where_to_add.parent
-            if where_to_add is None: where_to_add = self.document
-            where_to_add += footnote_node
-            where_to_add.setup_child(footnote_node)
 
 class ZoteroCitationSecondTransform(docutils.transforms.Transform):
     """Second pass transform for a Zotero citation. We use two passes
