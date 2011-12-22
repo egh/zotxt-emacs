@@ -198,24 +198,34 @@ class ZoteroCitationTransform(docutils.transforms.Transform):
 
     def apply(self):
         cite_cluster = self.startnode.details['cite_cluster']
-                
+        
         next_pending = docutils.nodes.pending(ZoteroCitationSecondTransform)
         next_pending.details['cite_cluster'] = cite_cluster
         self.document.note_pending(next_pending)
-        self.startnode.replace_self(next_pending)
+	self.startnode.replace_self(next_pending)
 
         # get the footnote label
 	footnote_node = self.startnode.parent.parent
         ref_node = footnote_node.parent
         ref_node.remove(footnote_node)
-        where_to_add = footnote_node.parent
-        while where_to_add is not None and \
-                not(isinstance(where_to_add, docutils.nodes.Structural)):
-            where_to_add = where_to_add.parent
-        if where_to_add is None: where_to_add = document
-        where_to_add += footnote_node
-        where_to_add.setup_child(footnote_node)
-        
+        ref_parent = ref_node.parent
+        tight_footnotes = getattr(self.document.settings, 'tight_footnotes', 0)
+        if tight_footnotes:
+            ref_and_note = docutils.nodes.generated()
+            ref_and_note += ref_node
+            ref_and_note.setup_child(ref_node)
+            ref_and_note += footnote_node
+            ref_and_note.setup_child(footnote_node)
+            ref_parent.replace(ref_node, ref_and_note)
+            ref_parent.setup_child(ref_and_note)
+        else:
+            where_to_add = footnote_node.parent
+            while where_to_add is not None and \
+            	not(isinstance(where_to_add, docutils.nodes.Structural)):
+                where_to_add = where_to_add.parent
+            if where_to_add is None: where_to_add = self.document
+            where_to_add += footnote_node
+            where_to_add.setup_child(footnote_node)
 
 class ZoteroCitationSecondTransform(docutils.transforms.Transform):
     """Second pass transform for a Zotero citation. We use two passes
