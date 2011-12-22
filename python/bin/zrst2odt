@@ -1,0 +1,64 @@
+#!/usr/bin/python
+
+# $Id: rst2odt.py 5839 2009-01-07 19:09:28Z dkuhlman $
+# Author: Dave Kuhlman <dkuhlman@rexx.com>
+# Copyright: This module has been placed in the public domain.
+
+"""
+A front end to the Docutils Publisher, producing OpenOffice documents.
+"""
+
+import sys
+try:
+    import locale
+    locale.setlocale(locale.LC_ALL, '')
+except:
+    pass
+
+from docutils import nodes
+from docutils.core import publish_cmdline_to_binary, default_description
+from docutils.writers import Writer as WriterBase
+from docutils.writers.odf_odt import Writer, Reader, ODFTranslator, SubElement
+
+import zot4rst
+
+description = ('Generates OpenDocument/OpenOffice/ODF documents from '
+               'standalone reStructuredText sources.  ' + default_description)
+
+class ODFTranslatorWithSmallCaps(ODFTranslator):
+
+    def visit_smallcaps(self, node):
+        el = SubElement(self.current_element, 'text:span',
+            attrib={'text:style-name': 'rststyle-small-caps'})
+        self.set_current_element(el)
+
+    def depart_smallcaps(self, node):
+        self.set_to_parent()
+
+    def generate_labeled_block(self, node, label):
+        # Ignore the label, just set text centered in bold
+        el = self.append_p('centeredtextbody')
+        if len(node.children) and isinstance(node.children[0], nodes.Text):
+            el1 = SubElement(el, 'text:span',
+                     attrib={'text:style-name': self.rststyle('strong')})
+            el1.text = node.children[0].astext()
+            node.children.pop(0)
+        return el
+
+    def generate_labeled_line(self, node, label):
+        el = self.append_p('centeredtextbody')
+        el1 = SubElement(el, 'text:span',
+            attrib={'text:style-name': self.rststyle('strong')})
+        el1.text = node.astext()
+        return el
+
+class WriterWithSmallCaps(Writer):
+    def __init__(self):
+        WriterBase.__init__(self)
+        self.translator_class = ODFTranslatorWithSmallCaps
+
+writer = WriterWithSmallCaps()
+reader = Reader()
+output = publish_cmdline_to_binary(reader=reader, writer=writer,
+    description=description)
+
