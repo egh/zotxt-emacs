@@ -1,33 +1,9 @@
 ===========================
 Zotero for reStructuredText
 ===========================
+
 -----------------
 Things left to do
 -----------------
 
-* In-text styles should be auto-detected, with any footnotes
-  that consist entirely of zotero:: directives moved into the
-  main text, and their footnotes quashed. Priority of the
-  citation rendering passes might need to be adjusted, to
-  catch notes in the correct state for this.
-
-* rst2pdf doesn't work. As touchups will often be needed
-  anyway, maybe rst2odf -> odf -> print to PDF is an acceptable
-  processing chain?
-
-* EasyInstall should maybe be hooked up, to get zotero.py,
-  the processing scripts and the modified styles.odt (for
-  small-caps support) onto the user's system with a minimum
-  of fuss.
-
-* Maybe the variant rst2xxx scripts should be given separate
-  names, like zrst2xxx?
-
-* With a bit more work (later) it should be possible to
-  embed the JSON for cited items in a dump of the original
-  source document, in a ReST comment block. We could then
-  provide an option to process with the embedded data. There
-  would be some details to work out (esp. where citeproc-js 
-  would reside in that case), but it would give us a portable
-  copy of the document, which would be very handy in
-  production.
+* ...
