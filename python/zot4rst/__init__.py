@@ -133,7 +133,7 @@ class ZoteroConnection(object):
                 index = self.get_index(cluster)
                 citations.append({ 'citationItems' : cluster,
                                    'properties'    : { 'index'    : index,
-                                                       'noteIndex': self.note_indexes[index]} })
+                                                       'noteIndex': self.note_indexes[index] + 1} })
             for cit in citations:
                 for c in cit['citationItems']:
                     c.id = self.get_item_id(c.key)
