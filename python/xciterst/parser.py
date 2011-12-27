@@ -80,7 +80,7 @@ class CiteParser(object):
         return cites
 
     def parse(self, what):
-        WORD_CHAR_RE = r'[\w.,</>-]'
+        WORD_CHAR_RE = r'[\w.,\'\"\(\)</>-]'
         
         greedyToken = Regex(r'%s+'%(WORD_CHAR_RE))
         wordWithDigits = Regex(r'%s*[0-9]%s*'%(WORD_CHAR_RE, WORD_CHAR_RE))

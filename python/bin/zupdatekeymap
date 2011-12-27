@@ -24,6 +24,7 @@ def backup_file(path):
 clean_re = re.compile(u'[^A-Za-z]+')
 def clean(s):
     # strip unicode accents
+    s = unicode(s)
     s2 = ''.join((c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn'))
     return clean_re.sub('', s2)
 
@@ -85,10 +86,21 @@ while len(items) > 0:
         if known_keys.has_key(key): continue
 
         date = "XXXX"
-        md = re.match(r'([0-9]{4})', item['date'])
+            
+        if item.has_key('date'):
+           date_key = 'date'
+        else:
+           date_key = 'dateDecided'
+        
+        md = re.match(r'([0-9]{4})', item[date_key])
         if md is not None: date = md.group(1)
 
-        title = clean(item['title'])
+        if item.has_key('title'):
+            title_key = 'title'
+        else:
+            title_key = 'caseName'
+
+        title = clean(item[title_key])
 
         creator = "Unknown"
         if item.has_key('creators') and len(item['creators']) > 0:
