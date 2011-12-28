@@ -13,6 +13,10 @@ class ZoteroJSONEncoder(jsbridge.network.JSObjectEncoder):
             if obj.suppress_author: retval['suppress-author'] = obj.suppress_author
             if obj.author_only: retval['author-only'] = obj.author_only
             return retval
+        elif isinstance(obj, CitationCluster):
+            return { 'citationItems': obj.citations,
+                     'properties'   : { 'index'     : obj.index,
+                                        'noteIndex' : obj.note_index } }
         else: return json.JSONEncoder.default(self, obj)
 
 jsbridge.network.encoder = ZoteroJSONEncoder()
