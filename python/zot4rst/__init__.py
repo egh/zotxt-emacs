@@ -23,9 +23,6 @@ DEFAULT_CITATION_FORMAT = "http://www.zotero.org/styles/chicago-author-date"
 # placeholder for global bridge to Zotero
 zotero_conn = None;
 
-# verbose flag
-verbose_flag = False
-
 def check_zotero_conn():
     if not zot4rst.zotero_conn:
         ## A kludge, but makes a big noise about the extension syntax for clarity.
@@ -166,7 +163,6 @@ class ZoteroSetupDirective(docutils.parsers.rst.Directive):
             zot4rst.zotero_conn = ZoteroConnection(self.options.get('format', DEFAULT_CITATION_FORMAT))
         else:
             zot4rst.zotero_conn.set_format(self.options.get('format', DEFAULT_CITATION_FORMAT))
-        zot4rst.verbose_flag = self.state_machine.reporter.report_level
 
     required_arguments = 0
     optional_arguments = 0
