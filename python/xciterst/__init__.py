@@ -11,7 +11,20 @@ class CitationInfo(object):
         self.suffix = kwargs.get('suffix', None)
         self.author_only = kwargs.get('author_only', False)
         self.id = None
+    
+    def __str__(self):
+        return "%s %s(%s) %s"%(self.prefix, self.key, self.locator, self.suffix)
 
+    def __eq__(self, other):
+        return ((self.key == other.key) and
+                (self.label == other.label) and
+                (self.locator == other.locator) and
+                (self.suppress_author == other.suppress_author) and
+                (self.prefix == other.prefix) and
+                (self.suffix == other.suffix) and
+                (self.author_only == other.author_only) and
+                (self.id == other.id))
+                
 class CitationCluster(object):
     """Class to hold a cluster of citations, with information about
     them suitable for submission to citeproc."""
