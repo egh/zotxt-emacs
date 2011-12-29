@@ -1,5 +1,6 @@
+import re
 import sys
-from pyparsing import Group, OneOrMore, Optional, Regex, Word, ZeroOrMore
+from pyparsing import Group, OneOrMore, Optional, Regex, White, Word, ZeroOrMore
 from xciterst import CitationInfo
 
 class CiteParser(object):
@@ -95,12 +96,22 @@ class CiteParser(object):
 
         text = strongText | emText | greedyToken
 
-        locator = OneOrMore(wordWithDigits) ^ (Optional(greedyToken) + OneOrMore(wordWithDigits))
-        locator.setParseAction(lambda s,l,t: CiteParser.Locator(" ".join(t)))
+        locator = (Optional(',') + OneOrMore(wordWithDigits)) ^ (Optional(',') + Optional(greedyToken) + OneOrMore(wordWithDigits))
+
+        def locator_parse_action(s, l, t):
+            raw = " ".join(t)
+            # strip leading comma
+            return CiteParser.Locator(re.sub('^,\s+', '', raw))
+        locator.setParseAction(locator_parse_action)
+
         citeKey = Optional('-') + '@' + Regex(r'[\w-]+')
         citeKey.setParseAction(lambda s,l,t: CiteParser.CiteKey(t))
+
+        # suffix comes after a cite
         suffix = OneOrMore(text)
         suffix.setParseAction(lambda s,l,t: CiteParser.Suffix(" ".join(t)))
+
+        # prefix comes before a cite
         prefix = OneOrMore(text)
         prefix.setParseAction(lambda s,l,t: CiteParser.Prefix(" ".join(t)))
 

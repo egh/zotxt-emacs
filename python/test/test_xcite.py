@@ -89,7 +89,7 @@ class TestXciteParserp(unittest2.TestCase):
 
     # XXX BROKEN
     # [*see* @item1 p. **32**]
-    #def test_parse_9(self):
+    # def test_parse_9(self):
     #    [first_cluster, second_cluster] = CiteParser().parse("[*see* @item1 p. **32**]")
     #    self.assertEqual(first_cluster, None)
     #    self.assertEqual(second_cluster,
@@ -131,6 +131,14 @@ class TestXciteParserp(unittest2.TestCase):
                          [CitationInfo(key="item2",
                                        suppress_author=True,
                                        locator="p. 44")])
+
+    # [@item1, p. 30]
+    def test_parse_14(self):
+        [first_cluster, second_cluster] = CiteParser().parse("[@item1, p. 30]")
+        self.assertEqual(first_cluster, None)
+        self.assertEqual(second_cluster,
+                         [CitationInfo(key="item1",
+                                       locator="p. 30")])
 
 if __name__ == '__main__':
     unittest2.main()
