@@ -33,3 +33,8 @@ class CitationCluster(object):
         self.citations = citations
         self.note_index = 0
         self.index = 0
+
+    def __eq__(self, other):
+        return ((self.citations == other.citations) and
+                (self.note_index == other.note_index) and
+                (self.index == other.index))
