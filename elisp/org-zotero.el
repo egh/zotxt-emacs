@@ -47,4 +47,23 @@ org-mode document."
   "Zotero"
   org-zotero-mode-map)
 
+(defun org-zotero-find-reference-create (id)
+  (widen)
+  (goto-char (point-min))
+  (if (not (re-search-forward (format "^\\* \\[\\[zotero://select//%s\\]" id) nil t))
+      (progn
+        (goto-char (point-max))
+        (insert (format
+                 "\n* [[zotero://select//%s][%s]]\n"
+                 id id))
+        (forward-line -1)
+        (org-zotero-update-reference-link-at-point)
+        (forward-line 1))))
+
+(defun org-zotero-insert-note (id note)
+  (org-zotero-find-reference-create id)
+  (org-forward-same-level 1)
+  (insert note)
+  (insert "\n"))
+
 (provide 'org-zotero)
