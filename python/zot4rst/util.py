@@ -99,12 +99,12 @@ def unquote(source):
     elif type(source) == dict:
         return dict([ (k, unquote(v)) for (k,v) in source.items()])
     elif (type(source) == unicode) or (type(source) == str) or (type(source) == jsbridge.jsobjects.JSString):
-        res = urllib.unquote(source)
+        res = urllib.unquote(unicode(source))
         if '%u' in res:
             reslst = re.split(r'(%u[A-Za-z0-9]{4})', res)
             for i in range(1, len(reslst), 2):
                 reslst[i] = reslst[i].replace('%u','\\u').decode('unicode_escape')
-            res = ''.join(reslst)
+            res = u"".join(reslst)
         return res
     else:
         return source
