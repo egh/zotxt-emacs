@@ -137,10 +137,17 @@ class ZoteroConnection(object):
             for cit in citations:
                 for c in cit['citationItems']:
                     c.id = self.get_item_id(c.key)
-            raw = self.methods.appendCitationClusterBatch(citations)
-            citation_blocks_html = json.loads(raw)
-            self.citations = [ html2rst(unquote(block)) for block in citation_blocks_html ]
-            
+            # Implement mini-batching. This is a hack to avoid what
+            # appears to be a string size limitation of some sort in
+            # jsbridge or code that it calls.
+            batchlen = 15
+            offset = 0
+            self.citations = []
+            while len(self.citations) < len(citations):
+                raw = self.methods.appendCitationClusterBatch(citations[offset:offset+batchlen])
+                citation_blocks_html = json.loads(raw)
+                self.citations.extend([ html2rst(unquote(block)) for block in citation_blocks_html ])
+                offset = offset + batchlen
     def get_citation(self, cluster):
         self.cache_citations()
         return self.citations[self.get_index(cluster)]
