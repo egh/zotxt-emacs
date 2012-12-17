@@ -3,8 +3,7 @@
 =========================================
 
 ``zot4rst`` (zotero reStructuredText tools have been moved to
-`http://bitbucket.org/egh/zot4rst`. This repository now contains
-only some tools for emacs.
+`zot4rst`_. This repository now contains only some tools for emacs.
 
 Emacs integration
 -----------------
@@ -40,4 +39,4 @@ To update the link text to reflect changed metadata from Zotero_, use
 .. _mozrepl: https://github.com/bard/mozrepl/wiki
 .. _emacs: http://www.gnu.org/software/emacs/
 .. _`org-mode`: http://orgmode.org/
-
+.. _`zot4rst`: http://bitbucket.org/egh/zot4rst
