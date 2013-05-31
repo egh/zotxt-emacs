@@ -1,9 +1,0 @@
-* zotero-plain example org-mode document
-
-** [[zotero://select//0_46SVHHG4][Cohen, D. J. “Zotero: Social and Semantic Computing for Historical Scholarship.” Perspectives 27 (2009).]]
-
-...
-
-** [[zotero://select//0_3A8VMRJ5][Cohen, D. J. “Creating Scholarly Tools and Resources for the Digital Ecosystem: Building Connections in the Zotero Project.” First Monday 13, no. 8 (2008).]]
-
-...
