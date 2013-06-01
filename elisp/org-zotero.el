@@ -19,7 +19,7 @@
   (let ((ids (zotero-get-selected-item-ids)))
     (mapc (lambda (id)
             (insert (format
-                     "[[zotero://select//%s][%s]]\n"
+                     "[[zotero://select/items/%s][%s]]\n"
                      id id))
             (org-zotero-update-reference-link-at-point)
             (forward-line 1))
