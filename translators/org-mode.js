@@ -4,15 +4,15 @@
     "label":"org-mode",
     "creator":"Erik Hetzner",
     "target":"html",
-    "minVersion":"1.0.0b4.r1",
+    "minVersion":"3.0.0",
     "maxVersion":"",
     "priority":200,
     "inRepository":false,
     "lastUpdated":"2010-11-27 18:50:15",
+    "displayOptions": {
+        "exportCharset": "UTF-8";
+    }
 }
-
-Zotero.configure("dataMode", "block");
-Zotero.addOption("exportCharset", "UTF-8");
 
 function doExport() {
     var citekeys = new Object();
