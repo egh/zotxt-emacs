@@ -35,6 +35,14 @@ zotero link with descriptive link text.
 To update the link text to reflect changed metadata from Zotero_, use
 ``C-c z u`` over the link.
 
+Following links
+---------------
+
+To ensure that ``zotero:`` links are followed by xdg-open, the default
+browser called by emacs, you may need to run the following command::
+  
+  xdg-mime default firefox.desktop x-scheme-handler/zotero
+
 .. _Zotero: http://www.zotero.org/
 .. _mozrepl: https://github.com/bard/mozrepl/wiki
 .. _emacs: http://www.gnu.org/software/emacs/
