@@ -24,22 +24,27 @@ with a @ to be recognized, but this will *not* be returned."
 point, or nil."
   (save-excursion
     (let ((key (zotero-easykey-at-point)))
-      (if key
-          (let* ((raw-url (format "http://localhost:23119/zotxt/items?format=key&easykey=%s" key))
-                 (url (url-encode-url raw-url)))
-            (message raw-url)
+      (if (null key)
+          nil
+        (let* ((raw-url (format "http://localhost:23119/zotxt/items?format=key&easykey=%s" key))
+               (url (url-encode-url raw-url))
+               (buff (url-retrieve-synchronously url)))
+          (set-buffer buff)
+          (url-http-parse-response)
+          (if (not (eq url-http-response-status 200))
+              nil
             (with-temp-buffer
-              (url-insert (url-retrieve-synchronously url))
+              (url-insert buff)
               (beginning-of-buffer)
-              (elt (json-read) 0)))
-        nil))))
+              (elt (json-read) 0))))))))
 
 (defun zotero-easykey-select-item-at-point ()
   "Select the item referred to by the easykey at point in Zotero."
   (interactive)
   (let ((item-id (zotero-easykey-get-item-id-at-point)))
     (if item-id
-        (browse-url (format "zotero://select/items/%s" item-id)))))
+        (browse-url (format "zotero://select/items/%s" item-id))
+      (error "No item found!"))))
 
 (define-minor-mode zotero-easykey-mode
   "Toggle zotero-easykey-mode.
