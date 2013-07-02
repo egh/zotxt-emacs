@@ -81,8 +81,10 @@ Null prefix argument turns off the mode.
 
 This is a minor mode for managing your citations with Zotero in a
 org-mode document."  
-  nil
-  "Zotero"
-  zotero-easykey-mode-map)
+  :init-value nil
+  :lighter "Zotero"
+  :keymap zotero-easykey-mode-map
+  (if zotero-easykey-mode
+      (add-to-list 'completion-at-point-functions 'zotero-easykey-complete-at-point)))
 
 (provide 'zotero-easykey)
