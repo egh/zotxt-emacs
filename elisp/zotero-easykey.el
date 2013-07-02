@@ -1,21 +1,27 @@
 (require 'zotero)
 
 (defvar zotero-easykey-regex
-  "@\\([[:alnum:]]+\\)")
+  "@\\([[:alnum:]:]+\\)")
 
 (defvar zotero-easykey-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map [(control c) (z) (o)] 'zotero-easykey-select-item-at-point)
     map))
 
+(defun zotero-easykey-at-point-match ()
+  (save-excursion
+    ;; always back up one
+    (backward-char)
+    (while (and (not (looking-at zotero-easykey-regex))
+                (looking-at "[[:alnum:]:]"))
+      (backward-char))
+    (looking-at zotero-easykey-regex)))
+
 (defun zotero-easykey-at-point ()
   "Return the value of the easykey at point. Easykey must start
 with a @ to be recognized, but this will *not* be returned."
   (save-excursion
-    (while (and (not (looking-at zotero-easykey-regex))
-                (looking-at "[[:alnum:]]"))
-      (backward-char))
-    (if (looking-at zotero-easykey-regex)
+    (if (zotero-easykey-at-point-match)
         (match-string 1)
       nil)))
 
