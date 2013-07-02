@@ -38,6 +38,20 @@ with a @ to be recognized, but this will *not* be returned."
           (beginning-of-buffer)
           (json-read))))))
   
+(defun zotero-easykey-complete-at-point ()
+  (save-excursion
+    (if (not (zotero-easykey-at-point-match))
+        nil
+      (let ((start (match-beginning 0))
+            (end (match-end 0))
+            (key (match-string 1)))
+        (let* ((url (format "http://localhost:23119/zotxt/complete?easykey=%s" key))
+               (response (zotero-easykey-url-retrieve url)))
+          (if (null response)
+              nil
+            (let ((completions (mapcar (lambda (k) (format "@%s" k)) response)))
+              (list start end completions))))))))
+
 (defun zotero-easykey-get-item-id-at-point ()
   "Return the Zotero ID of the item referred to by the easykey at
 point, or nil."
