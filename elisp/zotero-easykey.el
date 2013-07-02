@@ -85,6 +85,7 @@ org-mode document."
   :lighter "Zotero"
   :keymap zotero-easykey-mode-map
   (if zotero-easykey-mode
-      (add-to-list 'completion-at-point-functions 'zotero-easykey-complete-at-point)))
+      (add-to-list 'completion-at-point-functions 'zotero-easykey-complete-at-point)
+    (setq-local completion-at-point-functions (remove 'zotero-easykey-complete-at-point completion-at-point-functions))))
 
 (provide 'zotero-easykey)
