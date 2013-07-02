@@ -19,6 +19,19 @@ with a @ to be recognized, but this will *not* be returned."
         (match-string 1)
       nil)))
 
+(defun zotero-easykey-url-retrieve (raw-url)
+  (save-excursion
+    (let* ((url (url-encode-url raw-url))
+           (buff (url-retrieve-synchronously url)))
+      (set-buffer buff)
+      (url-http-parse-response)
+      (if (not (eq 200 url-http-response-status))
+          nil
+        (with-temp-buffer
+          (url-insert buff)
+          (beginning-of-buffer)
+          (json-read))))))
+  
 (defun zotero-easykey-get-item-id-at-point ()
   "Return the Zotero ID of the item referred to by the easykey at
 point, or nil."
@@ -26,17 +39,11 @@ point, or nil."
     (let ((key (zotero-easykey-at-point)))
       (if (null key)
           nil
-        (let* ((raw-url (format "http://localhost:23119/zotxt/items?format=key&easykey=%s" key))
-               (url (url-encode-url raw-url))
-               (buff (url-retrieve-synchronously url)))
-          (set-buffer buff)
-          (url-http-parse-response)
-          (if (not (eq url-http-response-status 200))
+        (let* ((url (format "http://localhost:23119/zotxt/items?format=key&easykey=%s" key))
+               (response (zotero-easykey-url-retrieve url)))
+          (if (null response)
               nil
-            (with-temp-buffer
-              (url-insert buff)
-              (beginning-of-buffer)
-              (elt (json-read) 0))))))))
+            (elt response 0)))))))
 
 (defun zotero-easykey-select-item-at-point ()
   "Select the item referred to by the easykey at point in Zotero."
