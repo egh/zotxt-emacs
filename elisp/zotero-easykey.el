@@ -16,7 +16,7 @@
         (while (and (not (looking-at zotero-easykey-regex))
                     (looking-at "[[:alnum:]:]"))
           (backward-char))
-        (looking-at zotero-easykey-regex)))
+        (looking-at zotero-easykey-regex))))
 
 (defun zotero-easykey-at-point ()
   "Return the value of the easykey at point. Easykey must start
