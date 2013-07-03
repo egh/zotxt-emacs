@@ -27,23 +27,14 @@
     retval))
 
 (defun zotero-generate-bib-entry-from-id (item-id &optional style bib-format)
-  (let ((url (url-encode-url (format "http://localhost:23119/zotxt/items?key=%s&format=bibliography&style=%s"
-                                     item-id (or style zotero-default-bibliography-style)))))
-    (save-excursion
-      (with-temp-buffer
-        (url-insert (url-retrieve-synchronously url))
-        (beginning-of-buffer)
-        (let* ((data (json-read))
-               (first (elt data 0))
-               (text (cdr (assq 'text first))))
-          (zotero-clean-bib-entry text))))))
+  (let* ((url (format "http://localhost:23119/zotxt/items?key=%s&format=bibliography&style=%s"
+                      item-id (or style zotero-default-bibliography-style)))
+         (results (zotero-url-retrieve url))
+         (first (elt results 0))
+         (text (cdr (assq 'text first))))
+    (zotero-clean-bib-entry text)))
 
 (defun zotero-get-selected-item-ids ()
-  (let ((url (url-encode-url "http://localhost:23119/zotxt/items?selected=selected&format=key")))
-    (save-excursion
-      (with-temp-buffer
-        (url-insert (url-retrieve-synchronously url))
-        (beginning-of-buffer)
-        (json-read)))))
+  (zotero-url-retrieve "http://localhost:23119/zotxt/items?selected=selected&format=key"))
 
 (provide 'zotero)
