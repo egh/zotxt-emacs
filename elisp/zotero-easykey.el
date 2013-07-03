@@ -9,13 +9,14 @@
     map))
 
 (defun zotero-easykey-at-point-match ()
-  (save-excursion
-    ;; always back up one
-    (backward-char)
-    (while (and (not (looking-at zotero-easykey-regex))
-                (looking-at "[[:alnum:]:]"))
-      (backward-char))
-    (looking-at zotero-easykey-regex)))
+  (if (not (looking-at zotero-easykey-regex))
+      (save-excursion
+        ;; always try to back up one char
+        (backward-char)
+        (while (and (not (looking-at zotero-easykey-regex))
+                    (looking-at "[[:alnum:]:]"))
+          (backward-char))
+        (looking-at zotero-easykey-regex)))
 
 (defun zotero-easykey-at-point ()
   "Return the value of the easykey at point. Easykey must start
