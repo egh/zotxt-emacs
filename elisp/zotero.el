@@ -4,6 +4,19 @@
   "http://www.zotero.org/styles/chicago-note-bibliography"
   "Default bibliography style to use.")
 
+(defun zotero-url-retrieve (raw-url)
+  (save-excursion
+    (let* ((url (url-encode-url raw-url))
+           (buff (url-retrieve-synchronously url)))
+      (set-buffer buff)
+      (url-http-parse-response)
+      (if (not (eq 200 url-http-response-status))
+          nil
+        (with-temp-buffer
+          (url-insert buff)
+          (beginning-of-buffer)
+          (json-read))))))
+
 (defun zotero-clean-bib-entry (entry)
   "Clean up a bibliography entry as returned by Zotero."
   (let ((retval entry))

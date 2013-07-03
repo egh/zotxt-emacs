@@ -25,19 +25,6 @@ with a @ to be recognized, but this will *not* be returned."
     (if (zotero-easykey-at-point-match)
         (match-string 1)
       nil)))
-
-(defun zotero-easykey-url-retrieve (raw-url)
-  (save-excursion
-    (let* ((url (url-encode-url raw-url))
-           (buff (url-retrieve-synchronously url)))
-      (set-buffer buff)
-      (url-http-parse-response)
-      (if (not (eq 200 url-http-response-status))
-          nil
-        (with-temp-buffer
-          (url-insert buff)
-          (beginning-of-buffer)
-          (json-read))))))
   
 (defun zotero-easykey-complete-at-point ()
   (save-excursion
@@ -47,7 +34,7 @@ with a @ to be recognized, but this will *not* be returned."
             (end (match-end 0))
             (key (match-string 1)))
         (let* ((url (format "http://localhost:23119/zotxt/complete?easykey=%s" key))
-               (response (zotero-easykey-url-retrieve url)))
+               (response (zotero-url-retrieve url)))
           (if (null response)
               nil
             (let ((completions (mapcar (lambda (k) (format "@%s" k)) response)))
@@ -61,7 +48,7 @@ point, or nil."
       (if (null key)
           nil
         (let* ((url (format "http://localhost:23119/zotxt/items?format=key&easykey=%s" key))
-               (response (zotero-easykey-url-retrieve url)))
+               (response (zotero-url-retrieve url)))
           (if (null response)
               nil
             (elt response 0)))))))
