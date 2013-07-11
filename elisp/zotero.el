@@ -1,3 +1,4 @@
+(require 'url-util)
 (require 'url-handlers)
 
 (defvar zotero-default-bibliography-style
