@@ -1,5 +1,6 @@
 (require 'url-util)
 (require 'url-handlers)
+(require 'json)
 
 (defvar zotero-default-bibliography-style
   "http://www.zotero.org/styles/chicago-note-bibliography"
