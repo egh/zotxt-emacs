@@ -6,18 +6,31 @@
   "http://www.zotero.org/styles/chicago-note-bibliography"
   "Default bibliography style to use.")
 
+(defun zotero-url-get-body-as-string ()
+  (with-temp-buffer
+    (url-insert buff)
+    (buffer-string)))
+
 (defun zotero-url-retrieve (raw-url)
   (save-excursion
     (let* ((url (url-encode-url raw-url))
            (buff (url-retrieve-synchronously url)))
       (set-buffer buff)
       (url-http-parse-response)
-      (if (not (eq 200 url-http-response-status))
-          nil
-        (with-temp-buffer
-          (url-insert buff)
-          (beginning-of-buffer)
-          (json-read))))))
+      (cond ((eq 400 url-http-response-status)
+             (error "Client error from server with message: %s" 
+                    (zotero-url-get-body-as-string)))
+            ((eq 500 url-http-response-status)
+             (error "Server error from server with message: %s"
+                    (zotero-url-get-body-as-string)))
+            ((eq 200 url-http-response-status)
+             (with-temp-buffer
+               (url-insert buff)
+               (beginning-of-buffer)
+               (json-read)))
+            (t
+             (error "Unexpected response from server: %d" 
+                    url-http-response-status))))))
 
 (defun zotero-clean-bib-entry (entry)
   "Clean up a bibliography entry as returned by Zotero."
