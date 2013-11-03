@@ -8,10 +8,11 @@
         (re-search-backward "\\[\\["))
     (re-search-forward "\\([A-Z0-9_]+\\)\\]\\[")
     (let* ((item-id (match-string 1))
-           (start (point)))
+           (start (point))
+           (text (zotero-generate-bib-entry-from-id item-id)))
       (re-search-forward "\\]\\]\\|$")
       (delete-region start (point))
-      (insert (zotero-generate-bib-entry-from-id item-id))
+      (insert text)
       (insert "]]"))))
 
 (defun org-zotero-insert-reference-link ()
