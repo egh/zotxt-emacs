@@ -16,6 +16,8 @@
     (let* ((url (url-encode-url raw-url))
            (buff (url-retrieve-synchronously url)))
       (set-buffer buff)
+      (if (not url-http-end-of-headers)
+          (error "Did not receive data from %s" url))
       (url-http-parse-response)
       (cond ((eq 400 url-http-response-status)
              (error "Client error from server with message: %s" 
