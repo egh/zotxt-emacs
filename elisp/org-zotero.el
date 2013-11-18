@@ -15,6 +15,22 @@
       (insert text)
       (insert "]]"))))
 
+(defun org-zotero-update-all-reference-links ()
+  "Update all zotero references in a document."
+  (interactive)
+  (save-excursion
+    (goto-char (point-min))
+    (let ((next-link (org-element-link-successor)))
+      (while (not (null next-link))
+        (goto-char (cdr next-link))
+        (let* ((parse (org-element-link-parser))
+               (path (org-element-property :raw-link parse))
+               (end (org-element-property :end parse)))
+          (if (string-match "^zotero" path)
+              (org-zotero-update-reference-link-at-point))
+          (goto-char end))
+        (setq next-link (org-element-link-successor))))))
+
 (defun org-zotero-insert-reference-link ()
   (interactive)
   (let ((ids (zotero-get-selected-item-ids)))
