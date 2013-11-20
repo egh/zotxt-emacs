@@ -1,4 +1,3 @@
-(require 'url-util)
 (require 'url-handlers)
 (require 'json)
 
@@ -11,10 +10,9 @@
     (url-insert buff)
     (buffer-string)))
 
-(defun zotero-url-retrieve (raw-url)
+(defun zotero-url-retrieve (url)
   (save-excursion
-    (let* ((url (url-encode-url raw-url))
-           (buff (url-retrieve-synchronously url)))
+    (let ((buff (url-retrieve-synchronously url)))
       (set-buffer buff)
       (if (not url-http-end-of-headers)
           (error "Did not receive data from %s" url))
@@ -45,7 +43,8 @@
 
 (defun zotero-generate-bib-entry-from-id (item-id &optional style bib-format)
   (let* ((url (format "http://localhost:23119/zotxt/items?key=%s&format=bibliography&style=%s"
-                      item-id (or style zotero-default-bibliography-style)))
+                      (url-hexify-string item-id)
+                      (url-hexify-string (or style zotero-default-bibliography-style))))
          (results (zotero-url-retrieve url))
          (first (elt results 0))
          (text (cdr (assq 'text first))))
