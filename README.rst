@@ -1,8 +1,8 @@
-=========
- zotmacs
-=========
+=============
+ zotxt-emacs
+=============
 
-Note: zotero-plain has been split into two parts: zotmacs (this
+Note: zotero-plain has been split into two parts: zotxt-emacs (this
 repository) for working with org, and ``zot4rst`` (zotero
 reStructuredText tools), which been moved to `zot4rst`_.
 
@@ -15,7 +15,7 @@ on the zotxt_ Zotero extension.
 
 To install, add the following to your ``.emacs`` file::
 
-  (add-to-list 'load-path "/path/to/zotmacs/elisp/")
+  (add-to-list 'load-path "/path/to/zotxt-emacs/elisp/")
   (autoload 'org-zotero-mode "org-zotero" "" t)
 
 zotero + org-mode
