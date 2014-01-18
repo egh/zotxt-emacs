@@ -53,6 +53,16 @@ point, or nil."
               nil
             (elt response 0)))))))
 
+(defun zotxt-easykey-get-item-easykey (key)
+  (zotxt-url-retrieve
+   (format "http://localhost:23119/zotxt/items?key=%s&format=easykey" key)))
+
+(defun zotxt-easykey-insert ()
+  "Prompt for a search string and insert an easy key."
+  (interactive)
+  (let ((key (zotxt-select)))
+    (insert (format "@%s" (elt (zotxt-easykey-get-item-easykey key) 0)))))
+
 (defun zotxt-easykey-select-item-at-point ()
   "Select the item referred to by the easykey at point in Zotero."
   (interactive)
