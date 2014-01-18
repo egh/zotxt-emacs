@@ -41,6 +41,27 @@ browser called by emacs, you may need to run the following command::
   
   xdg-mime default firefox.desktop x-scheme-handler/zotero
 
+zotxt EasyKey integration
+-------------------------
+
+zotxt supports a feature known as “easy keys” for integration with
+zotero and pandoc or zot4rst. These keys look like ``@doe:2014title``
+where Doe is the author’s last name, 2014 is the publication year, and
+title is the first word of the title (excluding “stop words”, such as
+“the” or “a”). The provided ``zotxt-easykey-mode`` supports completion
+of these easykeys in a buffer using the command
+``completion-at-point``. (This function is not bound in org-mode, but
+I replace the binding to ``pcomplete`` using::
+
+  ;; prefer completion-at-point to pcomplete
+  (define-key org-mode-map (kbd "C-M-i") 'completion-at-point)
+
+Now, the user can ``@doe`` and then ``C-M-i``. If the only matching
+easy key is ``@doe:2014title`` this will be completed. If there are
+multiple matches, the user will be presented with a buffer containing
+possible completions.
+ 
+
 .. _Zotero: http://www.zotero.org/
 .. _emacs: http://www.gnu.org/software/emacs/
 .. _`org-mode`: http://orgmode.org/
