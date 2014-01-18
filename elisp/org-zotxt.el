@@ -1,7 +1,7 @@
 (require 'org)
-(require 'zotero)
+(require 'zotxt)
 
-(defun org-zotero-update-reference-link-at-point ()
+(defun org-zotxt-update-reference-link-at-point ()
   (interactive)
   (save-excursion
     (if (not (looking-at "\\[\\["))
@@ -9,13 +9,13 @@
     (re-search-forward "\\([A-Z0-9_]+\\)\\]\\[")
     (let* ((item-id (match-string 1))
            (start (point))
-           (text (zotero-generate-bib-entry-from-id item-id)))
+           (text (zotxt-generate-bib-entry-from-id item-id)))
       (re-search-forward "\\]\\]\\|$")
       (delete-region start (point))
       (insert text)
       (insert "]]"))))
 
-(defun org-zotero-update-all-reference-links ()
+(defun org-zotxt-update-all-reference-links ()
   "Update all zotero references in a document."
   (interactive)
   (save-excursion
@@ -27,18 +27,18 @@
                (path (org-element-property :raw-link parse))
                (end (org-element-property :end parse)))
           (if (string-match "^zotero" path)
-              (org-zotero-update-reference-link-at-point))
+              (org-zotxt-update-reference-link-at-point))
           (goto-char end))
         (setq next-link (org-element-link-successor))))))
 
-(defun org-zotero-insert-reference-link ()
+(defun org-zotxt-insert-reference-link ()
   (interactive)
-  (let ((ids (zotero-get-selected-item-ids)))
+  (let ((ids (zotxt-get-selected-item-ids)))
     (mapc (lambda (id)
             (insert (format
                      "[[zotero://select/items/%s][%s]]\n"
                      id id))
-            (org-zotero-update-reference-link-at-point)
+            (org-zotxt-update-reference-link-at-point)
             (forward-line 1))
           ids)))
 
@@ -46,14 +46,14 @@
                    (lambda (rest)
                      (browse-url (format "zotero:%s" rest))))
 
-(defvar org-zotero-mode-map
+(defvar org-zotxt-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(control c) (z) (i)] 'org-zotero-insert-reference-link)
-    (define-key map [(control c) (z) (u)] 'org-zotero-update-reference-link-at-point)
+    (define-key map [(control c) (z) (i)] 'org-zotxt-insert-reference-link)
+    (define-key map [(control c) (z) (u)] 'org-zotxt-update-reference-link-at-point)
     map))
 
-(define-minor-mode org-zotero-mode
-  "Toggle org-zotero-mode.
+(define-minor-mode org-zotxt-mode
+  "Toggle org-zotxt-mode.
 With no argument, this command toggles the mode.
 Non-null prefix argument turns on the mode.
 Null prefix argument turns off the mode.
@@ -61,10 +61,10 @@ Null prefix argument turns off the mode.
 This is a minor mode for managing your citations with Zotero in a
 org-mode document."  
   nil
-  "Zotero"
-  org-zotero-mode-map)
+  "Zotxt"
+  org-zotxt-mode-map)
 
-(defun org-zotero-find-reference-create (id)
+(defun org-zotxt-find-reference-create (id)
   (widen)
   (goto-char (point-min))
   (if (not (re-search-forward (format "^\\* \\[\\[zotero://select//%s\\]" id) nil t))
@@ -74,13 +74,13 @@ org-mode document."
                  "\n* [[zotero://select//%s][%s]]\n"
                  id id))
         (forward-line -1)
-        (org-zotero-update-reference-link-at-point)
+        (org-zotxt-update-reference-link-at-point)
         (forward-line 1))))
 
-(defun org-zotero-insert-note (id note)
-  (org-zotero-find-reference-create id)
+(defun org-zotxt-insert-note (id note)
+  (org-zotxt-find-reference-create id)
   (org-forward-same-level 1)
   (insert note)
   (insert "\n"))
 
-(provide 'org-zotero)
+(provide 'org-zotxt)
