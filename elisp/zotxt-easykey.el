@@ -60,7 +60,7 @@ point, or nil."
 (defun zotxt-easykey-insert ()
   "Prompt for a search string and insert an easy key."
   (interactive)
-  (let ((key (zotxt-select)))
+  (let ((key (cdr (zotxt-select))))
     (insert (format "@%s" (elt (zotxt-easykey-get-item-easykey key) 0)))))
 
 (defun zotxt-easykey-select-item-at-point ()

@@ -60,13 +60,13 @@
 
 (defun zotxt-select ()
   "Prompt a user for a search string, then ask the user to select
-an item from the citation. Returns item key."
+an item from the citation. Returns (citation . key)."
   (let* ((search-string (read-from-minibuffer "Zotero quicksearch query: "))
          (results (mapcar (lambda (e) 
                             (cons (cdr (assq 'text e)) 
                                   (cdr (assq 'key e))))
                           (zotxt-search search-string "bibliography")))
          (item (completing-read "Select item: " results)))
-    (cdr (assoc-string item results))))
+    (assoc-string item results)))
 
 (provide 'zotxt)
