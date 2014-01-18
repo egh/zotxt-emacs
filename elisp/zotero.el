@@ -53,4 +53,20 @@
 (defun zotero-get-selected-item-ids ()
   (zotero-url-retrieve "http://localhost:23119/zotxt/items?selected=selected&format=key"))
 
+(defun zotero-search (q format)
+  (zotero-url-retrieve (format "http://localhost:23119/zotxt/search?q=%s&format=%s" 
+                               (url-hexify-string q)
+                               format)))
+
+(defun zotero-select ()
+  "Prompt a user for a search string, then ask the user to select
+an item from the citation. Returns item key."
+  (let* ((search-string (read-from-minibuffer "Zotero quicksearch query: "))
+         (results (mapcar (lambda (e) 
+                            (cons (cdr (assq 'text e)) 
+                                  (cdr (assq 'key e))))
+                          (zotero-search search-string "bibliography")))
+         (item (completing-read "Select item: " results)))
+    item))
+
 (provide 'zotero)
