@@ -67,6 +67,6 @@ an item from the citation. Returns item key."
                                   (cdr (assq 'key e))))
                           (zotxt-search search-string "bibliography")))
          (item (completing-read "Select item: " results)))
-    item))
+    (cdr (assoc-string item results))))
 
 (provide 'zotxt)
