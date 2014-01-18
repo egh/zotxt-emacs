@@ -77,10 +77,10 @@ With no argument, this command toggles the mode.
 Non-null prefix argument turns on the mode.
 Null prefix argument turns off the mode.
 
-This is a minor mode for managing your citations with Zotero in a
-org-mode document."  
+This is a minor mode for managing your easykey citations,
+including completion."
   :init-value nil
-  :lighter "Zotxt"
+  :lighter "Zotxt Easykey"
   :keymap zotxt-easykey-mode-map
   (if zotxt-easykey-mode
       (add-to-list 'completion-at-point-functions 'zotxt-easykey-complete-at-point)
