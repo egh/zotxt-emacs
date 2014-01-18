@@ -31,7 +31,7 @@
           (goto-char end))
         (setq next-link (org-element-link-successor))))))
 
-(defun org-zotxt-insert-reference-link ()
+(defun org-zotxt-insert-selected-reference-link ()
   (interactive)
   (let ((ids (zotxt-get-selected-item-ids)))
     (mapc (lambda (id)
@@ -42,13 +42,20 @@
             (forward-line 1))
           ids)))
 
+(defun org-zotxt-insert-reference-link ()
+  (interactive)
+  (let ((item (zotxt-select)))
+    (insert (format
+             "[[zotero://select/items/%s][%s]]\n" (cdr item) (car item)))))
+
 (org-add-link-type "zotero"
                    (lambda (rest)
                      (browse-url (format "zotero:%s" rest))))
 
 (defvar org-zotxt-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(control c) (z) (i)] 'org-zotxt-insert-reference-link)
+    (define-key map [(control c) (z) (i)] 'org-zotxt-insert-selected-reference-link-)
+    (define-key map [(control c) (z) (c)] 'org-zotxt-insert-reference-link)
     (define-key map [(control c) (z) (u)] 'org-zotxt-update-reference-link-at-point)
     map))
 
