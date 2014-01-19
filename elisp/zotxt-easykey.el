@@ -9,7 +9,7 @@
     map))
 
 (defun zotxt-easykey-at-point-match ()
-  (if (not (looking-at zotxt-easykey-regex))
+  (or (looking-at zotxt-easykey-regex)
       (save-excursion
         ;; always try to back up one char
         (backward-char)
