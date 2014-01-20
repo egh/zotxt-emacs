@@ -68,7 +68,8 @@ insert easykeys for the currently selected items in "
                          (format "@%s" (zotxt-easykey-get-item-easykey key))) keys " "))))
 
 (defun zotxt-easykey-select-item-at-point ()
-  "Select the item referred to by the easykey at point in Zotero."
+  "Select the item referred to by the easykey at point in
+Zotero."
   (interactive)
   (let ((item-id (zotxt-easykey-get-item-id-at-point)))
     (if item-id
