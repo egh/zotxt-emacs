@@ -33,7 +33,7 @@ with a @ or { to be recognized, but this will *not* be returned."
       (let ((start (match-beginning 0))
             (end (match-end 0))
             (key (match-string 1)))
-        (let* ((url (format "http://localhost:23119/zotxt/complete?easykey=%s" key))
+        (let* ((url (format "http://127.0.0.1:23119/zotxt/complete?easykey=%s" key))
                (response (zotxt-url-retrieve url)))
           (if (null response)
               nil
@@ -47,7 +47,7 @@ point, or nil."
     (let ((key (zotxt-easykey-at-point)))
       (if (null key)
           nil
-        (let* ((url (format "http://localhost:23119/zotxt/items?format=key&easykey=%s" key))
+        (let* ((url (format "http://127.0.0.1:23119/zotxt/items?format=key&easykey=%s" key))
                (response (zotxt-url-retrieve url)))
           (if (null response)
               nil
@@ -55,7 +55,7 @@ point, or nil."
 
 (defun zotxt-easykey-get-item-easykey (key)
   (elt (zotxt-url-retrieve
-        (format "http://localhost:23119/zotxt/items?key=%s&format=easykey" key)) 0))
+        (format "http://127.0.0.1:23119/zotxt/items?key=%s&format=easykey" key)) 0))
 
 (defun zotxt-easykey-insert (arg)
   "Prompt for a search string and insert an easy key. With C-u,

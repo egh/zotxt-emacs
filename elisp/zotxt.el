@@ -42,7 +42,7 @@
     retval))
 
 (defun zotxt-generate-bib-entry-from-id (item-id &optional style bib-format)
-  (let* ((url (format "http://localhost:23119/zotxt/items?key=%s&format=bibliography&style=%s"
+  (let* ((url (format "http://127.0.0.1:23119/zotxt/items?key=%s&format=bibliography&style=%s"
                       (url-hexify-string item-id)
                       (url-hexify-string (or style zotxt-default-bibliography-style))))
          (results (zotxt-url-retrieve url))
@@ -51,10 +51,10 @@
     (zotxt-clean-bib-entry text)))
 
 (defun zotxt-get-selected-item-ids ()
-  (zotxt-url-retrieve "http://localhost:23119/zotxt/items?selected=selected&format=key"))
+  (zotxt-url-retrieve "http://127.0.0.1:23119/zotxt/items?selected=selected&format=key"))
 
 (defun zotxt-search (q format)
-  (zotxt-url-retrieve (format "http://localhost:23119/zotxt/search?q=%s&format=%s" 
+  (zotxt-url-retrieve (format "http://127.0.0.1:23119/zotxt/search?q=%s&format=%s" 
                                (url-hexify-string q)
                                format)))
 
