@@ -54,7 +54,7 @@
 
 (defvar org-zotxt-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(control c) (z) (i)] 'org-zotxt-insert-selected-reference-link-)
+    (define-key map [(control c) (z) (i)] 'org-zotxt-insert-selected-reference-link)
     (define-key map [(control c) (z) (c)] 'org-zotxt-insert-reference-link)
     (define-key map [(control c) (z) (u)] 'org-zotxt-update-reference-link-at-point)
     map))
