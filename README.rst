@@ -9,22 +9,33 @@ reStructuredText tools), which been moved to `zot4rst`_.
 Emacs integration
 -----------------
 
-Emacs integration has 2 parts: a core library (``zotero.el``),
-`org-mode`_ integration (``org-zotero.el``). Emacs integration depends
+Emacs integration has 2 parts: a core library (``zotxt.el``),
+`org-mode`_ integration (``org-zotxt.el``). Emacs integration depends
 on the zotxt_ Zotero extension.
 
 To install, add the following to your ``.emacs`` file::
 
   (add-to-list 'load-path "/path/to/zotxt-emacs/elisp/")
-  (autoload 'org-zotero-mode "org-zotero" "" t)
+  (autoload 'org-zotxt-mode "org-zotxt" "" t)
 
-zotero + org-mode
-~~~~~~~~~~~~~~~~~
+For pandoc markdown files
+-------------------------
+
+zoxtxt-easykey, in combination with pandoc-zotxt, can help you edit
+your pandoc markdown files. Load the zotxt-easykey minor mode using
+``M-x zotxt-easykey-mode`` and get started by inserting an easykey
+using ``C-c z k``. This will prompt you for a search string, which
+will do a quicksearch in your Zotero library. You will then be
+prompted to make a selection from the results of that search. An
+easykey for your selection will then be inserted into your document.
+
+zotxt + org-mode
+~~~~~~~~~~~~~~~~
 
 To insert a citation into a `org-mode`_ document, first enable the
-``org-zotero`` minor mode::
+``org-zotxt`` minor mode::
 
-  M-x org-zotero-mode
+  M-x org-zotxt-mode
 
 Then select one or more items in Zotero_ pane. Finally, in emacs_,
 use: ``C-c z i`` to insert these items as citations. This inserts a
