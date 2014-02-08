@@ -59,7 +59,7 @@ point, or nil."
 
 (defun zotxt-easykey-insert (arg)
   "Prompt for a search string and insert an easy key. With C-u,
-insert easykeys for the currently selected items in "
+insert easykeys for the currently selected items in Zotero."
   (interactive "P")
   (let ((keys (if arg
                  (zotxt-get-selected-item-ids)
