@@ -5,7 +5,8 @@
 
 (defvar zotxt-easykey-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map [(control c) (z) (o)] 'zotxt-easykey-select-item-at-point)
+    (define-key map (kbd "C-c \" o") 'zotxt-easykey-select-item-at-point)
+    (define-key map (kbd "C-c \" k") 'zotxt-easykey-insert)
     map))
 
 (defun zotxt-easykey-at-point-match ()
