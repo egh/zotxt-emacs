@@ -69,4 +69,14 @@ an item from the citation. Returns (citation . key)."
          (item (completing-read "Select item: " results)))
     (assoc-string item results)))
 
+(defun zotxt-select-easykey (easykey)
+  (let ((url (format "http://127.0.0.1:23119/zotxt/select?easykey=%s"
+                    (url-hexify-string easykey))))
+    (zotxt-url-retrieve url)))
+
+(defun zotxt-select-key (key)
+  (let ((url (format "http://127.0.0.1:23119/zotxt/select?key=%s"
+                    (url-hexify-string key))))
+    (zotxt-url-retrieve url)))
+
 (provide 'zotxt)

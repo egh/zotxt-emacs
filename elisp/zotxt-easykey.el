@@ -72,10 +72,7 @@ insert easykeys for the currently selected items in Zotero."
   "Select the item referred to by the easykey at point in
 Zotero."
   (interactive)
-  (let ((item-id (zotxt-easykey-get-item-id-at-point)))
-    (if item-id
-        (browse-url (format "zotero://select/items/%s" item-id))
-      (error "No item found!"))))
+  (zotxt-select-easykey (zotxt-easykey-at-point)))
 
 (define-minor-mode zotxt-easykey-mode
   "Toggle zotxt-easykey-mode.

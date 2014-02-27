@@ -48,7 +48,7 @@
 
 (org-add-link-type "zotero"
                    (lambda (rest)
-                     (browse-url (format "zotero:%s" rest))))
+                     (zotxt-select-key (substring rest 15))))
 
 (defvar org-zotxt-mode-map
   (let ((map (make-sparse-keymap)))
