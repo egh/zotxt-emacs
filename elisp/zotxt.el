@@ -58,7 +58,7 @@
                                (url-hexify-string q)
                                format)))
 
-(defun zotxt-select ()
+(defun zotxt-choose ()
   "Prompt a user for a search string, then ask the user to select
 an item from the citation. Returns (citation . key)."
   (let* ((search-string (read-from-minibuffer "Zotero quicksearch query: "))

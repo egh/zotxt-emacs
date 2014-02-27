@@ -64,7 +64,7 @@ insert easykeys for the currently selected items in Zotero."
   (interactive "P")
   (let ((keys (if arg
                  (zotxt-get-selected-item-ids)
-                (list (cdr (zotxt-select))))))
+                (list (cdr (zotxt-choose))))))
     (insert (mapconcat (lambda (key)
                          (format "@%s" (zotxt-easykey-get-item-easykey key))) keys " "))))
 

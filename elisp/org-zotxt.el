@@ -42,7 +42,7 @@
                 (org-zotxt-update-reference-link-at-point)
                 (forward-line 1))
               ids))
-    (let ((item (zotxt-select)))
+    (let ((item (zotxt-choose)))
       (insert (format
                "[[zotero://select/items/%s][%s]]\n" (cdr item) (car item))))))
 
