@@ -31,7 +31,10 @@
           (goto-char end))
         (setq next-link (org-element-link-successor))))))
 
-(defun org-zotxt-insert-selected-reference-link (arg)
+(defun org-zotxt-insert-reference-link (arg)
+  "Insert a zotero link in the org-mode document. Prompts for
+search to choose item. If prefix argument (C-u) is used, will
+insert the currently selected item from Zotero."
   (interactive "P")
   (if arg 
       (let ((ids (zotxt-get-selected-item-ids)))
