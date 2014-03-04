@@ -72,23 +72,4 @@ org-mode document."
   "Zotxt"
   org-zotxt-mode-map)
 
-(defun org-zotxt-find-reference-create (id)
-  (widen)
-  (goto-char (point-min))
-  (if (not (re-search-forward (format "^\\* \\[\\[zotero://select//%s\\]" id) nil t))
-      (progn
-        (goto-char (point-max))
-        (insert (format
-                 "\n* [[zotero://select//%s][%s]]\n"
-                 id id))
-        (forward-line -1)
-        (org-zotxt-update-reference-link-at-point)
-        (forward-line 1))))
-
-(defun org-zotxt-insert-note (id note)
-  (org-zotxt-find-reference-create id)
-  (org-forward-same-level 1)
-  (insert note)
-  (insert "\n"))
-
 (provide 'org-zotxt)
