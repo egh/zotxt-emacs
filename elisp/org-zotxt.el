@@ -2,6 +2,7 @@
 (require 'zotxt)
 
 (defun org-zotxt-update-reference-link-at-point ()
+  "Updates the zotero:// link at point."
   (interactive)
   (save-excursion
     (if (not (looking-at "\\[\\["))
@@ -16,7 +17,7 @@
       (insert "]]"))))
 
 (defun org-zotxt-update-all-reference-links ()
-  "Update all zotero references in a document."
+  "Update all zotero:// links in a document."
   (interactive)
   (save-excursion
     (goto-char (point-min))
