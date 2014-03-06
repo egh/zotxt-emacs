@@ -83,7 +83,7 @@ Null prefix argument turns off the mode.
 This is a minor mode for managing your easykey citations,
 including completion."
   :init-value nil
-  :lighter "ZotEasykey"
+  :lighter " ZotEasykey"
   :keymap zotxt-easykey-mode-map
   (if zotxt-easykey-mode
       (setq-local completion-at-point-functions
