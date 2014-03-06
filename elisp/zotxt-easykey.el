@@ -86,7 +86,11 @@ including completion."
   :lighter "Zotxt Easykey"
   :keymap zotxt-easykey-mode-map
   (if zotxt-easykey-mode
-      (add-to-list 'completion-at-point-functions 'zotxt-easykey-complete-at-point)
-    (setq-local completion-at-point-functions (remove 'zotxt-easykey-complete-at-point completion-at-point-functions))))
+      (setq-local completion-at-point-functions
+                  (cons 'zotxt-easykey-complete-at-point
+                        completion-at-point-functions))
+    (setq-local completion-at-point-functions
+                (remove 'zotxt-easykey-complete-at-point 
+                        completion-at-point-functions))))
 
 (provide 'zotxt-easykey)
