@@ -7,7 +7,7 @@
 
 (defun zotxt-url-get-body-as-string ()
   (with-temp-buffer
-    (url-insert buff)
+    (url-insert (current-buffer))
     (buffer-string)))
 
 (defun zotxt-url-retrieve (url)
