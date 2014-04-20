@@ -67,6 +67,7 @@ insert the currently selected item from Zotero."
     (define-key map (kbd "C-c \" u") 'org-zotxt-update-reference-link-at-point)
     map))
 
+;;;###autoload
 (define-minor-mode org-zotxt-mode
   "Toggle org-zotxt-mode.
 With no argument, this command toggles the mode.

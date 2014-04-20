@@ -74,6 +74,7 @@ Zotero."
   (interactive)
   (zotxt-select-easykey (zotxt-easykey-at-point)))
 
+;;;###autoload
 (define-minor-mode zotxt-easykey-mode
   "Toggle zotxt-easykey-mode.
 With no argument, this command toggles the mode.
