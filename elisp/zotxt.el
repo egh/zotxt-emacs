@@ -1,3 +1,4 @@
+(require 'url-http)
 (require 'url-handlers)
 (require 'json)
 
@@ -12,7 +13,9 @@
 
 (defun zotxt-url-retrieve (url)
   (save-excursion
-    (let ((buff (url-retrieve-synchronously url)))
+    (let (url-http-end-of-headers ; prevent warnings about free variables
+          url-http-response-status
+          (buff (url-retrieve-synchronously url)))
       (set-buffer buff)
       (if (not url-http-end-of-headers)
           (error "Did not receive data from %s" url))
@@ -26,7 +29,7 @@
             ((eq 200 url-http-response-status)
              (with-temp-buffer
                (url-insert buff)
-               (beginning-of-buffer)
+               (goto-char (point-min))
                (json-read)))
             (t
              (error "Unexpected response from server: %d" 
