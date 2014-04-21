@@ -6,6 +6,12 @@ Note: zotero-plain has been split into two parts: zotxt-emacs (this
 repository) for working with org, and ``zot4rst`` (zotero
 reStructuredText tools), which been moved to `zot4rst`_.
 
+Installation
+------------
+
+zotxt-emacs can be installed via MELPA_; please see the ``zotxt``
+package.
+
 Emacs integration
 -----------------
 
@@ -13,10 +19,6 @@ Emacs integration has 2 parts: a core library (``zotxt.el``),
 `org-mode`_ integration (``org-zotxt.el``). Emacs integration depends
 on the zotxt_ Zotero extension.
 
-To install, add the following to your ``.emacs`` file::
-
-  (add-to-list 'load-path "/path/to/zotxt-emacs/elisp/")
-  (autoload 'org-zotxt-mode "org-zotxt" "" t)
 
 For pandoc markdown files
 -------------------------
@@ -78,3 +80,4 @@ possible completions.
 .. _`org-mode`: http://orgmode.org/
 .. _`zot4rst`: http://bitbucket.org/egh/zot4rst
 .. _zotxt: http://bitbucket.org/egh/zotxt
+.. _MELPA: http://melpa.milkbox.net/
