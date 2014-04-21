@@ -15,9 +15,10 @@ package.
 Emacs integration
 -----------------
 
-Emacs integration has 2 parts: a core library (``zotxt.el``),
-`org-mode`_ integration (``org-zotxt.el``). Emacs integration depends
-on the zotxt_ Zotero extension.
+Emacs integration has 3 parts: a core library (``zotxt.el``),
+`org-mode`_ integration (``org-zotxt.el``), and an “easykey” mode
+(``zotxt-easykey.el``). Emacs integration depends on the zotxt_ Zotero
+extension.
 
 
 For pandoc markdown files
