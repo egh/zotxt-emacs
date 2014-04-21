@@ -27,7 +27,7 @@ For pandoc markdown files
 zoxtxt-easykey, in combination with pandoc-zotxt, can help you edit
 your pandoc markdown files. Load the zotxt-easykey minor mode using
 ``M-x zotxt-easykey-mode`` and get started by inserting an easykey
-using ``C-c z k``. This will prompt you for a search string, which
+using ``C-c " k``. This will prompt you for a search string, which
 will do a quicksearch in your Zotero library. You will then be
 prompted to make a selection from the results of that search. An
 easykey for your selection will then be inserted into your document.
@@ -41,11 +41,11 @@ To insert a citation into a `org-mode`_ document, first enable the
   M-x org-zotxt-mode
 
 Then select one or more items in Zotero_ pane. Finally, in emacs_,
-use: ``C-c z i`` to insert these items as citations. This inserts a
+use: ``C-c " i`` to insert these items as citations. This inserts a
 zotero link with descriptive link text.
 
 To update the link text to reflect changed metadata from Zotero_, use
-``C-c z u`` over the link.
+``C-c " u`` over the link.
 
 Following links
 ---------------
