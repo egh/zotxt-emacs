@@ -69,7 +69,12 @@ an item from the citation. Returns (citation . key)."
                             (cons (cdr (assq 'text e)) 
                                   (cdr (assq 'key e))))
                           (zotxt-search search-string "bibliography")))
-         (item (completing-read "Select item: " results)))
+         (count (length results))
+         (item (if (= 0 count)
+                   nil
+                 (if (= 1 count)
+                     (car (car results))
+                   (completing-read "Select item: " results)))))
     (assoc-string item results)))
 
 (defun zotxt-select-easykey (easykey)
