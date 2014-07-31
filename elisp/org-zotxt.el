@@ -67,28 +67,19 @@ insert the currently selected item from Zotero."
     (define-key map (kbd "C-c \" u") 'org-zotxt-update-reference-link-at-point)
     map))
 
-(defun org-zotxt-insert-attachment-link ()
-  (interactive)
+(defun org-zotxt-open-attachment (arg)
+  (interactive "P")
   (let* ((key (cdr (zotxt-choose)))
          (item (zotxt-get-item key "recoll"))
          (paths (cdr (assq 'paths (elt item 0)))))
     (if (= 0 (length paths))
         (error "No attachments for selected item!")
       (if (= 1 (length paths))
-          (org-zotxt-insert-attachment-link-to-path (elt paths 0))
-        (org-zotxt-insert-attachment-link-to-path
-         (completing-read "File: " (append paths nil)))))))
+          (org-open-file (elt paths 0) arg)
+        (org-open-file
+         (completing-read "File: " (append paths nil))
+         arg)))))
 
-(defun org-zotxt-insert-attachment-link-to-path (path)
-  (let* ((escaped-path (org-link-escape (expand-file-name path)))
-         (link-type (if (string-match "\\(pdf\\|dvi\\|ps\\|docx\\|odt\\)$" escaped-path)
-                        "docview"
-                      "file"))
-         (page-number (if (string= link-type "docview")
-                          (concat "::" (read-from-minibuffer "Page:" "1"))
-                        "")))
-    (insert (format "%s:%s%s" link-type escaped-path page-number))))
-    
 ;;;###autoload
 (define-minor-mode org-zotxt-mode
   "Toggle org-zotxt-mode.
