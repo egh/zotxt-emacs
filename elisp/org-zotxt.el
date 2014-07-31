@@ -25,6 +25,7 @@
 
 ;;; Code:
 
+(require 'request)
 (require 'org)
 (require 'zotxt)
 
@@ -95,17 +96,28 @@ insert the currently selected item from Zotero."
     map))
 
 (defun org-zotxt-open-attachment (arg)
+  "Open a Zotero items attachment.
+Prefix ARG means open in Emacs."
   (interactive "P")
-  (let* ((key (cdr (zotxt-choose)))
-         (item (zotxt-get-item key "recoll"))
-         (paths (cdr (assq 'paths (elt item 0)))))
-    (if (= 0 (length paths))
-        (error "No attachments for selected item!")
-      (if (= 1 (length paths))
-          (org-open-file (elt paths 0) arg)
-        (org-open-file
-         (completing-read "File: " (append paths nil))
-         arg)))))
+  (let ((key (cdr (zotxt-choose))))
+    ;; cannot figure out another way to pass args to request callback
+    (setq org-zotxt-open-attachment--arg arg)
+    (request
+     zotxt-url-item
+     :params `(("key" . ,key) ("format" . "recoll"))
+     :parser 'json-read
+     :success (function*
+               (lambda (&key data &allow-other-keys)
+                 (let ((paths (cdr (assq 'paths (elt data 0)))))
+                   (message "yra: %s" org-zotxt-open-attachment--arg)
+                   (if (= 0 (length paths))
+                       (error "No attachments for selected item!")
+                     (if (= 1 (length paths))
+                         (org-open-file (elt paths 0)
+                                        org-zotxt-open-attachment--arg)
+                       (org-open-file
+                        (completing-read "File: " (append paths nil))
+                        org-zotxt-open-attachment--arg)))))))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode

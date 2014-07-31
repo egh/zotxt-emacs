@@ -90,16 +90,6 @@
 (defun zotxt-get-selected-item-ids ()
   (zotxt-url-retrieve "http://127.0.0.1:23119/zotxt/items?selected=selected&format=key"))
 
-(defun zotxt-get-item-json (key format success)
-  "Get info about an item with KEY in FORMAT; returns parsed JSON."
-  (request
-   zotxt-url-item
-   :params '(("key" . key) ("format" . format))
-   :parser 'json-read
-   :success (function*
-             (lambda (&key data &allow-other-keys)
-               data))))
-
 (defun zotxt-search (q format)
   (zotxt-url-retrieve (format "http://127.0.0.1:23119/zotxt/search?q=%s&format=%s" 
                                (url-hexify-string q)
