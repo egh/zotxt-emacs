@@ -6,6 +6,14 @@
   "http://www.zotero.org/styles/chicago-note-bibliography"
   "Default bibliography style to use.")
 
+(defvar zotxt-url-base
+  "Base URL to contact."
+  "http://127.0.0.1:23119/zotxt")
+
+(defvar zotxt-url-item
+  "Items URL to contact."
+  (format "%s/items" zotxt-url-base))
+
 (defun zotxt-url-get-body-as-string ()
   (with-temp-buffer
     (url-insert (current-buffer))
@@ -55,6 +63,16 @@
 
 (defun zotxt-get-selected-item-ids ()
   (zotxt-url-retrieve "http://127.0.0.1:23119/zotxt/items?selected=selected&format=key"))
+
+(defun zotxt-get-item-json (key format success)
+  "Get info about an item with KEY in FORMAT; returns parsed JSON."
+  (request
+   zotxt-url-item
+   :params '(("key" . key) ("format" . format))
+   :parser 'json-read
+   :success (function*
+             (lambda (&key data &allow-other-keys)
+               data))))
 
 (defun zotxt-search (q format)
   (zotxt-url-retrieve (format "http://127.0.0.1:23119/zotxt/search?q=%s&format=%s" 
