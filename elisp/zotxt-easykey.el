@@ -1,3 +1,30 @@
+;;; zotxt-easykey.el --- Zotero easykey support via the zotxt extension
+     
+;; Copyright (C) 2010-2014 Erik Hetzner
+
+;; Author: Erik Hetzner <egh@e6h.org>
+;; Keywords: bib
+
+;; This file is not part of GNU Emacs.
+
+;; zotxt-easykey.el is free software: you can redistribute it and/or modify it
+;; under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; zotxt-easykey.el is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+;; General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with zotxt-easykey.el. If not, see
+;; <http://www.gnu.org/licenses/>.
+
+;;; Commentary:
+
+;;; Code:
+
 (require 'zotxt)
 
 (defvar zotxt-easykey-regex
@@ -95,3 +122,4 @@ including completion."
                         completion-at-point-functions))))
 
 (provide 'zotxt-easykey)
+;;; zotxt-easykey.el ends here
