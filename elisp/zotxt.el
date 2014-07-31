@@ -7,12 +7,12 @@
   "Default bibliography style to use.")
 
 (defvar zotxt-url-base
-  "Base URL to contact."
-  "http://127.0.0.1:23119/zotxt")
+  "http://127.0.0.1:23119/zotxt"
+  "Base URL to contact.")
 
 (defvar zotxt-url-item
-  "Items URL to contact."
-  (format "%s/items" zotxt-url-base))
+  (format "%s/items" zotxt-url-base)
+  "Items URL to contact.")
 
 (defun zotxt-url-get-body-as-string ()
   (with-temp-buffer
