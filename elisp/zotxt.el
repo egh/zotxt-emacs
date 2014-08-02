@@ -27,6 +27,7 @@
 (require 'url-http)
 (require 'url-handlers)
 (require 'json)
+(require 'request)
 
 (defvar zotxt-default-bibliography-style
   "http://www.zotero.org/styles/chicago-note-bibliography"
@@ -78,14 +79,24 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
-(defun zotxt-generate-bib-entry-from-id (item-id &optional style bib-format)
-  (let* ((url (format "http://127.0.0.1:23119/zotxt/items?key=%s&format=bibliography&style=%s"
-                      (url-hexify-string item-id)
-                      (url-hexify-string (or style zotxt-default-bibliography-style))))
-         (results (zotxt-url-retrieve url))
-         (first (elt results 0))
-         (text (cdr (assq 'text first))))
-    (zotxt-clean-bib-entry text)))
+(cl-defun zotxt-generate-bib-entry-from-id (item-id &key
+                                                    callback
+                                                    (style zotxt-default-bibliography-style))
+  "Retrieve the generated bibliography for ITEM-ID.
+Call CALLBACK with text of bibliography entry.  Use STYLE to
+specify a custom bibliography style."
+  (lexical-let ((callback1 callback))
+    (request
+     "http://127.0.0.1:23119/zotxt/items"
+     :params `(("key" . ,item-id)
+               ("format" . "bibliography")
+               ("style" . ,style))
+     :parser 'json-read
+     :success (function*
+               (lambda (&key data &allow-other-keys)
+                 (let* ((first (elt data 0))
+                        (text (cdr (assq 'text first))))
+                   (funcall callback1 text)))))))
 
 (defun zotxt-get-selected-item-ids ()
   (zotxt-url-retrieve "http://127.0.0.1:23119/zotxt/items?selected=selected&format=key"))

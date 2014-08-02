@@ -36,13 +36,17 @@
     (if (not (looking-at "\\[\\["))
         (re-search-backward "\\[\\["))
     (re-search-forward "\\([A-Z0-9_]+\\)\\]\\[")
-    (let* ((item-id (match-string 1))
-           (start (point))
-           (text (zotxt-generate-bib-entry-from-id item-id)))
-      (re-search-forward "\\]\\]\\|$")
-      (delete-region start (point))
-      (insert text)
-      (insert "]]"))))
+    (let ((item-id (match-string 1)))
+      (lexical-let ((start (point)))
+        (zotxt-generate-bib-entry-from-id
+         item-id
+         :callback (lambda (text)
+                     (save-excursion
+                       (goto-char start)
+                       (re-search-forward "\\]\\]\\|$")
+                       (delete-region start (point))
+                       (insert text)
+                       (insert "]]"))))))))
 
 (defun org-zotxt-update-all-reference-links ()
   "Update all zotero:// links in a document."
