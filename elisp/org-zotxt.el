@@ -29,24 +29,32 @@
 (require 'org)
 (require 'zotxt)
 
+(defun org-zotxt-extract-link-id-from-link (path)
+  "Return the zotxt ID from a link PATH."
+  (if (string-match "^zotero://select/items/\\(.*\\)$" s)
+      (match-string 1 s)
+    nil))
+
 (defun org-zotxt-update-reference-link-at-point ()
-  "Updates the zotero:// link at point."
+  "Update the zotero:// link at point."
   (interactive)
-  (save-excursion
-    (if (not (looking-at "\\[\\["))
-        (re-search-backward "\\[\\["))
-    (re-search-forward "\\([A-Z0-9_]+\\)\\]\\[")
-    (let ((item-id (match-string 1)))
-      (lexical-let ((start (point)))
-        (zotxt-generate-bib-entry-from-id
-         item-id
-         :callback (lambda (text)
-                     (save-excursion
-                       (goto-char start)
-                       (re-search-forward "\\]\\]\\|$")
-                       (delete-region start (point))
-                       (insert text)
-                       (insert "]]"))))))))
+  (let* ((ct (org-element-context))
+         (link (org-element-property :raw-link ct)))
+    (if (eq 'link (org-element-type ct))
+        (lexical-let ((mk (point-marker))
+                      (item-id (org-zotxt-extract-link-id-from-link link)))
+          (if item-id
+              (zotxt-generate-bib-entry-from-id
+               item-id
+               :callback (lambda (text)
+                           (save-excursion
+                             (with-current-buffer (marker-buffer mk)
+                               (goto-char (marker-position mk))
+                               (let* ((ct (org-element-context)))
+                                 (goto-char (org-element-property :begin ct))
+                                 (delete-region (org-element-property :begin ct)
+                                                (org-element-property :end ct))
+                                 (insert (format "[[zotero://select/items/%s][%s]]" item-id text))))))))))))
 
 (defun org-zotxt-update-all-reference-links ()
   "Update all zotero:// links in a document."
@@ -59,7 +67,7 @@
         (let* ((parse (org-element-link-parser))
                (path (org-element-property :raw-link parse))
                (end (org-element-property :end parse)))
-          (if (string-match "^zotero" path)
+          (if (org-zotxt-extract-link-id-from-link path)
               (org-zotxt-update-reference-link-at-point))
           (goto-char end))
         (setq next-link (org-element-link-successor))))))
