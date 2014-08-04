@@ -122,6 +122,31 @@ an item from the citation. Returns (citation . key)."
                    (completing-read "Select item: " results)))))
     (assoc-string item results)))
 
+(defun zotxt-choose-async (func)
+  "Prompt a user for a search string, then ask the user to select an item from the citation.
+Calls FUNC with args (key citation)."
+  (let* ((search-string (read-from-minibuffer "Zotero quicksearch query: ")))
+    (lexical-let ((func1 func))
+      (request
+       "http://127.0.0.1:23119/zotxt/search"
+       :params `(("q" . ,search-string)
+                 (format . "bibliography"))
+       :parser 'json-read
+       :success (function*
+                 (lambda (&key data &allow-other-keys)
+                   (let* ((results (mapcar (lambda (e) 
+                                             (cons (cdr (assq 'text e)) 
+                                                   (cdr (assq 'key e))))
+                                           data))
+                          (count (length results))
+                          (citation (if (= 0 count)
+                                        nil
+                                      (if (= 1 count)
+                                          (car (car results))
+                                        (completing-read "Select item: " results))))
+                          (key (cdr (assoc-string citation results))))
+                     (funcall func1 key citation))))))))
+
 (defun zotxt-select-easykey (easykey)
   (let ((url (format "http://127.0.0.1:23119/zotxt/select?easykey=%s"
                     (url-hexify-string easykey))))
