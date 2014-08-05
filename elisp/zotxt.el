@@ -148,14 +148,14 @@ Calls FUNC with args (key citation)."
                      (funcall func1 key citation))))))))
 
 (defun zotxt-select-easykey (easykey)
-  (let ((url (format "http://127.0.0.1:23119/zotxt/select?easykey=%s"
-                    (url-hexify-string easykey))))
-    (zotxt-url-retrieve url)))
+  (request
+   "http://127.0.0.1:23119/zotxt/select"
+   :params `(("easykey" . ,easykey))))
 
 (defun zotxt-select-key (key)
-  (let ((url (format "http://127.0.0.1:23119/zotxt/select?key=%s"
-                    (url-hexify-string key))))
-    (zotxt-url-retrieve url)))
+  (request
+   "http://127.0.0.1:23119/zotxt/select"
+   :params `(("key" . ,key))))
 
 (defvar zotxt-easykey-regex
   "[@{]\\([[:alnum:]:]+\\)")
