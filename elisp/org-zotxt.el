@@ -123,15 +123,16 @@ Prefix ARG means open in Emacs."
   (interactive "P")
   (lexical-let ((arg1 arg))
     (zotxt-choose-async
-     (lambda (key citation)
-       (request
-        zotxt-url-items
-        :params `(("key" . ,key) ("format" . "recoll"))
-        :parser 'json-read
-        :success (function*
-                  (lambda (&key data &allow-other-keys)
-                    (let ((paths (cdr (assq 'paths (elt data 0)))))
-                      (org-open-file (org-zotxt-choose-path paths) arg1)))))))))
+     (lambda (items)
+       (let ((item (car items)))
+         (request
+          zotxt-url-items
+          :params `(("key" . ,(plist-get item :key)) ("format" . "recoll"))
+          :parser 'json-read
+          :success (function*
+                    (lambda (&key data &allow-other-keys)
+                      (let ((paths (cdr (assq 'paths (elt data 0)))))
+                        (org-open-file (org-zotxt-choose-path paths) arg1))))))))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode

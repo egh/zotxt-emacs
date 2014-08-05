@@ -130,7 +130,7 @@ Calls FUNC with args (key citation)."
       (request
        "http://127.0.0.1:23119/zotxt/search"
        :params `(("q" . ,search-string)
-                 (format . "bibliography"))
+                 ("format" . "bibliography"))
        :parser 'json-read
        :success (function*
                  (lambda (&key data &allow-other-keys)
@@ -145,7 +145,7 @@ Calls FUNC with args (key citation)."
                                           (car (car results))
                                         (completing-read "Select item: " results))))
                           (key (cdr (assoc-string citation results))))
-                     (funcall func1 key citation))))))))
+                     (funcall func1 `((:key ,key :citation ,citation))))))))))
 
 (defun zotxt-select-easykey (easykey)
   (request
