@@ -107,26 +107,31 @@ insert the currently selected item from Zotero."
     (define-key map (kbd "C-c \" u") 'org-zotxt-update-reference-link-at-point)
     map))
 
+(defun org-zotxt-choose-path (paths)
+  "Prompt user to select a path from the PATHS.
+If only path is available, return it.  If no paths are available, error."
+  (if (= 0 (length paths))
+      (progn (message "No attachments for item!")
+             (error "No attachments for item!"))
+    (if (= 1 (length paths))
+        (elt paths 0)
+      (completing-read "File: " (append paths nil)))))
+
 (defun org-zotxt-open-attachment (arg)
   "Open a Zotero items attachment.
 Prefix ARG means open in Emacs."
   (interactive "P")
-  (let ((key (cdr (zotxt-choose))))
-    (lexical-let ((arg1 arg))
-      (request
-       zotxt-url-item
-       :params `(("key" . ,key) ("format" . "recoll"))
-       :parser 'json-read
-       :success (function*
-                 (lambda (&key data &allow-other-keys)
-                   (let ((paths (cdr (assq 'paths (elt data 0)))))
-                     (if (= 0 (length paths))
-                         (error "No attachments for selected item!")
-                       (if (= 1 (length paths))
-                           (org-open-file (elt paths 0) arg1)
-                         (org-open-file
-                          (completing-read "File: " (append paths nil))
-                          arg1))))))))))
+  (lexical-let ((arg1 arg))
+    (zotxt-choose-async
+     (lambda (key citation)
+       (request
+        zotxt-url-items
+        :params `(("key" . ,key) ("format" . "recoll"))
+        :parser 'json-read
+        :success (function*
+                  (lambda (&key data &allow-other-keys)
+                    (let ((paths (cdr (assq 'paths (elt data 0)))))
+                      (org-open-file (org-zotxt-choose-path paths) arg1)))))))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode
