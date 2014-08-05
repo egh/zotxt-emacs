@@ -37,7 +37,7 @@
   "http://127.0.0.1:23119/zotxt"
   "Base URL to contact.")
 
-(defvar zotxt-url-item
+(defvar zotxt-url-items
   (format "%s/items" zotxt-url-base)
   "Items URL to contact.")
 
@@ -87,7 +87,7 @@ Call CALLBACK with text of bibliography entry.  Use STYLE to
 specify a custom bibliography style."
   (lexical-let ((callback1 callback))
     (request
-     "http://127.0.0.1:23119/zotxt/items"
+     zotxt-url-items
      :params `(("key" . ,item-id)
                ("format" . "bibliography")
                ("style" . ,style))
