@@ -71,7 +71,7 @@
                     url-http-response-status))))))
 
 (defun zotxt-clean-bib-entry (entry)
-  "Clean up a bibliography ENTRY as returned by Zotxt."
+  "Clean up a bibliography entry as returned by Zotxt."
   (let ((retval entry))
     (setq retval (replace-regexp-in-string "\n" "" retval))
     (setq retval (replace-regexp-in-string "\" "“" retval))
@@ -216,9 +216,8 @@ point, or nil."
         (format "http://127.0.0.1:23119/zotxt/items?key=%s&format=easykey" key)) 0))
 
 (defun zotxt-easykey-insert (arg)
-  "Prompt for a search string and insert an easy key.
-With prefix ARG, insert easykeys for the currently selected items
-in Zotero."
+  "Prompt for a search string and insert an easy key. With C-u,
+insert easykeys for the currently selected items in Zotero."
   (interactive "P")
   (let ((keys (if arg
                  (zotxt-get-selected-item-ids)
