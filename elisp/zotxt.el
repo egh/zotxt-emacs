@@ -28,6 +28,7 @@
 (require 'url-handlers)
 (require 'json)
 (require 'request)
+(require 'deferred)
 
 (defvar zotxt-default-bibliography-style
   "http://www.zotero.org/styles/chicago-note-bibliography"
@@ -98,8 +99,20 @@ specify a custom bibliography style."
                         (text (cdr (assq 'text first))))
                    (funcall callback1 text)))))))
 
-(defun zotxt-get-selected-item-ids ()
-  (zotxt-url-retrieve "http://127.0.0.1:23119/zotxt/items?selected=selected&format=key"))
+(defun zotxt-get-selected-items-deferred ()
+  (lexical-let ((d (deferred:new #'identity)))
+    (request
+     zotxt-url-items
+     :params '(("selected" . "selected")
+               ("format" . "key"))
+     :parser 'json-read
+     :success (function*
+               (lambda (&key data &allow-other-keys)
+                     (deferred:callback-post
+                       d (mapcar (lambda (k)
+                                   (list :key k))
+                                 data)))))
+      d))
 
 (defun zotxt-search (q format)
   (zotxt-url-retrieve (format "http://127.0.0.1:23119/zotxt/search?q=%s&format=%s" 
@@ -122,11 +135,11 @@ an item from the citation. Returns (citation . key)."
                    (completing-read "Select item: " results)))))
     (assoc-string item results)))
 
-(defun zotxt-choose-async (func)
-  "Prompt a user for a search string, then ask the user to select an item from the citation.
-Calls FUNC with args (key citation)."
-  (let* ((search-string (read-from-minibuffer "Zotero quicksearch query: ")))
-    (lexical-let ((func1 func))
+(defun zotxt-choose-deferred ()
+  "Prompt a user for a search string, then ask the user to select an item from the citation."
+  (let* ((search-string
+          (read-from-minibuffer "Zotero quicksearch query: ")))
+    (lexical-let ((d (deferred:new #'identity)))
       (request
        "http://127.0.0.1:23119/zotxt/search"
        :params `(("q" . ,search-string)
@@ -145,7 +158,9 @@ Calls FUNC with args (key citation)."
                                           (car (car results))
                                         (completing-read "Select item: " results))))
                           (key (cdr (assoc-string citation results))))
-                     (funcall func1 `((:key ,key :citation ,citation))))))))))
+                     (deferred:callback-post
+                       d `((:key ,key :citation ,citation)))))))
+      d)))
 
 (defun zotxt-select-easykey (easykey)
   (request
