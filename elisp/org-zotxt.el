@@ -122,17 +122,23 @@ If only path is available, return it.  If no paths are available, error."
 Prefix ARG means open in Emacs."
   (interactive "P")
   (lexical-let ((arg1 arg))
-    (zotxt-choose-async
-     (lambda (items)
-       (let ((item (car items)))
-         (request
-          zotxt-url-items
-          :params `(("key" . ,(plist-get item :key)) ("format" . "recoll"))
-          :parser 'json-read
-          :success (function*
-                    (lambda (&key data &allow-other-keys)
-                      (let ((paths (cdr (assq 'paths (elt data 0)))))
-                        (org-open-file (org-zotxt-choose-path paths) arg1))))))))))
+    (deferred:$
+      (zotxt-choose-deferred)
+      (deferred:nextc it
+        (lambda (items)
+          (lexical-let ((d (deferred:new #'identity)))
+            (request-deferred
+             zotxt-url-items
+             :params `(("key" . ,(plist-get (car items) :key)) ("format" . "recoll"))
+             :parser 'json-read
+             :success (function*
+                       (lambda (&key data &allow-other-keys)
+                         (deferred:callback-post d data))))
+            d)))
+      (deferred:nextc it
+        (lambda (data)
+          (let ((paths (cdr (assq 'paths (elt data 0)))))
+            (org-open-file (org-zotxt-choose-path paths) arg1)))))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode
