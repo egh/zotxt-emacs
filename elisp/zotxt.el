@@ -80,13 +80,12 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
-(cl-defun zotxt-generate-bib-entry-from-id (item-id &key
-                                                    callback
-                                                    (style zotxt-default-bibliography-style))
+(cl-defun zotxt-generate-bib-entry-from-id-deferred (item-id &key
+                                                             (style zotxt-default-bibliography-style))
   "Retrieve the generated bibliography for ITEM-ID.
 Call CALLBACK with text of bibliography entry.  Use STYLE to
 specify a custom bibliography style."
-  (lexical-let ((callback1 callback))
+  (lexical-let ((d (deferred:new #'identity)))
     (request
      zotxt-url-items
      :params `(("key" . ,item-id)
@@ -97,7 +96,8 @@ specify a custom bibliography style."
                (lambda (&key data &allow-other-keys)
                  (let* ((first (elt data 0))
                         (text (cdr (assq 'text first))))
-                   (funcall callback1 text)))))))
+                   (deferred:callback-post d text)))))
+    d))
 
 (defun zotxt-get-selected-items-deferred ()
   (lexical-let ((d (deferred:new #'identity)))
