@@ -230,6 +230,19 @@ point, or nil."
   (elt (zotxt-url-retrieve
         (format "http://127.0.0.1:23119/zotxt/items?key=%s&format=easykey" key)) 0))
 
+(defun zotxt-get-item-easykey-deferred (item)
+  (lexical-let ((item1 item)
+                (d (deferred:new #'identity)))
+    (request
+     zotxt-url-items
+     :params `(("key" . ,(plist-get item :id))
+               ("format" . "easykey"))
+     :parser 'json-read
+     :success (function*
+               (lambda (&key data &allow-other-keys)
+                 (plist-put item1 :easykey data))))
+    d))
+
 (defun zotxt-easykey-insert (arg)
   "Prompt for a search string and insert an easy key. With C-u,
 insert easykeys for the currently selected items in Zotero."
