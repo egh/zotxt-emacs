@@ -263,12 +263,14 @@ insert easykeys for the currently selected items in Zotero."
         (zotxt-choose-deferred))
       (deferred:nextc it
         (lambda (items)
+          (zotxt-mapcar-deferred items #'zotxt-get-item-easykey-deferred)))
+      (deferred:nextc it
+        (lambda (items)
           (with-current-buffer (marker-buffer mk)
             (goto-char (marker-position mk))
             (insert (mapconcat
                      (lambda (item)
-                       (format "@%s" (zotxt-easykey-get-item-easykey
-                                      (plist-get item :key))))
+                       (format "@%s" (plist-get item :easykey)))
                      items " "))))))))
 
 (defun zotxt-easykey-select-item-at-point ()
