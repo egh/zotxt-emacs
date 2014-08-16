@@ -230,10 +230,13 @@ point, or nil."
               nil
             (elt response 0)))))))
 
-(defun zotxt-easykey-get-item-easykey (key)
-  (elt (zotxt-url-retrieve
-        (format "http://127.0.0.1:23119/zotxt/items?key=%s&format=easykey" key)) 0))
-
+(defun zotxt-get-item-easykey (item)
+  "Given a plist ITEM, add the :easykey corresponding to the :key value.
+Non-deferred version of `zotxt-get-item-easykey-deferred'."
+  (deferred:$
+    (zotxt-get-item-easykey-deferred item)
+    (deferred:sync! it)))
+    
 (defun zotxt-get-item-easykey-deferred (item)
   "Given a plist ITEM, add the :easykey corresponding to the :key value."
   (lexical-let ((item1 item)
