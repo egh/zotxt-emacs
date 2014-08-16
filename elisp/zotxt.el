@@ -42,6 +42,10 @@
   (format "%s/items" zotxt-url-base)
   "Items URL to contact.")
 
+(defun zotxt-mapcar-deferred (lst func)
+  (apply #'deferred:parallel
+         (mapcar func lst)))
+
 (defun zotxt-url-get-body-as-string ()
   (with-temp-buffer
     (url-insert (current-buffer))
