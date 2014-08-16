@@ -235,7 +235,7 @@ point, or nil."
                 (d (deferred:new #'identity)))
     (request
      zotxt-url-items
-     :params `(("key" . ,(plist-get item :id))
+     :params `(("key" . ,(plist-get item :key))
                ("format" . "easykey"))
      :parser 'json-read
      :success (function*
