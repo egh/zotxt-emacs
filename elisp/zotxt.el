@@ -245,7 +245,8 @@ point, or nil."
      :parser 'json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
-                 (plist-put item1 :easykey data))))
+                 (plist-put item1 :easykey (elt data 0))
+                 (deferred:callback-post d item1))))
     d))
 
 (defun zotxt-easykey-insert (arg)
