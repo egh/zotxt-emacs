@@ -247,11 +247,20 @@ point, or nil."
   "Prompt for a search string and insert an easy key. With C-u,
 insert easykeys for the currently selected items in Zotero."
   (interactive "P")
-  (let ((keys (if arg
-                 (zotxt-get-selected-item-ids)
-                (list (cdr (zotxt-choose))))))
-    (insert (mapconcat (lambda (key)
-                         (format "@%s" (zotxt-easykey-get-item-easykey key))) keys " "))))
+  (lexical-let ((mk (point-marker)))
+    (deferred:$
+      (if arg
+          (zotxt-get-selected-items-deferred)
+        (zotxt-choose-deferred))
+      (deferred:nextc it
+        (lambda (items)
+          (with-current-buffer (marker-buffer mk)
+            (goto-char (marker-position mk))
+            (insert (mapconcat
+                     (lambda (item)
+                       (format "@%s" (zotxt-easykey-get-item-easykey
+                                      (plist-get item :key))))
+                     items " "))))))))
 
 (defun zotxt-easykey-select-item-at-point ()
   "Select the item referred to by the easykey at point in Zotero."
