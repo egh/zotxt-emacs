@@ -231,6 +231,7 @@ point, or nil."
         (format "http://127.0.0.1:23119/zotxt/items?key=%s&format=easykey" key)) 0))
 
 (defun zotxt-get-item-easykey-deferred (item)
+  "Given a plist ITEM, add the :easykey corresponding to the :key value."
   (lexical-let ((item1 item)
                 (d (deferred:new #'identity)))
     (request
