@@ -55,3 +55,14 @@
                                       (plist-get item :easykey)) items)))
              (sort easykeys #'string-lessp))
            '("doe:2005first" "doe:2007why"))))
+
+(ert-deftest zotxt-test-get-item-bibliography-deferred ()
+  (let ((text "Doe, John. First Book. Cambridge: Cambridge University Press, 2005.")
+        (item
+         (deferred:$
+           (deferred:next (lambda () '(:key "0_ZBZQ4KMP")))
+           (deferred:nextc it
+             (lambda (item) (zotxt-get-item-bibliography-deferred item)))
+           (deferred:sync! it))))
+    (should (equal text (plist-get item :bibliography)))
+    (should (equal text (plist-get item :chicago-note-bibliography)))))

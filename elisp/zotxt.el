@@ -31,7 +31,7 @@
 (require 'deferred)
 
 (defvar zotxt-default-bibliography-style
-  "http://www.zotero.org/styles/chicago-note-bibliography"
+  "chicago-note-bibliography"
   "Default bibliography style to use.")
 
 (defvar zotxt-url-base
@@ -84,24 +84,33 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
-(cl-defun zotxt-generate-bib-entry-from-id (item-id &key
-                                                    callback
-                                                    (style zotxt-default-bibliography-style))
-  "Retrieve the generated bibliography for ITEM-ID.
-Call CALLBACK with text of bibliography entry.  Use STYLE to
-specify a custom bibliography style."
-  (lexical-let ((callback callback))
+(cl-defun zotxt-get-item-bibliography-deferred
+    (item &key
+          (style zotxt-default-bibliography-style))
+  "Retrieve the generated bibliography for ITEM (a plist).
+Use STYLE to specify a custom bibliography style.
+Adds a plist entry with the name of the style as a self-quoting symbol, e.g.
+:chicago-note-bibliography.
+Also adds :bibliography entry if STYLE is the default."
+  (lexical-let ((d (deferred:new))
+                (style style)
+                (item item))
     (request
      zotxt-url-items
-     :params `(("key" . ,item-id)
+     :params `(("key" . ,(plist-get item :key))
                ("format" . "bibliography")
                ("style" . ,style))
      :parser 'json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
-                 (let* ((first (elt data 0))
-                        (text (cdr (assq 'text first))))
-                   (funcall callback text)))))))
+                 (let* ((style-key (intern (format ":%s" style)))
+                        (first (elt data 0))
+                        (text (zotxt-clean-bib-entry (cdr (assq 'text first)))))
+                   (if (string= style zotxt-default-bibliography-style)
+                       (plist-put item :bibliography text))
+                   (plist-put item style-key text)
+                   (deferred:callback-post d item)))))
+    d))
 
 (defun zotxt-get-selected-items-deferred ()
   (lexical-let ((d (deferred:new)))
