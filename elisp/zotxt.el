@@ -90,7 +90,7 @@
   "Retrieve the generated bibliography for ITEM-ID.
 Call CALLBACK with text of bibliography entry.  Use STYLE to
 specify a custom bibliography style."
-  (lexical-let ((callback1 callback))
+  (lexical-let ((callback callback))
     (request
      zotxt-url-items
      :params `(("key" . ,item-id)
@@ -101,7 +101,7 @@ specify a custom bibliography style."
                (lambda (&key data &allow-other-keys)
                  (let* ((first (elt data 0))
                         (text (cdr (assq 'text first))))
-                   (funcall callback1 text)))))))
+                   (funcall callback text)))))))
 
 (defun zotxt-get-selected-items-deferred ()
   (lexical-let ((d (deferred:new #'identity)))
@@ -239,7 +239,7 @@ Non-deferred version of `zotxt-get-item-easykey-deferred'."
     
 (defun zotxt-get-item-easykey-deferred (item)
   "Given a plist ITEM, add the :easykey corresponding to the :key value."
-  (lexical-let ((item1 item)
+  (lexical-let ((item item)
                 (d (deferred:new #'identity)))
     (request
      zotxt-url-items
@@ -248,8 +248,8 @@ Non-deferred version of `zotxt-get-item-easykey-deferred'."
      :parser 'json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
-                 (plist-put item1 :easykey (elt data 0))
-                 (deferred:callback-post d item1))))
+                 (plist-put item :easykey (elt data 0))
+                 (deferred:callback-post d item))))
     d))
 
 (defun zotxt-easykey-insert (arg)

@@ -121,7 +121,7 @@ If only path is available, return it.  If no paths are available, error."
   "Open a Zotero items attachment.
 Prefix ARG means open in Emacs."
   (interactive "P")
-  (lexical-let ((arg1 arg))
+  (lexical-let ((arg arg))
     (zotxt-choose-async
      (lambda (items)
        (let ((item (car items)))
@@ -132,7 +132,7 @@ Prefix ARG means open in Emacs."
           :success (function*
                     (lambda (&key data &allow-other-keys)
                       (let ((paths (cdr (assq 'paths (elt data 0)))))
-                        (org-open-file (org-zotxt-choose-path paths) arg1))))))))))
+                        (org-open-file (org-zotxt-choose-path paths) arg))))))))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode
