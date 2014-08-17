@@ -42,7 +42,7 @@
   (format "%s/items" zotxt-url-base)
   "Items URL to contact.")
 
-(defun zotxt-mapcar-deferred (lst func)
+(defun zotxt-mapcar-deferred (func lst)
   (apply #'deferred:parallel
          (mapcar func lst)))
 
@@ -263,7 +263,7 @@ insert easykeys for the currently selected items in Zotero."
         (zotxt-choose-deferred))
       (deferred:nextc it
         (lambda (items)
-          (zotxt-mapcar-deferred items #'zotxt-get-item-easykey-deferred)))
+          (zotxt-mapcar-deferred #'zotxt-get-item-easykey-deferred items)))
       (deferred:nextc it
         (lambda (items)
           (with-current-buffer (marker-buffer mk)

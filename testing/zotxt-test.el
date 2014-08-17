@@ -27,7 +27,9 @@
                           (:key "0_TWCW4IJ7"))))
                     (deferred:nextc it
                       (lambda (items)
-                        (zotxt-mapcar-deferred items #'zotxt-get-item-easykey-deferred)))
+                        (zotxt-mapcar-deferred
+                         #'zotxt-get-item-easykey-deferred
+                         items)))
                     (deferred:sync! it)))
                   (easykeys (mapcar (lambda (item)
                                       (plist-get item :easykey)) items)))
