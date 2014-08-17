@@ -31,8 +31,8 @@
 
 (defun org-zotxt-extract-link-id-from-link (path)
   "Return the zotxt ID from a link PATH."
-  (if (string-match "^zotero://select/items/\\(.*\\)$" s)
-      (match-string 1 s)
+  (if (string-match "^zotero://select/items/\\(.*\\)$" path)
+      (match-string 1 path)
     nil))
 
 (defun org-zotxt-update-reference-link-at-point ()
@@ -43,18 +43,23 @@
     (if (eq 'link (org-element-type ct))
         (lexical-let ((mk (point-marker))
                       (item-id (org-zotxt-extract-link-id-from-link link)))
-          (if item-id
-              (zotxt-generate-bib-entry-from-id
-               item-id
-               :callback (lambda (text)
-                           (save-excursion
-                             (with-current-buffer (marker-buffer mk)
-                               (goto-char (marker-position mk))
-                               (let* ((ct (org-element-context)))
-                                 (goto-char (org-element-property :begin ct))
-                                 (delete-region (org-element-property :begin ct)
-                                                (org-element-property :end ct))
-                                 (insert (format "[[zotero://select/items/%s][%s]]" item-id text))))))))))))
+          (deferred:$
+            (deferred:next (lambda () `(:key ,item-id)))
+            (deferred:nextc it
+              (lambda (item)
+                (zotxt-get-item-bibliography-deferred item)))
+            (deferred:nextc it
+              (lambda (item)
+                (save-excursion
+                  (with-current-buffer (marker-buffer mk)
+                    (goto-char (marker-position mk))
+                    (let ((ct (org-element-context)))
+                      (goto-char (org-element-property :begin ct))
+                      (delete-region (org-element-property :begin ct)
+                                     (org-element-property :end ct))
+                      (insert (format "[[zotero://select/items/%s][%s]]"
+                                      (plist-get item :key)
+                                      (plist-get item :bibliography)))))))))))))
 
 (defun org-zotxt-update-all-reference-links ()
   "Update all zotero:// links in a document."
