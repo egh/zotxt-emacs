@@ -217,19 +217,6 @@ with a @ or { to be recognized, but this will *not* be returned."
             (let ((completions (mapcar (lambda (k) (format "@%s" k)) response)))
               (list start end completions))))))))
 
-(defun zotxt-easykey-get-item-id-at-point ()
-  "Return the Zotero ID of the item referred to by the easykey at
-point, or nil."
-  (save-excursion
-    (let ((key (zotxt-easykey-at-point)))
-      (if (null key)
-          nil
-        (let* ((url (format "http://127.0.0.1:23119/zotxt/items?format=key&easykey=%s" key))
-               (response (zotxt-url-retrieve url)))
-          (if (null response)
-              nil
-            (elt response 0)))))))
-
 (defun zotxt-get-item-easykey (item)
   "Given a plist ITEM, add the :easykey corresponding to the :key value.
 Non-deferred version of `zotxt-get-item-easykey-deferred'."
