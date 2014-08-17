@@ -118,11 +118,6 @@ specify a custom bibliography style."
                                  data)))))
       d))
 
-(defun zotxt-search (q format)
-  (zotxt-url-retrieve (format "http://127.0.0.1:23119/zotxt/search?q=%s&format=%s" 
-                               (url-hexify-string q)
-                               format)))
-
 (defun zotxt-choose-deferred ()
   "Prompt a user for a search string, then ask the user to select an item from the citation."
   (let* ((search-string
