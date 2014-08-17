@@ -104,7 +104,7 @@ specify a custom bibliography style."
                    (funcall callback text)))))))
 
 (defun zotxt-get-selected-items-deferred ()
-  (lexical-let ((d (deferred:new #'identity)))
+  (lexical-let ((d (deferred:new)))
     (request
      zotxt-url-items
      :params '(("selected" . "selected")
@@ -143,7 +143,7 @@ an item from the citation. Returns (citation . key)."
   "Prompt a user for a search string, then ask the user to select an item from the citation."
   (let* ((search-string
           (read-from-minibuffer "Zotero quicksearch query: ")))
-    (lexical-let ((d (deferred:new #'identity)))
+    (lexical-let ((d (deferred:new)))
       (request
        "http://127.0.0.1:23119/zotxt/search"
        :params `(("q" . ,search-string)
@@ -227,7 +227,7 @@ Non-deferred version of `zotxt-get-item-easykey-deferred'."
 (defun zotxt-get-item-easykey-deferred (item)
   "Given a plist ITEM, add the :easykey corresponding to the :key value."
   (lexical-let ((item item)
-                (d (deferred:new #'identity)))
+                (d (deferred:new)))
     (request
      zotxt-url-items
      :params `(("key" . ,(plist-get item :key))
