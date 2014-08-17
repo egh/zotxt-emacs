@@ -123,22 +123,6 @@ specify a custom bibliography style."
                                (url-hexify-string q)
                                format)))
 
-(defun zotxt-choose ()
-  "Prompt a user for a search string, then ask the user to select
-an item from the citation. Returns (citation . key)."
-  (let* ((search-string (read-from-minibuffer "Zotero quicksearch query: "))
-         (results (mapcar (lambda (e) 
-                            (cons (cdr (assq 'text e)) 
-                                  (cdr (assq 'key e))))
-                          (zotxt-search search-string "bibliography")))
-         (count (length results))
-         (item (if (= 0 count)
-                   nil
-                 (if (= 1 count)
-                     (car (car results))
-                   (completing-read "Select item: " results)))))
-    (assoc-string item results)))
-
 (defun zotxt-choose-deferred ()
   "Prompt a user for a search string, then ask the user to select an item from the citation."
   (let* ((search-string
