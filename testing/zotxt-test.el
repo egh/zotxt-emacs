@@ -1,3 +1,23 @@
+(ert-deftest zotxt-test-mapcar-deferred ()
+  (let ((results
+         (deferred:$
+           (deferred:next
+             (lambda ()
+               '(1 2 3)))
+           (deferred:nextc it
+             (lambda (lst)
+               (zotxt-mapcar-deferred
+                (lambda (n)
+                  (lexical-let ((n n)
+                                (d (deferred:new)))
+                    (deferred:setTimeout
+                      (lambda ()
+                        (deferred:callback-post d (+ 1 n))) 1)
+                    d))
+                  lst)))
+           (deferred:sync! it))))
+    (should (equal '(2 3 4) results))))
+         
 (ert-deftest zotxt-test-get-item-easykey ()
   (should (equal
            (plist-get (zotxt-get-item-easykey '(:key "0_ZBZQ4KMP")) :easykey)
