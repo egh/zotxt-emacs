@@ -31,8 +31,8 @@
 
 (defun org-zotxt-extract-link-id-from-link (path)
   "Return the zotxt ID from a link PATH."
-  (if (string-match "^zotero://select/items/\\(.*\\)$" s)
-      (match-string 1 s)
+  (if (string-match "^zotero://select/items/\\(.*\\)$" path)
+      (match-string 1 path)
     nil))
 
 (defun org-zotxt-update-reference-link-at-point ()
@@ -43,18 +43,23 @@
     (if (eq 'link (org-element-type ct))
         (lexical-let ((mk (point-marker))
                       (item-id (org-zotxt-extract-link-id-from-link link)))
-          (if item-id
-              (zotxt-generate-bib-entry-from-id
-               item-id
-               :callback (lambda (text)
-                           (save-excursion
-                             (with-current-buffer (marker-buffer mk)
-                               (goto-char (marker-position mk))
-                               (let* ((ct (org-element-context)))
-                                 (goto-char (org-element-property :begin ct))
-                                 (delete-region (org-element-property :begin ct)
-                                                (org-element-property :end ct))
-                                 (insert (format "[[zotero://select/items/%s][%s]]" item-id text))))))))))))
+          (deferred:$
+            (deferred:next (lambda () `(:key ,item-id)))
+            (deferred:nextc it
+              (lambda (item)
+                (zotxt-get-item-bibliography-deferred item)))
+            (deferred:nextc it
+              (lambda (item)
+                (save-excursion
+                  (with-current-buffer (marker-buffer mk)
+                    (goto-char (marker-position mk))
+                    (let ((ct (org-element-context)))
+                      (goto-char (org-element-property :begin ct))
+                      (delete-region (org-element-property :begin ct)
+                                     (org-element-property :end ct))
+                      (insert (format "[[zotero://select/items/%s][%s]]"
+                                      (plist-get item :key)
+                                      (plist-get item :bibliography)))))))))))))
 
 (defun org-zotxt-update-all-reference-links ()
   "Update all zotero:// links in a document."
@@ -121,24 +126,18 @@ If only path is available, return it.  If no paths are available, error."
   "Open a Zotero items attachment.
 Prefix ARG means open in Emacs."
   (interactive "P")
-  (lexical-let ((arg1 arg))
-    (deferred:$
-      (zotxt-choose-deferred)
-      (deferred:nextc it
-        (lambda (items)
-          (lexical-let ((d (deferred:new #'identity)))
-            (request-deferred
-             zotxt-url-items
-             :params `(("key" . ,(plist-get (car items) :key)) ("format" . "recoll"))
-             :parser 'json-read
-             :success (function*
-                       (lambda (&key data &allow-other-keys)
-                         (deferred:callback-post d data))))
-            d)))
-      (deferred:nextc it
-        (lambda (data)
-          (let ((paths (cdr (assq 'paths (elt data 0)))))
-            (org-open-file (org-zotxt-choose-path paths) arg1)))))))
+  (lexical-let ((arg arg))
+    (zotxt-choose-async
+     (lambda (items)
+       (let ((item (car items)))
+         (request
+          zotxt-url-items
+          :params `(("key" . ,(plist-get item :key)) ("format" . "recoll"))
+          :parser 'json-read
+          :success (function*
+                    (lambda (&key data &allow-other-keys)
+                      (let ((paths (cdr (assq 'paths (elt data 0)))))
+                        (org-open-file (org-zotxt-choose-path paths) arg))))))))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode

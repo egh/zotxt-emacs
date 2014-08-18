@@ -24,14 +24,13 @@
 
 ;;; Code:
 
-(require 'url-http)
-(require 'url-handlers)
 (require 'json)
 (require 'request)
 (require 'deferred)
+(require 'request-deferred)
 
 (defvar zotxt-default-bibliography-style
-  "http://www.zotero.org/styles/chicago-note-bibliography"
+  "chicago-note-bibliography"
   "Default bibliography style to use.")
 
 (defvar zotxt-url-base
@@ -42,34 +41,9 @@
   (format "%s/items" zotxt-url-base)
   "Items URL to contact.")
 
-(defun zotxt-url-get-body-as-string ()
-  (with-temp-buffer
-    (url-insert (current-buffer))
-    (buffer-string)))
-
-(defun zotxt-url-retrieve (url)
-  (save-excursion
-    (let (url-http-end-of-headers ; prevent warnings about free variables
-          url-http-response-status
-          (buff (url-retrieve-synchronously url)))
-      (set-buffer buff)
-      (if (not url-http-end-of-headers)
-          (error "Did not receive data from %s" url))
-      (url-http-parse-response)
-      (cond ((eq 400 url-http-response-status)
-             (error "Client error from server with message: %s" 
-                    (zotxt-url-get-body-as-string)))
-            ((eq 500 url-http-response-status)
-             (error "Server error from server with message: %s"
-                    (zotxt-url-get-body-as-string)))
-            ((eq 200 url-http-response-status)
-             (with-temp-buffer
-               (url-insert buff)
-               (goto-char (point-min))
-               (json-read)))
-            (t
-             (error "Unexpected response from server: %d" 
-                    url-http-response-status))))))
+(defun zotxt-mapcar-deferred (func lst)
+  (apply #'deferred:parallel
+         (mapcar func lst)))
 
 (defun zotxt-clean-bib-entry (entry)
   "Clean up a bibliography entry as returned by Zotxt."
@@ -80,27 +54,36 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
-(cl-defun zotxt-generate-bib-entry-from-id-deferred (item-id &key
-                                                             (style zotxt-default-bibliography-style))
-  "Retrieve the generated bibliography for ITEM-ID.
-Call CALLBACK with text of bibliography entry.  Use STYLE to
-specify a custom bibliography style."
-  (lexical-let ((d (deferred:new #'identity)))
+(cl-defun zotxt-generate-bib-entry-from-id (item-id &key
+    (item &key
+          (style zotxt-default-bibliography-style))
+  "Retrieve the generated bibliography for ITEM (a plist).
+Use STYLE to specify a custom bibliography style.
+Adds a plist entry with the name of the style as a self-quoting symbol, e.g.
+:chicago-note-bibliography.
+Also adds :bibliography entry if STYLE is the default."
+  (lexical-let ((d (deferred:new))
+                (style style)
+                (item item))
     (request
      zotxt-url-items
-     :params `(("key" . ,item-id)
+     :params `(("key" . ,(plist-get item :key))
                ("format" . "bibliography")
                ("style" . ,style))
      :parser 'json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
-                 (let* ((first (elt data 0))
-                        (text (cdr (assq 'text first))))
-                   (deferred:callback-post d text)))))
+                 (let* ((style-key (intern (format ":%s" style)))
+                        (first (elt data 0))
+                        (text (zotxt-clean-bib-entry (cdr (assq 'text first)))))
+                   (if (string= style zotxt-default-bibliography-style)
+                       (plist-put item :bibliography text))
+                   (plist-put item style-key text)
+                   (deferred:callback-post d item)))))
     d))
 
 (defun zotxt-get-selected-items-deferred ()
-  (lexical-let ((d (deferred:new #'identity)))
+  (lexical-let ((d (deferred:new)))
     (request
      zotxt-url-items
      :params '(("selected" . "selected")
@@ -114,32 +97,11 @@ specify a custom bibliography style."
                                  data)))))
       d))
 
-(defun zotxt-search (q format)
-  (zotxt-url-retrieve (format "http://127.0.0.1:23119/zotxt/search?q=%s&format=%s" 
-                               (url-hexify-string q)
-                               format)))
-
-(defun zotxt-choose ()
-  "Prompt a user for a search string, then ask the user to select
-an item from the citation. Returns (citation . key)."
-  (let* ((search-string (read-from-minibuffer "Zotero quicksearch query: "))
-         (results (mapcar (lambda (e) 
-                            (cons (cdr (assq 'text e)) 
-                                  (cdr (assq 'key e))))
-                          (zotxt-search search-string "bibliography")))
-         (count (length results))
-         (item (if (= 0 count)
-                   nil
-                 (if (= 1 count)
-                     (car (car results))
-                   (completing-read "Select item: " results)))))
-    (assoc-string item results)))
-
 (defun zotxt-choose-deferred ()
   "Prompt a user for a search string, then ask the user to select an item from the citation."
   (let* ((search-string
           (read-from-minibuffer "Zotero quicksearch query: ")))
-    (lexical-let ((d (deferred:new #'identity)))
+    (lexical-let ((d (deferred:new)))
       (request
        "http://127.0.0.1:23119/zotxt/search"
        :params `(("q" . ,search-string)
@@ -203,42 +165,66 @@ with a @ or { to be recognized, but this will *not* be returned."
   (save-excursion
     (if (not (zotxt-easykey-at-point-match))
         nil
-      (let ((start (match-beginning 0))
-            (end (match-end 0))
-            (key (match-string 1)))
-        (let* ((url (format "http://127.0.0.1:23119/zotxt/complete?easykey=%s" key))
-               (response (zotxt-url-retrieve url)))
-          (if (null response)
-              nil
-            (let ((completions (mapcar (lambda (k) (format "@%s" k)) response)))
-              (list start end completions))))))))
+      (let* ((start (match-beginning 0))
+             (end (match-end 0))
+             (key (match-string 1))
+             (completions
+              (deferred:$
+                (request-deferred
+                 "http://127.0.0.1:23119/zotxt/complete"
+                 :params `(("easykey" . ,key))
+                 :parser 'json-read)
+                (deferred:nextc it
+                  (lambda (response)
+                    (mapcar (lambda (k) (format "@%s" k))
+                            (request-response-data response))))
+                (deferred:sync! it))))
+        (if (null completions)
+            nil
+          (list start end completions))))))
 
-(defun zotxt-easykey-get-item-id-at-point ()
-  "Return the Zotero ID of the item referred to by the easykey at
-point, or nil."
-  (save-excursion
-    (let ((key (zotxt-easykey-at-point)))
-      (if (null key)
-          nil
-        (let* ((url (format "http://127.0.0.1:23119/zotxt/items?format=key&easykey=%s" key))
-               (response (zotxt-url-retrieve url)))
-          (if (null response)
-              nil
-            (elt response 0)))))))
-
-(defun zotxt-easykey-get-item-easykey (key)
-  (elt (zotxt-url-retrieve
-        (format "http://127.0.0.1:23119/zotxt/items?key=%s&format=easykey" key)) 0))
+(defun zotxt-get-item-easykey (item)
+  "Given a plist ITEM, add the :easykey corresponding to the :key value.
+Non-deferred version of `zotxt-get-item-easykey-deferred'."
+  (deferred:$
+    (zotxt-get-item-easykey-deferred item)
+    (deferred:sync! it)))
+    
+(defun zotxt-get-item-easykey-deferred (item)
+  "Given a plist ITEM, add the :easykey corresponding to the :key value."
+  (lexical-let ((item item)
+                (d (deferred:new)))
+    (request
+     zotxt-url-items
+     :params `(("key" . ,(plist-get item :key))
+               ("format" . "easykey"))
+     :parser 'json-read
+     :success (function*
+               (lambda (&key data &allow-other-keys)
+                 (plist-put item :easykey (elt data 0))
+                 (deferred:callback-post d item))))
+    d))
 
 (defun zotxt-easykey-insert (arg)
   "Prompt for a search string and insert an easy key. With C-u,
 insert easykeys for the currently selected items in Zotero."
   (interactive "P")
-  (let ((keys (if arg
-                 (zotxt-get-selected-item-ids)
-                (list (cdr (zotxt-choose))))))
-    (insert (mapconcat (lambda (key)
-                         (format "@%s" (zotxt-easykey-get-item-easykey key))) keys " "))))
+  (lexical-let ((mk (point-marker)))
+    (deferred:$
+      (if arg
+          (zotxt-get-selected-items-deferred)
+        (zotxt-choose-deferred))
+      (deferred:nextc it
+        (lambda (items)
+          (zotxt-mapcar-deferred #'zotxt-get-item-easykey-deferred items)))
+      (deferred:nextc it
+        (lambda (items)
+          (with-current-buffer (marker-buffer mk)
+            (goto-char (marker-position mk))
+            (insert (mapconcat
+                     (lambda (item)
+                       (format "@%s" (plist-get item :easykey)))
+                     items " "))))))))
 
 (defun zotxt-easykey-select-item-at-point ()
   "Select the item referred to by the easykey at point in Zotero."
