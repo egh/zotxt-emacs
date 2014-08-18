@@ -24,8 +24,6 @@
 
 ;;; Code:
 
-(require 'url-http)
-(require 'url-handlers)
 (require 'json)
 (require 'request)
 (require 'deferred)
