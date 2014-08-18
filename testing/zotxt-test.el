@@ -77,5 +77,16 @@
       (while (string= start-text (buffer-string))
         (sleep-for 0 1))
       (should (equal (buffer-string) end-text)))))
-                   
 
+(ert-deftest org-zotxt-test-update-all-reference-links ()
+  (let ((start-text "[[zotero://select/items/0_ZBZQ4KMP][foo]]
+[[zotero://select/items/0_TWCW4IJ7][bar]]")
+        (end-text "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]
+[[zotero://select/items/0_TWCW4IJ7][Doe, John, and Jenny Roe. “Why Water Is Wet.” In Third Book, edited by Sam Smith. Oxford: Oxford University Press, 2007.]]"))
+    (with-temp-buffer
+      (insert start-text)
+      (goto-char (point-min))
+      (org-zotxt-update-all-reference-links)
+      (while (> 150 (length (buffer-string)))
+        (sleep-for 0 1))
+      (should (equal (buffer-string) end-text)))))
