@@ -47,35 +47,6 @@
   (apply #'deferred:parallel
          (mapcar func lst)))
 
-(defun zotxt-url-get-body-as-string ()
-  (with-temp-buffer
-    (url-insert (current-buffer))
-    (buffer-string)))
-
-(defun zotxt-url-retrieve (url)
-  (save-excursion
-    (let (url-http-end-of-headers ; prevent warnings about free variables
-          url-http-response-status
-          (buff (url-retrieve-synchronously url)))
-      (set-buffer buff)
-      (if (not url-http-end-of-headers)
-          (error "Did not receive data from %s" url))
-      (url-http-parse-response)
-      (cond ((eq 400 url-http-response-status)
-             (error "Client error from server with message: %s" 
-                    (zotxt-url-get-body-as-string)))
-            ((eq 500 url-http-response-status)
-             (error "Server error from server with message: %s"
-                    (zotxt-url-get-body-as-string)))
-            ((eq 200 url-http-response-status)
-             (with-temp-buffer
-               (url-insert buff)
-               (goto-char (point-min))
-               (json-read)))
-            (t
-             (error "Unexpected response from server: %d" 
-                    url-http-response-status))))))
-
 (defun zotxt-clean-bib-entry (entry)
   "Clean up a bibliography entry as returned by Zotxt."
   (let ((retval entry))
