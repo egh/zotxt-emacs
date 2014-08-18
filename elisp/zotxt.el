@@ -29,6 +29,7 @@
 (require 'json)
 (require 'request)
 (require 'deferred)
+(require 'request-deferred)
 
 (defvar zotxt-default-bibliography-style
   "chicago-note-bibliography"
@@ -195,15 +196,23 @@ with a @ or { to be recognized, but this will *not* be returned."
   (save-excursion
     (if (not (zotxt-easykey-at-point-match))
         nil
-      (let ((start (match-beginning 0))
-            (end (match-end 0))
-            (key (match-string 1)))
-        (let* ((url (format "http://127.0.0.1:23119/zotxt/complete?easykey=%s" key))
-               (response (zotxt-url-retrieve url)))
-          (if (null response)
-              nil
-            (let ((completions (mapcar (lambda (k) (format "@%s" k)) response)))
-              (list start end completions))))))))
+      (let* ((start (match-beginning 0))
+             (end (match-end 0))
+             (key (match-string 1))
+             (completions
+              (deferred:$
+                (request-deferred
+                 "http://127.0.0.1:23119/zotxt/complete"
+                 :params `(("easykey" . ,key))
+                 :parser 'json-read)
+                (deferred:nextc it
+                  (lambda (response)
+                    (mapcar (lambda (k) (format "@%s" k))
+                            (request-response-data response))))
+                (deferred:sync! it))))
+        (if (null completions)
+            nil
+          (list start end completions))))))
 
 (defun zotxt-get-item-easykey (item)
   "Given a plist ITEM, add the :easykey corresponding to the :key value.
