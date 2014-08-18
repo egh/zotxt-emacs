@@ -66,3 +66,16 @@
            (deferred:sync! it))))
     (should (equal text (plist-get item :bibliography)))
     (should (equal text (plist-get item :chicago-note-bibliography)))))
+
+(ert-deftest org-zotxt-test-update-reference-link-at-point ()
+  (let ((start-text "[[zotero://select/items/0_ZBZQ4KMP][foo]]")
+        (end-text "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]"))
+    (with-temp-buffer
+      (insert start-text)
+      (goto-char (point-min))
+      (org-zotxt-update-reference-link-at-point)
+      (while (string= start-text (buffer-string))
+        (sleep-for 0 1))
+      (should (equal (buffer-string) end-text)))))
+                   
+
