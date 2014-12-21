@@ -63,9 +63,7 @@
                       (goto-char (org-element-property :begin ct))
                       (delete-region (org-element-property :begin ct)
                                      (org-element-property :end ct))
-                      (insert (format "[[zotero://select/items/%s][%s]]"
-                                      (plist-get item :key)
-                                      (plist-get item :bibliography)))))))))))))
+                      (org-zotxt-insert-reference-link-to-item item)))))))))))
 
 (defun org-zotxt-update-all-reference-links ()
   "Update all zotero:// links in a document."
