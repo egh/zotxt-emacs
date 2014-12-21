@@ -54,16 +54,14 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
-(cl-defun zotxt-generate-bib-entry-from-id (item-id &key
-    (item &key
-          (style zotxt-default-bibliography-style))
+(defun zotxt-generate-bib-entry-from-id (item)
   "Retrieve the generated bibliography for ITEM (a plist).
 Use STYLE to specify a custom bibliography style.
 Adds a plist entry with the name of the style as a self-quoting symbol, e.g.
 :chicago-note-bibliography.
 Also adds :bibliography entry if STYLE is the default."
   (lexical-let ((d (deferred:new))
-                (style style)
+                (style zotxt-default-bibliography-style)
                 (item item))
     (request
      zotxt-url-items
