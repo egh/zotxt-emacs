@@ -93,18 +93,31 @@ insertion in org-mode. Useful for capture templates."
 search to choose item. If prefix argument (C-u) is used, will
 insert the currently selected item from Zotero."
   (interactive "P")
-  (if arg 
-      (let ((ids (zotxt-get-selected-item-ids)))
-        (mapc (lambda (id)
-                (insert (format
-                         "[[zotero://select/items/%s][%s]]\n"
-                         id id))
-                (org-zotxt-update-reference-link-at-point)
-                (forward-line 1))
-              ids))
-    (let ((item (zotxt-choose)))
-      (insert (format
-               "[[zotero://select/items/%s][%s]]\n" (cdr item) (car item))))))
+  (lexical-let ((mk (point-marker)))
+    (if arg 
+        (deferred:$
+          (zotxt-get-selected-items-deferred)
+          (deferred:nextc it
+            (lambda (ids)
+              (with-current-buffer (marker-buffer mk)
+                (goto-char (marker-position mk))
+                (mapc (lambda (id)
+                        (insert (format
+                                 "[[zotero://select/items/%s][%s]]\n"
+                                 id id))
+                        (org-zotxt-update-reference-link-at-point)
+                        (forward-line 1))
+                      ids)))))
+      (deferred:$
+        (zotxt-choose-deferred)
+        (deferred:nextc it
+          (lambda (item)
+            (zotxt-generate-bib-entry-from-id (car item))))
+        (deferred:nextc it
+          (lambda (item)
+            (with-current-buffer (marker-buffer mk)
+              (goto-char (marker-position mk))
+              (org-zotxt-insert-reference-link-to-item item))))))))
 
 (org-add-link-type "zotero"
                    (lambda (rest)
