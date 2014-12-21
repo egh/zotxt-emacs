@@ -46,7 +46,7 @@
          (mapcar func lst)))
 
 (defun zotxt-clean-bib-entry (entry)
-  "Clean up a bibliography entry as returned by Zotxt."
+  "Clean up a bibliography ENTRY as returned by Zotxt."
   (let ((retval entry))
     (setq retval (replace-regexp-in-string "\n" "" retval))
     (setq retval (replace-regexp-in-string "\" "“" retval))
