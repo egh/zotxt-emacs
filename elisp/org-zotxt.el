@@ -35,6 +35,12 @@
       (match-string 1 path)
     nil))
 
+(defun org-zotxt-insert-reference-link-to-item (item)
+    "Insert link to Zotero ITEM in buffer."
+  (insert (org-make-link-string (format "zotero://select/items/%s"
+                                        (plist-get item :key))
+                                (plist-get item :bibliography))))
+
 (defun org-zotxt-update-reference-link-at-point ()
   "Update the zotero:// link at point."
   (interactive)
