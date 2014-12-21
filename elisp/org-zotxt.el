@@ -105,7 +105,7 @@ insert the currently selected item from Zotero."
         (zotxt-choose-deferred)
         (deferred:nextc it
           (lambda (item)
-            (zotxt-generate-bib-entry-from-id (car item))))
+            (zotxt-get-item-bibliography-deferred (car item))))
         (deferred:nextc it
           (lambda (item)
             (with-current-buffer (marker-buffer mk)

@@ -54,7 +54,7 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
-(defun zotxt-generate-bib-entry-from-id (item)
+(defun zotxt-get-item-bibliography-deferred (item)
   "Retrieve the generated bibliography for ITEM (a plist).
 Use STYLE to specify a custom bibliography style.
 Adds a plist entry with the name of the style as a self-quoting symbol, e.g.
