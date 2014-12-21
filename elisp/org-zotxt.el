@@ -81,13 +81,6 @@
           (goto-char end))
         (setq next-link (org-element-link-successor))))))
 
-(defun org-zotxt-get-reference-link ()
-  "Prompts for item and returns a reference link suitable for
-insertion in org-mode. Useful for capture templates."
-  (let ((item (zotxt-choose)))
-    (format
-     "[[zotero://select/items/%s][%s]]\n" (cdr item) (car item))))
-
 (defun org-zotxt-insert-reference-link (arg)
   "Insert a zotero link in the org-mode document. Prompts for
 search to choose item. If prefix argument (C-u) is used, will
