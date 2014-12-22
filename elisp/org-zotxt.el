@@ -26,7 +26,7 @@
 ;;; Code:
 
 (require 'request)
-(require 'org)
+(require 'org-element)
 (require 'zotxt)
 
 (defun org-zotxt-extract-link-id-from-link (path)
