@@ -39,7 +39,7 @@
     "Insert link to Zotero ITEM in buffer."
   (insert (org-make-link-string (format "zotero://select/items/%s"
                                         (plist-get item :key))
-                                (plist-get item :bibliography))))
+                                (plist-get item :citation))))
 
 (defun org-zotxt-update-reference-link-at-point ()
   "Update the zotero:// link at point."
