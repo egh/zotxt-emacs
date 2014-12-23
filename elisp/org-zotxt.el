@@ -36,10 +36,18 @@
     nil))
 
 (defun org-zotxt-insert-reference-link-to-item (item)
-    "Insert link to Zotero ITEM in buffer."
+  "Insert link to Zotero ITEM in buffer."
   (insert (org-make-link-string (format "zotero://select/items/%s"
                                         (plist-get item :key))
                                 (plist-get item :citation))))
+
+(defun org-zotxt-insert-reference-links-to-items (items)
+  "Insert links to Zotero ITEMS in buffer."
+  (mapc (lambda (item)
+          (org-zotxt-insert-reference-link-to-item item)
+          (insert "\n")
+          (forward-line 1))
+        items))
 
 (defun org-zotxt-update-reference-link-at-point ()
   "Update the zotero:// link at point."
@@ -87,30 +95,18 @@ search to choose item. If prefix argument (C-u) is used, will
 insert the currently selected item from Zotero."
   (interactive "P")
   (lexical-let ((mk (point-marker)))
-    (if arg 
-        (deferred:$
+    (deferred:$
+      (if arg 
           (zotxt-get-selected-items-deferred)
-          (deferred:nextc it
-            (lambda (ids)
-              (with-current-buffer (marker-buffer mk)
-                (goto-char (marker-position mk))
-                (mapc (lambda (id)
-                        (insert (format
-                                 "[[zotero://select/items/%s][%s]]\n"
-                                 id id))
-                        (org-zotxt-update-reference-link-at-point)
-                        (forward-line 1))
-                      ids)))))
-      (deferred:$
-        (zotxt-choose-deferred)
-        (deferred:nextc it
-          (lambda (item)
-            (zotxt-get-item-bibliography-deferred (car item))))
-        (deferred:nextc it
-          (lambda (item)
-            (with-current-buffer (marker-buffer mk)
-              (goto-char (marker-position mk))
-              (org-zotxt-insert-reference-link-to-item item))))))))
+        (zotxt-choose-deferred))
+      (deferred:nextc it
+        (lambda (items)
+          (zotxt-mapcar-deferred #'zotxt-get-item-bibliography-deferred items)))
+      (deferred:nextc it
+        (lambda (items)
+          (with-current-buffer (marker-buffer mk)
+            (goto-char (marker-position mk))
+            (org-zotxt-insert-reference-links-to-items items)))))))
 
 (org-add-link-type "zotero"
                    (lambda (rest)

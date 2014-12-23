@@ -63,21 +63,25 @@ Also adds :citation entry if STYLE is the default."
   (lexical-let ((d (deferred:new))
                 (style zotxt-default-bibliography-style)
                 (item item))
-    (request
-     zotxt-url-items
-     :params `(("key" . ,(plist-get item :key))
-               ("format" . "bibliography")
-               ("style" . ,style))
-     :parser 'json-read
-     :success (function*
-               (lambda (&key data &allow-other-keys)
-                 (let* ((style-key (intern (format ":%s" style)))
-                        (first (elt data 0))
-                        (text (zotxt-clean-bib-entry (cdr (assq 'text first)))))
-                   (if (string= style zotxt-default-bibliography-style)
-                       (plist-put item :citation text))
-                   (plist-put item style-key text)
-                   (deferred:callback-post d item)))))
+    (if (and (string= style zotxt-default-bibliography-style)
+             (plist-get item :citation))
+        ;; item already has citation, no need to fetch
+        (deferred:callback-post d item)
+      (request
+       zotxt-url-items
+       :params `(("key" . ,(plist-get item :key))
+                 ("format" . "bibliography")
+                 ("style" . ,style))
+       :parser 'json-read
+       :success (function*
+                 (lambda (&key data &allow-other-keys)
+                   (let* ((style-key (intern (format ":%s" style)))
+                          (first (elt data 0))
+                          (text (zotxt-clean-bib-entry (cdr (assq 'text first)))))
+                     (if (string= style zotxt-default-bibliography-style)
+                         (plist-put item :citation text))
+                     (plist-put item style-key text)
+                     (deferred:callback-post d item))))))
     d))
 
 (defun zotxt-get-selected-items-deferred ()

@@ -90,3 +90,20 @@
       (while (> 150 (length (buffer-string)))
         (sleep-for 0 1))
       (should (equal (buffer-string) end-text)))))
+
+(ert-deftest org-zotxt-test-insert-reference-link-to-item ()
+  (let ((text "[[zotero://select/items/foo][Foo Bar]]")
+        (item '(:key "foo" :citation "Foo Bar")))
+    (with-temp-buffer
+      (org-zotxt-insert-reference-link-to-item item)
+      (should (equal (buffer-string) text)))))
+
+(ert-deftest org-zotxt-test-insert-reference-links-to-items ()
+  (let ((text "[[zotero://select/items/foo][Foo Bar]]
+[[zotero://select/items/bar][Bar Foo]]
+")
+        (items '((:key "foo" :citation "Foo Bar")
+                 (:key "bar" :citation "Bar Foo"))))
+    (with-temp-buffer
+      (org-zotxt-insert-reference-links-to-items items)
+      (should (equal (buffer-string) text)))))
