@@ -29,6 +29,13 @@
 (require 'org-element)
 (require 'zotxt)
 
+(defcustom org-zotxt-link-text-style
+  :citation
+  "Style to use for org zotxt link texts."
+  :group 'org-zotxt
+  :type '(choice (const :tag "easykey" :easykey)
+                 (const :tag "citation" :citation)))
+
 (defun org-zotxt-extract-link-id-from-link (path)
   "Return the zotxt ID from a link PATH."
   (if (string-match "^zotero://select/items/\\(.*\\)$" path)
@@ -39,7 +46,9 @@
   "Insert link to Zotero ITEM in buffer."
   (insert (org-make-link-string (format "zotero://select/items/%s"
                                         (plist-get item :key))
-                                (plist-get item :citation))))
+                                (if (eq org-zotxt-link-text-style :easykey)
+                                    (concat "@" (plist-get item :easykey))
+                                  (plist-get item :citation)))))
 
 (defun org-zotxt-insert-reference-links-to-items (items)
   "Insert links to Zotero ITEMS in buffer."
@@ -61,7 +70,7 @@
             (deferred:next (lambda () `(:key ,item-id)))
             (deferred:nextc it
               (lambda (item)
-                (zotxt-get-item-bibliography-deferred item)))
+                (org-zotxt-get-item-link-text-deferred item)))
             (deferred:nextc it
               (lambda (item)
                 (save-excursion
@@ -89,6 +98,14 @@
           (goto-char end))
         (setq next-link (org-element-link-successor))))))
 
+(defun org-zotxt-get-item-link-text-deferred (item)
+  "Get the link text for ITEM.
+May be either an easy key or bibliography, depending on the value
+of `org-zotxt-link-text-style'."
+  (if (eq org-zotxt-link-text-style :easykey)
+      (zotxt-get-item-easykey-deferred item)
+    (zotxt-get-item-bibliography-deferred item)))
+
 (defun org-zotxt-insert-reference-link (arg)
   "Insert a zotero link in the org-mode document. Prompts for
 search to choose item. If prefix argument (C-u) is used, will
@@ -101,7 +118,7 @@ insert the currently selected item from Zotero."
         (zotxt-choose-deferred))
       (deferred:nextc it
         (lambda (items)
-          (zotxt-mapcar-deferred #'zotxt-get-item-bibliography-deferred items)))
+          (zotxt-mapcar-deferred #'org-zotxt-get-item-link-text-deferred items)))
       (deferred:nextc it
         (lambda (items)
           (with-current-buffer (marker-buffer mk)
