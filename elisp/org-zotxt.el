@@ -138,6 +138,7 @@ insert the currently selected item from Zotero."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c \" i") 'org-zotxt-insert-reference-link)
     (define-key map (kbd "C-c \" u") 'org-zotxt-update-reference-link-at-point)
+    (define-key map (kbd "C-c \" a") 'org-zotxt-open-attachment)
     map))
 
 (defun org-zotxt-choose-path (paths)
@@ -151,21 +152,23 @@ If only path is available, return it.  If no paths are available, error."
       (completing-read "File: " (append paths nil)))))
 
 (defun org-zotxt-open-attachment (arg)
-  "Open a Zotero items attachment.
-Prefix ARG means open in Emacs."
+  "Open attachment of Zotero items linked at point.
+If multiple attachments, will prompt.
+With optional prefix argument ARG, Emacs will visit the file.
+With a double C-u C-u prefix arg, Org tries to avoid opening in Emacs
+and to use an external application to visit the file."
   (interactive "P")
-  (lexical-let ((arg arg))
+  (lexical-let ((item-id (org-zotxt-extract-link-id-at-point))
+                (arg arg))
     (deferred:$
-      (zotxt-choose-deferred)
-      (deferred:nextc it
-        (lambda (items)
-          (request-deferred
-           zotxt-url-items
-           :params `(("key" . ,(plist-get  (car items) :key)) ("format" . "recoll"))
-           :parser 'json-read)))
+      (request-deferred
+       zotxt-url-items
+       :params `(("key" . ,item-id) ("format" . "recoll"))
+       :parser 'json-read)
       (deferred:nextc it
         (lambda (response)
           (let ((paths (cdr (assq 'paths (elt (request-response-data response) 0)))))
+            (message "%s" arg)
             (org-open-file (org-zotxt-choose-path paths) arg)))))))
 
 ;;;###autoload
