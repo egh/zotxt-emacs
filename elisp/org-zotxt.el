@@ -36,6 +36,13 @@
   :type '(choice (const :tag "easykey" :easykey)
                  (const :tag "citation" :citation)))
 
+(defun org-zotxt-extract-link-id-at-point ()
+  "Extract the Zotero key of the link at point."
+  (let ((ct (org-element-context)))
+    (if (eq 'link (org-element-type ct))
+        (org-zotxt-extract-link-id-from-link (org-element-property :raw-link ct))
+      nil)))
+
 (defun org-zotxt-extract-link-id-from-link (path)
   "Return the zotxt ID from a link PATH."
   (if (string-match "^zotero://select/items/\\(.*\\)$" path)
@@ -61,26 +68,24 @@
 (defun org-zotxt-update-reference-link-at-point ()
   "Update the zotero:// link at point."
   (interactive)
-  (let* ((ct (org-element-context))
-         (link (org-element-property :raw-link ct)))
-    (if (eq 'link (org-element-type ct))
-        (lexical-let ((mk (point-marker))
-                      (item-id (org-zotxt-extract-link-id-from-link link)))
-          (deferred:$
-            (deferred:next (lambda () `(:key ,item-id)))
-            (deferred:nextc it
-              (lambda (item)
-                (org-zotxt-get-item-link-text-deferred item)))
-            (deferred:nextc it
-              (lambda (item)
-                (save-excursion
-                  (with-current-buffer (marker-buffer mk)
-                    (goto-char (marker-position mk))
-                    (let ((ct (org-element-context)))
-                      (goto-char (org-element-property :begin ct))
-                      (delete-region (org-element-property :begin ct)
-                                     (org-element-property :end ct))
-                      (org-zotxt-insert-reference-link-to-item item)))))))))))
+  (lexical-let ((mk (point-marker))
+                (item-id (org-zotxt-extract-link-id-at-point)))
+    (if item-id
+        (deferred:$
+          (deferred:next (lambda () `(:key ,item-id)))
+          (deferred:nextc it
+            (lambda (item)
+              (org-zotxt-get-item-link-text-deferred item)))
+          (deferred:nextc it
+            (lambda (item)
+              (save-excursion
+                (with-current-buffer (marker-buffer mk)
+                  (goto-char (marker-position mk))
+                  (let ((ct (org-element-context)))
+                    (goto-char (org-element-property :begin ct))
+                    (delete-region (org-element-property :begin ct)
+                                   (org-element-property :end ct))
+                    (org-zotxt-insert-reference-link-to-item item))))))))))
 
 (defun org-zotxt-update-all-reference-links ()
   "Update all zotero:// links in a document."

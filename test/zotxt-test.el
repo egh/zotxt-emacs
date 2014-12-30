@@ -91,6 +91,12 @@
             (deferred:sync! it))))
     (should (equal text (plist-get item :easykey)))))
 
+(ert-deftest org-zotxt-test-extract-link-id-at-point ()
+  (with-temp-buffer
+    (insert "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]")
+    (goto-char (point-min))
+    (should (equal (org-zotxt-extract-link-id-at-point) "0_ZBZQ4KMP"))))
+
 (ert-deftest org-zotxt-test-update-reference-link-at-point ()
   (let ((org-zotxt-link-text-style :citation)
         (start-text "[[zotero://select/items/0_ZBZQ4KMP][foo]]")
