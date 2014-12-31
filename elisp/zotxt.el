@@ -99,32 +99,33 @@ Also adds :citation entry if STYLE is the default."
                                  data)))))
       d))
 
-(defun zotxt-choose-deferred ()
+(defun zotxt-choose-deferred (&optional search-string)
   "Prompt a user for a search string, then ask the user to select an item from the citation."
-  (let* ((search-string
-          (read-from-minibuffer "Zotero quicksearch query: ")))
-    (lexical-let ((d (deferred:new)))
-      (request
-       "http://127.0.0.1:23119/zotxt/search"
-       :params `(("q" . ,search-string)
-                 ("format" . "bibliography"))
-       :parser 'json-read
-       :success (function*
-                 (lambda (&key data &allow-other-keys)
-                   (let* ((results (mapcar (lambda (e) 
-                                             (cons (cdr (assq 'text e)) 
-                                                   (cdr (assq 'key e))))
-                                           data))
-                          (count (length results))
-                          (citation (if (= 0 count)
-                                        nil
-                                      (if (= 1 count)
-                                          (car (car results))
-                                        (completing-read "Select item: " results))))
-                          (key (cdr (assoc-string citation results))))
-                     (deferred:callback-post
-                       d `((:key ,key :citation ,citation)))))))
-      d)))
+  (if (null search-string)
+      (setq search-string
+            (read-from-minibuffer "Zotero quicksearch query: ")))
+  (lexical-let ((d (deferred:new)))
+    (request
+     "http://127.0.0.1:23119/zotxt/search"
+     :params `(("q" . ,search-string)
+               ("format" . "bibliography"))
+     :parser 'json-read
+     :success (function*
+               (lambda (&key data &allow-other-keys)
+                 (let* ((results (mapcar (lambda (e) 
+                                           (cons (cdr (assq 'text e)) 
+                                                 (cdr (assq 'key e))))
+                                         data))
+                        (count (length results))
+                        (citation (if (= 0 count)
+                                      nil
+                                    (if (= 1 count)
+                                        (car (car results))
+                                      (completing-read "Select item: " results))))
+                        (key (cdr (assoc-string citation results))))
+                   (deferred:callback-post
+                     d `((:key ,key :citation ,citation)))))))
+    d))
 
 (defun zotxt-select-easykey (easykey)
   (request

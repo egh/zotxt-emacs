@@ -123,6 +123,13 @@
         (sleep-for 0 1))
       (should (equal (buffer-string) end-text)))))
 
+(ert-deftest zotxt-test-choose-deferred ()
+  (let ((results
+         (deferred:$
+           (zotxt-choose-deferred "doe first book")
+           (deferred:sync! it))))
+    (should (equal results '((:key "0_ZBZQ4KMP" :citation "Doe, John. First Book. Cambridge: Cambridge University Press, 2005."))))))
+
 (ert-deftest org-zotxt-test-insert-reference-link-to-item ()
   (let ((org-zotxt-link-text-style :citation)
         (text "[[zotero://select/items/foo][Foo Bar]]")
