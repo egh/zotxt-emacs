@@ -124,7 +124,8 @@ Also adds :citation entry if STYLE is the default."
                                       (completing-read "Select item: " results))))
                         (key (cdr (assoc-string citation results))))
                    (deferred:callback-post
-                     d `((:key ,key :citation ,citation)))))))
+                     d (if (null citation) nil
+                         `((:key ,key :citation ,citation))))))))
     d))
 
 (defun zotxt-select-easykey (easykey)

@@ -123,12 +123,17 @@ insert the currently selected item from Zotero."
         (zotxt-choose-deferred))
       (deferred:nextc it
         (lambda (items)
-          (zotxt-mapcar-deferred #'org-zotxt-get-item-link-text-deferred items)))
+          (if (null items)
+              (error "No item found for search")
+            (zotxt-mapcar-deferred #'org-zotxt-get-item-link-text-deferred items))))
       (deferred:nextc it
         (lambda (items)
           (with-current-buffer (marker-buffer mk)
             (goto-char (marker-position mk))
-            (org-zotxt-insert-reference-links-to-items items)))))))
+            (org-zotxt-insert-reference-links-to-items items))))
+      (deferred:error it
+        (lambda (err)
+          (error (error-message-string err)))))))
 
 (org-add-link-type "zotero"
                    (lambda (rest)
