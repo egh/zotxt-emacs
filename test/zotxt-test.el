@@ -18,12 +18,7 @@
            (deferred:sync! it))))
     (should (equal '(2 3 4) results))))
          
-(ert-deftest zotxt-test-get-item-easykey ()
-  (should (equal
-           (plist-get (zotxt-get-item-easykey '(:key "0_ZBZQ4KMP")) :easykey)
-           "doe:2005first")))
-
-(ert-deftest zotxt-test-get-item-easykey-deferred ()
+(ert-deftest zotxt-test-get-item-deferred ()
   (should (equal
            (let ((item
                   (deferred:$
@@ -32,7 +27,7 @@
                         '(:key "0_ZBZQ4KMP")))
                     (deferred:nextc it
                       (lambda (item)
-                        (zotxt-get-item-easykey-deferred item)))
+                        (zotxt-get-item-deferred item :easykey)))
                     (deferred:sync! it))))
              (plist-get item :easykey))
            "doe:2005first")))
@@ -48,7 +43,8 @@
                     (deferred:nextc it
                       (lambda (items)
                         (zotxt-mapcar-deferred
-                         #'zotxt-get-item-easykey-deferred
+                         (lambda (item)
+                           (zotxt-get-item-deferred item :easykey))
                          items)))
                     (deferred:sync! it)))
                   (easykeys (mapcar (lambda (item)
@@ -142,6 +138,14 @@
   (let ((org-zotxt-link-text-style :easykey)
         (text "[[zotero://select/items/foo][@foo:2014bar]]")
         (item '(:key "foo" :easykey "foo:2014bar")))
+    (with-temp-buffer
+      (org-zotxt-insert-reference-link-to-item item)
+      (should (equal (buffer-string) text)))))
+
+(ert-deftest org-zotxt-test-insert-reference-link-to-item-with-betterbibtex ()
+  (let ((org-zotxt-link-text-style :betterbibtex)
+        (text "[[zotero://select/items/foo][@foo:2014bar]]")
+        (item '(:key "foo" :betterbibtex "foo:2014bar")))
     (with-temp-buffer
       (org-zotxt-insert-reference-link-to-item item)
       (should (equal (buffer-string) text)))))

@@ -187,25 +187,19 @@ with a @ or { to be recognized, but this will *not* be returned."
             nil
           (list start end completions))))))
 
-(defun zotxt-get-item-easykey (item)
-  "Given a plist ITEM, add the :easykey corresponding to the :key value.
-Non-deferred version of `zotxt-get-item-easykey-deferred'."
-  (deferred:$
-    (zotxt-get-item-easykey-deferred item)
-    (deferred:sync! it)))
-    
-(defun zotxt-get-item-easykey-deferred (item)
-  "Given a plist ITEM, add the :easykey corresponding to the :key value."
+(defun zotxt-get-item-deferred (item format)
+  "Given a plist ITEM, add the FORMAT."
   (lexical-let ((item item)
+                (format format)
                 (d (deferred:new)))
     (request
      zotxt-url-items
      :params `(("key" . ,(plist-get item :key))
-               ("format" . "easykey"))
+               ("format" . ,(substring (symbol-name format) 1)))
      :parser 'json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
-                 (plist-put item :easykey (elt data 0))
+                 (plist-put item format (elt data 0))
                  (deferred:callback-post d item))))
     d))
 
@@ -220,7 +214,9 @@ insert easykeys for the currently selected items in Zotero."
         (zotxt-choose-deferred))
       (deferred:nextc it
         (lambda (items)
-          (zotxt-mapcar-deferred #'zotxt-get-item-easykey-deferred items)))
+          (zotxt-mapcar-deferred (lambda (item)
+                                   (zotxt-get-item-easykey-deferred item :easykey))
+                                 items)))
       (deferred:nextc it
         (lambda (items)
           (with-current-buffer (marker-buffer mk)
