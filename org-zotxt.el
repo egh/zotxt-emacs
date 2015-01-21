@@ -140,7 +140,12 @@ insert the currently selected item from Zotero."
 
 (org-add-link-type "zotero"
                    (lambda (rest)
-                     (zotxt-select-key (substring rest 15))))
+                     (zotxt-select-key (substring rest 15)))
+                   (lambda (path desc format)
+                     (if (and (eq format 'latex)
+                              (string-match "^@\\(.*\\)$" desc))
+                         (format "\\cite{%s}" (match-string 1 desc))
+                       nil)))
 
 (defvar org-zotxt-mode-map
   (let ((map (make-sparse-keymap)))
