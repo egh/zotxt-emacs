@@ -142,10 +142,10 @@
       (org-zotxt-insert-reference-link-to-item item)
       (should (equal (buffer-string) text)))))
 
-(ert-deftest org-zotxt-test-insert-reference-link-to-item-with-betterbibtex ()
-  (let ((org-zotxt-link-text-style :betterbibtex)
+(ert-deftest org-zotxt-test-insert-reference-link-to-item-with-betterbibtexkey ()
+  (let ((org-zotxt-link-description-style :betterbibtexkey)
         (text "[[zotero://select/items/foo][@foo:2014bar]]")
-        (item '(:key "foo" :betterbibtex "foo:2014bar")))
+        (item '(:key "foo" :betterbibtexkey "foo:2014bar")))
     (with-temp-buffer
       (org-zotxt-insert-reference-link-to-item item)
       (should (equal (buffer-string) text)))))
