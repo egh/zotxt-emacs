@@ -34,7 +34,7 @@
   "Style to use for org zotxt link texts."
   :group 'org-zotxt
   :type '(choice (const :tag "easykey" :easykey)
-                 (const :tag "better BibTeX" :betterbibtex)
+                 (const :tag "better BibTeX" :betterbibtexkey)
                  (const :tag "citation" :citation)))
 
 (defun org-zotxt-extract-link-id-at-point ()
@@ -55,7 +55,7 @@
   (insert (org-make-link-string (format "zotero://select/items/%s"
                                         (plist-get item :key))
                                 (if (or (eq org-zotxt-link-text-style :easykey)
-                                        (eq org-zotxt-link-text-style :betterbibtex))
+                                        (eq org-zotxt-link-text-style :betterbibtexkey))
                                     (concat "@" (plist-get item org-zotxt-link-text-style))
                                   (plist-get item :citation)))))
 
@@ -110,7 +110,7 @@
 May be either an easy key or bibliography, depending on the value
 of `org-zotxt-link-text-style'."
   (if (or (eq org-zotxt-link-text-style :easykey)
-          (eq org-zotxt-link-text-style :betterbibtex))
+          (eq org-zotxt-link-text-style :betterbibtexkey))
       (zotxt-get-item-deferred item org-zotxt-link-text-style)
     (zotxt-get-item-bibliography-deferred item)))
 
