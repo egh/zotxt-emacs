@@ -29,7 +29,7 @@
 (require 'org-element)
 (require 'zotxt)
 
-(defcustom org-zotxt-link-text-style
+(defcustom org-zotxt-link-description-style
   :citation
   "Style to use for org zotxt link texts."
   :group 'org-zotxt
@@ -54,9 +54,9 @@
   "Insert link to Zotero ITEM in buffer."
   (insert (org-make-link-string (format "zotero://select/items/%s"
                                         (plist-get item :key))
-                                (if (or (eq org-zotxt-link-text-style :easykey)
-                                        (eq org-zotxt-link-text-style :betterbibtexkey))
-                                    (concat "@" (plist-get item org-zotxt-link-text-style))
+                                (if (or (eq org-zotxt-link-description-style :easykey)
+                                        (eq org-zotxt-link-description-style :betterbibtexkey))
+                                    (concat "@" (plist-get item org-zotxt-link-description-style))
                                   (plist-get item :citation)))))
 
 (defun org-zotxt-insert-reference-links-to-items (items)
@@ -108,10 +108,10 @@
 (defun org-zotxt-get-item-link-text-deferred (item)
   "Get the link text for ITEM.
 May be either an easy key or bibliography, depending on the value
-of `org-zotxt-link-text-style'."
-  (if (or (eq org-zotxt-link-text-style :easykey)
-          (eq org-zotxt-link-text-style :betterbibtexkey))
-      (zotxt-get-item-deferred item org-zotxt-link-text-style)
+of `org-zotxt-link-description-style'."
+  (if (or (eq org-zotxt-link-description-style :easykey)
+          (eq org-zotxt-link-description-style :betterbibtexkey))
+      (zotxt-get-item-deferred item org-zotxt-link-description-style)
     (zotxt-get-item-bibliography-deferred item)))
 
 (defun org-zotxt-insert-reference-link (arg)

@@ -70,7 +70,7 @@
            (deferred:next (lambda () '(:key "0_ZBZQ4KMP")))
            (deferred:nextc it
              (lambda (item)
-               (let ((org-zotxt-link-text-style :citation))
+               (let ((org-zotxt-link-description-style :citation))
                  (org-zotxt-get-item-link-text-deferred item))))
            (deferred:sync! it))))
     (should (equal text (plist-get item :citation)))))
@@ -82,7 +82,7 @@
            (deferred:next (lambda () '(:key "0_ZBZQ4KMP")))
            (deferred:nextc it
              (lambda (item)
-               (let ((org-zotxt-link-text-style :easykey))
+               (let ((org-zotxt-link-description-style :easykey))
                  (org-zotxt-get-item-link-text-deferred item))))
             (deferred:sync! it))))
     (should (equal text (plist-get item :easykey)))))
@@ -94,7 +94,7 @@
     (should (equal (org-zotxt-extract-link-id-at-point) "0_ZBZQ4KMP"))))
 
 (ert-deftest org-zotxt-test-update-reference-link-at-point ()
-  (let ((org-zotxt-link-text-style :citation)
+  (let ((org-zotxt-link-description-style :citation)
         (start-text "[[zotero://select/items/0_ZBZQ4KMP][foo]]")
         (end-text "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]"))
     (with-temp-buffer
@@ -106,7 +106,7 @@
       (should (equal (buffer-string) end-text)))))
 
 (ert-deftest org-zotxt-test-update-all-reference-links ()
-  (let ((org-zotxt-link-text-style :citation)
+  (let ((org-zotxt-link-description-style :citation)
         (start-text "[[zotero://select/items/0_ZBZQ4KMP][foo]]
 [[zotero://select/items/0_TWCW4IJ7][bar]]")
         (end-text "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]
@@ -127,7 +127,7 @@
     (should (equal results '((:key "0_ZBZQ4KMP" :citation "Doe, John. First Book. Cambridge: Cambridge University Press, 2005."))))))
 
 (ert-deftest org-zotxt-test-insert-reference-link-to-item ()
-  (let ((org-zotxt-link-text-style :citation)
+  (let ((org-zotxt-link-description-style :citation)
         (text "[[zotero://select/items/foo][Foo Bar]]")
         (item '(:key "foo" :citation "Foo Bar")))
     (with-temp-buffer
@@ -135,7 +135,7 @@
       (should (equal (buffer-string) text)))))
 
 (ert-deftest org-zotxt-test-insert-reference-link-to-item-with-easykey ()
-  (let ((org-zotxt-link-text-style :easykey)
+  (let ((org-zotxt-link-description-style :easykey)
         (text "[[zotero://select/items/foo][@foo:2014bar]]")
         (item '(:key "foo" :easykey "foo:2014bar")))
     (with-temp-buffer
@@ -151,7 +151,7 @@
       (should (equal (buffer-string) text)))))
 
 (ert-deftest org-zotxt-test-insert-reference-links-to-items ()
-  (let ((org-zotxt-link-text-style :citation)
+  (let ((org-zotxt-link-description-style :citation)
         (text "[[zotero://select/items/foo][Foo Bar]]
 [[zotero://select/items/bar][Bar Foo]]
 ")
