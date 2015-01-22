@@ -99,15 +99,41 @@ Also adds :citation entry if STYLE is the default."
                                  data)))))
       d))
 
-(defun zotxt-choose-deferred (&optional search-string)
-  "Prompt a user for a search string, then ask the user to select an item from the citation."
+(defconst zotxt-quicksearch-method-names
+  '(("title, creator, year" . :title-creator-year)
+    ("fields" . :fields)
+    ("everything" . :everything)))
+
+(defconst  zotxt-quicksearch-method-params
+  '((:title-creator-year . "titleCreatorYear")
+    (:fields . "fields")
+    (:everything . "everything")))
+
+(defconst zotxt-quicksearch-method-to-names
+  '((:title-creator-year . "title, creator, year")
+    (:fields . "fields")
+    (:everything . "everything")))
+
+(defun zotxt-choose-deferred (&optional method search-string)
+  "Prompt a user for a search string, then ask the user to select an item from the citation.
+
+If METHOD is supplied, it should be one of :title-creator-year, :fields, or :everything.
+If SEARCH-STRING is supplied, it should be the search string."
+  (if (null method)
+      (let ((method-name 
+             (completing-read
+              "Zotero search method (nothing for title, creator, year): "
+              zotxt-quicksearch-method-names
+              nil t nil nil "title, creator, year")))
+        (setq method (cdr (assoc method-name zotxt-quicksearch-method-names)))))
   (if (null search-string)
       (setq search-string
-            (read-from-minibuffer "Zotero quicksearch query: ")))
+            (read-string (format "Zotero quicksearch (%s) query: " (cdr (assq method zotxt-quicksearch-method-to-names))))))
   (lexical-let ((d (deferred:new)))
     (request
      "http://127.0.0.1:23119/zotxt/search"
      :params `(("q" . ,search-string)
+               ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
                ("format" . "bibliography"))
      :parser 'json-read
      :success (function*

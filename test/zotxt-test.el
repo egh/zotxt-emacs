@@ -122,7 +122,7 @@
 (ert-deftest zotxt-test-choose-deferred ()
   (let ((results
          (deferred:$
-           (zotxt-choose-deferred "doe first book")
+           (zotxt-choose-deferred :title-creator-year "doe first book")
            (deferred:sync! it))))
     (should (equal results '((:key "0_ZBZQ4KMP" :citation "Doe, John. First Book. Cambridge: Cambridge University Press, 2005."))))))
 
