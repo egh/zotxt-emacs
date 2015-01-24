@@ -241,7 +241,7 @@ insert easykeys for the currently selected items in Zotero."
       (deferred:nextc it
         (lambda (items)
           (zotxt-mapcar-deferred (lambda (item)
-                                   (zotxt-get-item-easykey-deferred item :easykey))
+                                   (zotxt-get-item-deferred item :easykey))
                                  items)))
       (deferred:nextc it
         (lambda (items)
