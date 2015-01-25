@@ -162,7 +162,7 @@ If only path is available, return it.  If no paths are available, error."
              (error "No attachments for item!"))
     (if (= 1 (length paths))
         (elt paths 0)
-      (completing-read "File: " (append paths nil)))))
+      (zotxt-completing-read "File: " (append paths nil)))))
 
 (defun org-zotxt-open-attachment (arg)
   "Open attachment of Zotero items linked at point.
