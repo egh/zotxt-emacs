@@ -115,7 +115,7 @@
       (insert start-text)
       (goto-char (point-min))
       (org-zotxt-update-all-reference-links)
-      (while (> 200 (length (buffer-string)))
+      (while (> 250 (length (buffer-string)))
         (sleep-for 0 1))
       (should (equal (buffer-string) end-text)))))
 
