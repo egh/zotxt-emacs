@@ -37,9 +37,8 @@
   "http://127.0.0.1:23119/zotxt"
   "Base URL to contact.")
 
-(defconst zotxt-url-items
-  (format "%s/items" zotxt-url-base)
-  "Items URL to contact.")
+(defconst zotxt-url-search
+  "Search URL to contact.")
 
 (defun zotxt-mapcar-deferred (func lst)
   (apply #'deferred:parallel
@@ -68,7 +67,7 @@ Also adds :citation entry if STYLE is the default."
         ;; item already has citation, no need to fetch
         (deferred:callback-post d item)
       (request
-       zotxt-url-items
+       (format "%s/items" zotxt-url-base)
        :params `(("key" . ,(plist-get item :key))
                  ("format" . "bibliography")
                  ("style" . ,style))
@@ -87,7 +86,7 @@ Also adds :citation entry if STYLE is the default."
 (defun zotxt-get-selected-items-deferred ()
   (lexical-let ((d (deferred:new)))
     (request
-     zotxt-url-items
+     (format "%s/items" zotxt-url-base)
      :params '(("selected" . "selected")
                ("format" . "key"))
      :parser 'json-read
@@ -131,7 +130,7 @@ If SEARCH-STRING is supplied, it should be the search string."
             (read-string (format "Zotero quicksearch (%s) query: " (cdr (assq method zotxt-quicksearch-method-to-names))))))
   (lexical-let ((d (deferred:new)))
     (request
-     "http://127.0.0.1:23119/zotxt/search"
+     (format "%s/search" zotxt-url-base)
      :params `(("q" . ,search-string)
                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
                ("format" . "bibliography"))
@@ -156,12 +155,12 @@ If SEARCH-STRING is supplied, it should be the search string."
 
 (defun zotxt-select-easykey (easykey)
   (request
-   "http://127.0.0.1:23119/zotxt/select"
+   (format "%s/select" zotxt-url-base)
    :params `(("easykey" . ,easykey))))
 
 (defun zotxt-select-key (key)
   (request
-   "http://127.0.0.1:23119/zotxt/select"
+   (format "%s/select" zotxt-url-base)
    :params `(("key" . ,key))))
 
 (defvar zotxt-easykey-regex
@@ -201,7 +200,7 @@ with a @ or { to be recognized, but this will *not* be returned."
              (completions
               (deferred:$
                 (request-deferred
-                 "http://127.0.0.1:23119/zotxt/complete"
+                 (format "%s/complete" zotxt-url-base)
                  :params `(("easykey" . ,key))
                  :parser 'json-read)
                 (deferred:nextc it
@@ -219,7 +218,7 @@ with a @ or { to be recognized, but this will *not* be returned."
                 (format format)
                 (d (deferred:new)))
     (request
-     zotxt-url-items
+     (format "%s/items" zotxt-url-base)
      :params `(("key" . ,(plist-get item :key))
                ("format" . ,(substring (symbol-name format) 1)))
      :parser 'json-read
