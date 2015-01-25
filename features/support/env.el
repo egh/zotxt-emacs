@@ -18,8 +18,8 @@
 (require 'ert)
 
 (Setup
- ;; Before anything has run
- )
+ (setq zotxt-url-base "http://127.0.0.1:33119/zotxt"
+       zotxt--debug-sync t))
 
 (Before
  ;; Before each scenario is run
