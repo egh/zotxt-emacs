@@ -1,7 +1,7 @@
 language: python
 env:
   matrix:
-    - EMACS=emacs24
+    - EMACS=emacs24 EMACS_PPA=ppa:cassou/emacs
     - EMACS=emacs-snapshot EMACS_PPA=ppa:ubuntu-elisp/ppa
   global:
     - CASK=$HOME/.cask/bin/cask
