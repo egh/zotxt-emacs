@@ -1,4 +1,4 @@
-#/bin/sh
+#/bin/sh -e
 bundle install
 cask
 ruby mock-server.rb -p 33119 &
