@@ -12,10 +12,11 @@
     ;; ...
     ))
 
-(Then "^I should have \"\\(.+\\)\"$"
-  (lambda (something)
-    ;; ...
-    ))
+(Then "^\\(.+\\) should be active$"
+  (lambda (mode)
+    (let* ((symbol (intern mode))
+           (active (and (boundp symbol) (symbol-value symbol))))
+      (should active))))
 
 (And "^I have \"\\(.+\\)\"$"
   (lambda (something)

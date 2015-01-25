@@ -11,7 +11,9 @@
 
 (add-to-list 'load-path zotxt-root-path)
 
+(require 'org)
 (require 'zotxt)
+(require 'org-zotxt)
 (require 'espuds)
 (require 'ert)
 

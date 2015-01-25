@@ -10,6 +10,5 @@
 
 (development
   (depends-on "ert-runner")
-  (depends-on "ecukes"))
-
-
+  (depends-on "ecukes")
+  (depends-on "org"))

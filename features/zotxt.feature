@@ -1,11 +1,10 @@
-Feature: Do Some things
-  In order to do something
+Feature: Use org-zotxt-mode 
+  In order to write academic documents
   As a user
-  I want to do something
+  I want to access Zotero from org-mode
 
-  Scenario: Do Something
-    Given I have "something"
-    When I have "something"
-    Then I should have "something"
-    And I should have "something"
-    But I should not have "something"
+  Scenario: Turn on org-zotxt-mode 
+    Given I am in buffer "foo"
+    When I turn on org-mode
+    When I turn on org-zotxt-mode
+    Then org-zotxt-mode should be active
