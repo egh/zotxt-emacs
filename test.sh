@@ -1,4 +1,5 @@
 #/bin/sh
+bundle install
 ruby mock-server.rb -p 33119 &
 MOCK_PID=$!
 sleep 2
