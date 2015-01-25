@@ -14,7 +14,7 @@ before_install:
   - sudo apt-get install -y -qq "$EMACS"
 
   # Install Cask
-  - curl -fsSkL https://raw.github.com/cask/cask/master/go | sh
+  - curl -fsSkL https://raw.github.com/cask/cask/master/go | python
   - export PATH="/home/travis/.cask/bin:$PATH"
   - cask
 script:
