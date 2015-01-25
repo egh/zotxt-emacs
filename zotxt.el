@@ -33,11 +33,11 @@
   "chicago-note-bibliography"
   "Default bibliography style to use.")
 
-(defvar zotxt-url-base
+(defconst zotxt-url-base
   "http://127.0.0.1:23119/zotxt"
   "Base URL to contact.")
 
-(defvar zotxt-url-items
+(defconst zotxt-url-items
   (format "%s/items" zotxt-url-base)
   "Items URL to contact.")
 

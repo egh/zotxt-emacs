@@ -8,3 +8,4 @@
 (require 'zotxt)
 (require 'org-zotxt)
 
+(setq zotxt-url-items "http://127.0.0.1:33119/zotxt/items")
