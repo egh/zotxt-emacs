@@ -40,6 +40,9 @@
 (defconst zotxt-url-search
   "Search URL to contact.")
 
+(defvar zotxt--debug-sync nil
+  "Use synchronous requests.  For debug only!")
+
 (defun zotxt-mapcar-deferred (func lst)
   (apply #'deferred:parallel
          (mapcar func lst)))
@@ -78,6 +81,7 @@ Also adds :citation entry if STYLE is the default."
                  ("format" . "bibliography")
                  ("style" . ,style))
        :parser 'json-read
+       :sync zotxt--debug-sync
        :success (function*
                  (lambda (&key data &allow-other-keys)
                    (let* ((style-key (intern (format ":%s" style)))
@@ -96,6 +100,7 @@ Also adds :citation entry if STYLE is the default."
      :params '(("selected" . "selected")
                ("format" . "key"))
      :parser 'json-read
+     :sync zotxt--debug-sync
      :success (function*
                (lambda (&key data &allow-other-keys)
                      (deferred:callback-post
@@ -141,6 +146,7 @@ If SEARCH-STRING is supplied, it should be the search string."
                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
                ("format" . "bibliography"))
      :parser 'json-read
+     :sync zotxt--debug-sync
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (let* ((results (mapcar (lambda (e) 
@@ -228,6 +234,7 @@ with a @ or { to be recognized, but this will *not* be returned."
      :params `(("key" . ,(plist-get item :key))
                ("format" . ,(substring (symbol-name format) 1)))
      :parser 'json-read
+     :sync zotxt--debug-sync
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (plist-put item format (elt data 0))
