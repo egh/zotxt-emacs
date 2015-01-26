@@ -1,7 +1,7 @@
 #/bin/sh -e
 bundle install
 cask
-ruby mock-server.rb -p 33119 &
+ruby mock-server.rb -p 33119 > /dev/null 2> /dev/null &
 MOCK_PID=$!
 sleep 2
 cask exec ert-runner
