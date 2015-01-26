@@ -32,3 +32,15 @@ Feature: Use org-zotxt-mode
     And I press "RET"
     And I execute the action chain
     Then I should see "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]"
+
+  Scenario: Update all citations
+    Given I clear the buffer
+    And I insert "[[zotero://select/items/0_ZBZQ4KMP][foo]]\n[[zotero://select/items/0_TWCW4IJ7][bar]]"
+    When I go to beginning of buffer
+    And I start an action chain
+    And I press "M-x"
+    And I type "org-zotxt-update-all-reference-links"
+    And I press "RET"
+    And I execute the action chain
+    Then I should see "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]"
+    And I should see "[[zotero://select/items/0_TWCW4IJ7][Doe, John, and Jenny Roe. “Why Water Is Wet.” In Third Book, edited by Sam Smith. Oxford: Oxford University Press, 2007.]]"
