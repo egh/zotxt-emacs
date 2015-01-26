@@ -20,3 +20,9 @@ Feature: Use org-zotxt-mode
     And I execute the action chain
     And I wait for deferred tasks
     Then I should see "[[zotero://select/items/0_4T8MCITQ][Doe, John. “Article.” Journal of Generic Studies 6 (2006): 33–34.]]"
+
+  Scenario: Update citation
+    Given I insert "[[zotero://select/items/0_4T8MCITQ][foo]]"
+    When I go to beginning of buffer
+    And I type "C-c \" u"
+    Then I should see "[[zotero://select/items/0_4T8MCITQ][Doe, John. “Article.” Journal of Generic Studies 6 (2006): 33–34.]]"
