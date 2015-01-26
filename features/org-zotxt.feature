@@ -10,6 +10,7 @@ Feature: Use org-zotxt-mode
   Scenario: Insert citation
     Given I clear the buffer
     When I start an action chain
+    # Cucumber cannot handle "C-c \" i" as a keybinding because of double quote
     And I press "M-x"
     And I type "org-zotxt-insert-reference-link"
     And I press "RET"
