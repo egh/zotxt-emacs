@@ -81,7 +81,6 @@ Also adds :citation entry if STYLE is the default."
                  ("format" . "bibliography")
                  ("style" . ,style))
        :parser 'json-read
-       :sync zotxt--debug-sync
        :success (function*
                  (lambda (&key data &allow-other-keys)
                    (let* ((style-key (intern (format ":%s" style)))
@@ -100,7 +99,6 @@ Also adds :citation entry if STYLE is the default."
      :params '(("selected" . "selected")
                ("format" . "key"))
      :parser 'json-read
-     :sync zotxt--debug-sync
      :success (function*
                (lambda (&key data &allow-other-keys)
                      (deferred:callback-post
@@ -146,7 +144,6 @@ If SEARCH-STRING is supplied, it should be the search string."
                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
                ("format" . "bibliography"))
      :parser 'json-read
-     :sync zotxt--debug-sync
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (let* ((results (mapcar (lambda (e) 
@@ -234,7 +231,6 @@ with a @ or { to be recognized, but this will *not* be returned."
      :params `(("key" . ,(plist-get item :key))
                ("format" . ,(substring (symbol-name format) 1)))
      :parser 'json-read
-     :sync zotxt--debug-sync
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (plist-put item format (elt data 0))
@@ -262,7 +258,8 @@ insert easykeys for the currently selected items in Zotero."
             (insert (mapconcat
                      (lambda (item)
                        (format "@%s" (plist-get item :easykey)))
-                     items " "))))))))
+                     items " ")))))
+      (if zotxt--debug-sync (deferred:sync! it)))))
 
 (defun zotxt-easykey-select-item-at-point ()
   "Select the item referred to by the easykey at point in Zotero."

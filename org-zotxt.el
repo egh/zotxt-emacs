@@ -87,7 +87,8 @@
                     (goto-char (org-element-property :begin ct))
                     (delete-region (org-element-property :begin ct)
                                    (org-element-property :end ct))
-                    (org-zotxt-insert-reference-link-to-item item))))))))))
+                    (org-zotxt-insert-reference-link-to-item item))))))
+          (if zotxt--debug-sync (deferred:sync! it))))))
 
 (defun org-zotxt-update-all-reference-links ()
   "Update all zotero:// links in a document."
@@ -136,7 +137,8 @@ insert the currently selected item from Zotero."
             (org-zotxt-insert-reference-links-to-items items))))
       (deferred:error it
         (lambda (err)
-          (error (error-message-string err)))))))
+          (error (error-message-string err))))
+      (if zotxt--debug-sync (deferred:sync! it)))))
 
 (org-add-link-type "zotero"
                    (lambda (rest)
@@ -182,7 +184,8 @@ and to use an external application to visit the file."
         (lambda (response)
           (let ((paths (cdr (assq 'paths (elt (request-response-data response) 0)))))
             (message "%s" arg)
-            (org-open-file (org-zotxt-choose-path paths) arg)))))))
+            (org-open-file (org-zotxt-choose-path paths) arg))))
+      (if zotxt--debug-sync (deferred:sync! it)))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode

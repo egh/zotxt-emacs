@@ -20,7 +20,6 @@ Feature: Use org-zotxt-mode
     And I type "Doe, John. “Article.” Journal of Generic Studies 6 (2006): 33–34."
     And I press "RET"
     And I execute the action chain
-    And I wait for deferred tasks
     Then I should see "[[zotero://select/items/0_4T8MCITQ][Doe, John. “Article.” Journal of Generic Studies 6 (2006): 33–34.]]"
 
   Scenario: Update citation
@@ -32,5 +31,4 @@ Feature: Use org-zotxt-mode
     And I type "org-zotxt-update-reference-link-at-point"
     And I press "RET"
     And I execute the action chain
-    And I wait for deferred tasks
     Then I should see "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]"

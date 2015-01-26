@@ -18,10 +18,6 @@
            (active (and (boundp symbol) (symbol-value symbol))))
       (should active))))
 
-(When "^I wait for deferred tasks$"
-  (lambda ()
-    (deferred:flush-queue!)))
-
 (And "^I have \"\\(.+\\)\"$"
   (lambda (something)
     ;; ...
