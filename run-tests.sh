@@ -1,5 +1,5 @@
 #/bin/sh -e
-bundle install
+bundle install --quiet
 cask
 ruby mock-server.rb -p 33119 > /dev/null 2> /dev/null &
 MOCK_PID=$!
