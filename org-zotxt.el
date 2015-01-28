@@ -144,9 +144,12 @@ insert the currently selected item from Zotero."
                    (lambda (rest)
                      (zotxt-select-key (substring rest 15)))
                    (lambda (path desc format)
-                     (if (and (eq format 'latex)
-                              (string-match "^@\\(.*\\)$" desc))
-                         (format "\\cite{%s}" (match-string 1 desc))
+                     (if (string-match "^@\\(.*\\)$" desc)
+                         (cond ((eq format 'latex)
+                                (format "\\cite{%s}" (match-string 1 desc)))
+                               ((eq format 'md)
+                                desc)
+                               (t nil))
                        nil)))
 
 (defvar org-zotxt-mode-map
