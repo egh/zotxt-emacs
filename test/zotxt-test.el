@@ -54,6 +54,10 @@
 
 (ert-deftest zotxt-test-get-item-bibliography-deferred ()
   (let ((text "Doe, John. First Book. Cambridge: Cambridge University Press, 2005.")
+        (html "<div style=\"line-height: 1.35; padding-left: 2em; text-indent:-2em;\" class=\"csl-bib-body\">
+  <div class=\"csl-entry\">Doe, John. <i>First Book</i>. Cambridge: Cambridge University Press, 2005.</div>
+  <span class=\"Z3988\" title=\"url_ver=Z39.88-2004&amp;ctx_ver=Z39.88-2004&amp;rfr_id=info%3Asid%2Fzotero.org%3A2&amp;rft_val_fmt=info%3Aofi%2Ffmt%3Akev%3Amtx%3Abook&amp;rft.genre=book&amp;rft.btitle=First%20Book&amp;rft.place=Cambridge&amp;rft.publisher=Cambridge%20University%20Press&amp;rft.aufirst=John&amp;rft.aulast=Doe&amp;rft.au=John%20Doe&amp;rft.date=2005\"></span>
+</div>")
         (item
          (deferred:$
            (deferred:next (lambda () '(:key "0_ZBZQ4KMP")))
@@ -61,7 +65,9 @@
              (lambda (item) (zotxt-get-item-bibliography-deferred item)))
            (deferred:sync! it))))
     (should (equal text (plist-get item :citation)))
-    (should (equal text (plist-get item :chicago-note-bibliography)))))
+    (should (equal html (plist-get item :citation-html)))
+    (should (equal text (plist-get item :chicago-note-bibliography)))
+    (should (equal html (plist-get item :chicago-note-bibliography-html)))))
 
 (ert-deftest org-zotxt-test-get-item-link-text-deferred ()
   (let ((text "Doe, John. First Book. Cambridge: Cambridge University Press, 2005.")

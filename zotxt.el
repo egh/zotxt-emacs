@@ -67,7 +67,8 @@
 Use STYLE to specify a custom bibliography style.
 Adds a plist entry with the name of the style as a self-quoting symbol, e.g.
 :chicago-note-bibliography.
-Also adds :citation entry if STYLE is the default."
+Also adds :citation entry if STYLE is the default.
+Also adds HTML versions, suffixed with -html"
   (lexical-let ((d (deferred:new))
                 (style zotxt-default-bibliography-style)
                 (item item))
@@ -84,11 +85,16 @@ Also adds :citation entry if STYLE is the default."
        :success (function*
                  (lambda (&key data &allow-other-keys)
                    (let* ((style-key (intern (format ":%s" style)))
+                          (style-key-html (intern (format ":%s-html" style)))
                           (first (elt data 0))
-                          (text (zotxt-clean-bib-entry (cdr (assq 'text first)))))
+                          (text (zotxt-clean-bib-entry (cdr (assq 'text first))))
+                          (html (cdr (assq 'html first))))
                      (if (string= style zotxt-default-bibliography-style)
-                         (plist-put item :citation text))
+                         (progn
+                           (plist-put item :citation text)
+                           (plist-put item :citation-html html)))
                      (plist-put item style-key text)
+                     (plist-put item style-key-html html)
                      (deferred:callback-post d item))))))
     d))
 
