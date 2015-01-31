@@ -236,10 +236,17 @@ with a @ or { to be recognized, but this will *not* be returned."
      (format "%s/items" zotxt-url-base)
      :params `(("key" . ,(plist-get item :key))
                ("format" . ,(substring (symbol-name format) 1)))
-     :parser 'json-read
+     :parser (if (or (eq format :easykey)
+                     (eq format :betterbibtexkey))
+                 #'json-read
+               #'buffer-string)
      :success (function*
                (lambda (&key data &allow-other-keys)
-                 (plist-put item format (elt data 0))
+                 (if (or (eq format :easykey)
+                         (eq format :betterbibtexkey))
+                     ;; json data
+                     (plist-put item format (elt data 0))
+                   (plist-put item format data))
                  (deferred:callback-post d item))))
     d))
 

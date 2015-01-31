@@ -18,6 +18,8 @@ get '/zotxt/items' do
       ].to_json
     elsif format == 'easykey' 
       return ['doe:2005first'].to_json
+    elsif format == '248bebf1-46ab-4067-9f93-ec3d2960d0cd'
+      return '{ | Doe, 2005 | | |zu:1254:ZBZQ4KMP}'
     end
   elsif key == '0_TWCW4IJ7'
     if format == 'bibliography' && style == 'chicago-note-bibliography'

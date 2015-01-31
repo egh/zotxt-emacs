@@ -32,6 +32,20 @@
              (plist-get item :easykey))
            "doe:2005first")))
 
+(ert-deftest zotxt-test-get-item-uuid-deferred ()
+  (should (equal
+           (let ((item
+                  (deferred:$
+                    (deferred:next
+                      (lambda ()
+                        '(:key "0_ZBZQ4KMP")))
+                    (deferred:nextc it
+                      (lambda (item)
+                        (zotxt-get-item-deferred item :248bebf1-46ab-4067-9f93-ec3d2960d0cd)))
+                    (deferred:sync! it))))
+             (plist-get item :248bebf1-46ab-4067-9f93-ec3d2960d0cd))
+           "{ | Doe, 2005 | | |zu:1254:ZBZQ4KMP}")))
+
 (ert-deftest zotxt-test-get-item-easykey-list-chain ()
   (should (equal
            (let* ((items
