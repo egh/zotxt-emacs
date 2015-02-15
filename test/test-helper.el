@@ -6,6 +6,7 @@
 (add-to-list 'load-path zotxt-root-path)
 
 (require 'undercover)
+(undercover "*.el")
 
 (require 'zotxt)
 (require 'org-zotxt)
