@@ -5,6 +5,8 @@
 
 (add-to-list 'load-path zotxt-root-path)
 
+(require 'undercover)
+
 (require 'zotxt)
 (require 'org-zotxt)
 
