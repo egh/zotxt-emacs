@@ -180,7 +180,7 @@ and to use an external application to visit the file."
                 (arg arg))
     (deferred:$
       (request-deferred
-       zotxt-url-items
+       (format "%s/items" zotxt-url-base)
        :params `(("key" . ,item-id) ("format" . "recoll"))
        :parser 'json-read)
       (deferred:nextc it
