@@ -41,12 +41,12 @@
   "Extract the Zotero key of the link at point."
   (let ((ct (org-element-context)))
     (if (eq 'link (org-element-type ct))
-        (org-zotxt-extract-link-id-from-link (org-element-property :raw-link ct))
+        (org-zotxt-extract-link-id-from-path (org-element-property :path ct))
       nil)))
 
-(defun org-zotxt-extract-link-id-from-link (path)
+(defun org-zotxt-extract-link-id-from-path (path)
   "Return the zotxt ID from a link PATH."
-  (if (string-match "^zotero://select/items/\\(.*\\)$" path)
+  (if (string-match "^//select/items/\\(.*\\)$" path)
       (match-string 1 path)
     nil))
 
@@ -99,9 +99,9 @@
       (while (not (null next-link))
         (goto-char (cdr next-link))
         (let* ((parse (org-element-link-parser))
-               (path (org-element-property :raw-link parse))
+               (path (org-element-property :path parse))
                (end (org-element-property :end parse)))
-          (if (org-zotxt-extract-link-id-from-link path)
+          (if (org-zotxt-extract-link-id-from-path path)
               (org-zotxt-update-reference-link-at-point))
           (goto-char end))
         (setq next-link (org-element-link-successor))))))
