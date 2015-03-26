@@ -56,6 +56,53 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
+(defun zotxt-helm-search ()
+  (lexical-let (retval)
+    (request
+     (format "%s/search" zotxt-url-base)
+     :params `(("q" . ,helm-pattern)
+               ("method" . "titleCreatorYear")
+               ("format" . "bibliography"))
+     :timeout 15
+     :parser 'json-read
+     :sync t
+     :success (function*
+               (lambda (&key data &allow-other-keys)
+                 (setq retval (mapcar (lambda (e)
+                                        (cons (cdr (assq 'text e))
+                                              (cdr (assq 'key e))))
+                                      data)))))
+    retval))
+
+(setq zotxt-helm-source
+  '((name . "zotxt")
+    ;; (init . (lambda ()
+    ;;           (setq helm-test-cache nil)))
+    ;; (cleanup . (lambda ()
+    ;;              (setq zotxt--helm-last-search nil)))
+;;    (volatile)
+    ;; (match identity)
+    (candidates . zotxt-helm-search)
+    ;; (candidate-transformer
+    ;;  . (lambda (cs)
+    ;;      (mapcar (function (lambda (c)
+    ;;                          (replace-regexp-in-string "file://" "" c)))
+    ;;              cs)))
+    ;; (matchplugin)
+    (requires-pattern . 3)
+    ;; (update . (lambda ()
+    ;;             (message "updat")
+    ;;             (remhash "zotxt" helm-candidate-cache)))
+    ;; (history . 'zotxt-helm-history)
+    ;; (candidate-number-limit . 9999)
+    ;; (delayed)
+    (action . (lambda (candidate)
+                (message-box "%s" candidate)))))
+
+(defun zotxt-foo ()
+  (interactive)
+  (message "%s" (helm :sources '(zotxt-helm-source))))
+
 (defun zotxt-completing-read (&rest args)
   "Use ido-completing-read if ido-mode is t, else use completing-read."
   (if ido-mode
