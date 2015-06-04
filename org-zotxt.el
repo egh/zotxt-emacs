@@ -37,6 +37,18 @@
                  (const :tag "better BibTeX" :betterbibtexkey)
                  (const :tag "citation" :citation)))
 
+(defcustom org-zotxt-default-search-method nil
+  "Default method to use for searching with `org-zotxt-insert-reference-link'.
+If nil, the user is prompted to choose each time.
+
+A selected default method can be bypassed by giving a double
+prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
+  :group 'org-zotxt
+  :type (append '(choice) '((const :tag "Choose each time" nil))
+                (mapcar
+                 (lambda (c) (list 'const :tag (car c) (cdr c)))
+                 zotxt-quicksearch-method-names)))
+
 (defun org-zotxt-extract-link-id-at-point ()
   "Extract the Zotero key of the link at point."
   (let ((ct (org-element-context)))
@@ -118,13 +130,15 @@ of `org-zotxt-link-description-style'."
 (defun org-zotxt-insert-reference-link (arg)
   "Insert a zotero link in the org-mode document. Prompts for
 search to choose item. If prefix argument (C-u) is used, will
-insert the currently selected item from Zotero."
+insert the currently selected item from Zotero. If double prefix
+argument (C-u C-u) is used the search method will have to be
+selected even if `org-zotxt-default-search-method' is non-nil"
   (interactive "P")
   (lexical-let ((mk (point-marker)))
     (deferred:$
-      (if arg 
+      (if (equal '(4) arg) 
           (zotxt-get-selected-items-deferred)
-        (zotxt-choose-deferred))
+        (zotxt-choose-deferred (unless (equal '(16) arg) org-zotxt-default-search-method)))
       (deferred:nextc it
         (lambda (items)
           (if (null items)
