@@ -57,6 +57,14 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
+(defun zotxt-make-quick-bib-string (item)
+  "Make a useful quick bibliography string from ITEM."
+  (-let* (((&plist :json (&alist 'author author 'title title)) item)
+          (author-string (if (= (length author) 0)
+                             ""
+                           (-let (((&alist 'given given 'family family) (elt author 0))) (format "%s, %s" family given)))))
+    (format "%s - %s" author-string title)))
+
 (defun zotxt-get-item-bibliography-deferred (item)
   "Retrieve the generated bibliography for ITEM (a plist).
 Use STYLE to specify a custom bibliography style.

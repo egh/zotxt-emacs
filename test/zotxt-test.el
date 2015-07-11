@@ -180,3 +180,13 @@
     (with-temp-buffer
       (org-zotxt-insert-reference-links-to-items items)
       (should (equal (buffer-string) text)))))
+
+(ert-deftest org-zotxt-make-quick-bib-string ()
+  (let ((item
+         (deferred:$
+           (deferred:next (lambda () '(:key "0_ZBZQ4KMP")))
+           (deferred:nextc it
+             (lambda (item) (zotxt-get-item-deferred item :json)))
+           (deferred:sync! it))))
+    (should (equal "Doe, John - First Book"
+                   (zotxt-make-quick-bib-string item)))))
