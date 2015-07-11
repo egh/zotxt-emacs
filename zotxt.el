@@ -37,8 +37,6 @@
   "http://127.0.0.1:23119/zotxt"
   "Base URL to contact.")
 
-(defconst zotxt-url-search
-  "Search URL to contact.")
 
 (defvar zotxt--debug-sync nil
   "Use synchronous requests.  For debug only!")
