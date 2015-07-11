@@ -37,6 +37,9 @@
   "http://127.0.0.1:23119/zotxt"
   "Base URL to contact.")
 
+(defconst zotxt--json-formats
+  '(:easykey :betterbibtexkey :json)
+  "Formats to parse as JSON.")
 
 (defvar zotxt--debug-sync nil
   "Use synchronous requests.  For debug only!")
@@ -228,14 +231,12 @@ with a @ or { to be recognized, but this will *not* be returned."
      (format "%s/items" zotxt-url-base)
      :params `(("key" . ,(plist-get item :key))
                ("format" . ,(substring (symbol-name format) 1)))
-     :parser (if (or (eq format :easykey)
-                     (eq format :betterbibtexkey))
+     :parser (if (member format zotxt--json-formats)
                  #'json-read
                #'buffer-string)
      :success (function*
                (lambda (&key data &allow-other-keys)
-                 (if (or (eq format :easykey)
-                         (eq format :betterbibtexkey))
+                 (if (member format zotxt--json-formats)
                      ;; json data
                      (plist-put item format (elt data 0))
                    (plist-put item format data))

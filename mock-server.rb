@@ -20,6 +20,17 @@ get '/zotxt/items' do
       return ['doe:2005first'].to_json
     elsif format == '248bebf1-46ab-4067-9f93-ec3d2960d0cd'
       return '{ | Doe, 2005 | | |zu:1254:ZBZQ4KMP}'
+    elsif format == 'json'
+      return [{ 'id' => 'http://zotero.org/users/1254/items/ZBZQ4KMP',
+                'type' => 'book',
+                'title' => 'First Book',
+                'publisher' => 'Cambridge University Press',
+                'publisher-place' => 'Cambridge',
+                'event-place' => 'Cambridge',
+                'note' => 'bibtex: Doe2005',
+                'author' => [{ 'family' => 'Doe', 'given' => 'John' }],
+                'issued' => { 'date-parts' => [['2005']] }
+              }].to_json
     end
   elsif key == '0_TWCW4IJ7'
     if format == 'bibliography' && style == 'chicago-note-bibliography'
