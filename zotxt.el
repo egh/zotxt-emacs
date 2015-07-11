@@ -65,6 +65,11 @@
                            (-let (((&alist 'given given 'family family) (elt author 0))) (format "%s, %s" family given)))))
     (format "%s - %s" author-string title)))
 
+(defun zotxt--id2key (id)
+  "Turn an ID, as returned by Zotero, into a key."
+  (if (string-match "/\\([^/]+\\)$" id)
+      (format "0_%s" (match-string 1 id))))
+
 (defun zotxt-get-item-bibliography-deferred (item)
   "Retrieve the generated bibliography for ITEM (a plist).
 Use STYLE to specify a custom bibliography style.
@@ -151,13 +156,13 @@ If SEARCH-STRING is supplied, it should be the search string."
      (format "%s/search" zotxt-url-base)
      :params `(("q" . ,search-string)
                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
-               ("format" . "bibliography"))
+               ("format" . "json"))
      :parser 'json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (let* ((results (mapcar (lambda (e) 
-                                           (cons (cdr (assq 'text e)) 
-                                                 (cdr (assq 'key e))))
+                                           (cons (zotxt-make-quick-bib-string `(:json ,e))
+                                                 (zotxt--id2key (cdr (assq 'id e)))))
                                          data))
                         (count (length results))
                         (citation (if (= 0 count)
@@ -168,7 +173,7 @@ If SEARCH-STRING is supplied, it should be the search string."
                         (key (cdr (assoc-string citation results))))
                    (deferred:callback-post
                      d (if (null citation) nil
-                         `((:key ,key :citation ,citation))))))))
+                         `((:key ,key))))))))
     d))
 
 (defun zotxt-select-easykey (easykey)
