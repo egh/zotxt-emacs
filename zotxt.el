@@ -56,12 +56,6 @@
     (setq retval (replace-regexp-in-string "\^]" "”" retval))
     retval))
 
-(defun zotxt-completing-read (&rest args)
-  "Use ido-completing-read if ido-mode is t, else use completing-read."
-  (if ido-mode
-      (apply #'ido-completing-read args)
-    (apply #'completing-read args)))
-
 (defun zotxt-get-item-bibliography-deferred (item)
   "Retrieve the generated bibliography for ITEM (a plist).
 Use STYLE to specify a custom bibliography style.
@@ -135,7 +129,7 @@ If METHOD is supplied, it should be one of :title-creator-year, :fields, or :eve
 If SEARCH-STRING is supplied, it should be the search string."
   (if (null method)
       (let ((method-name 
-             (zotxt-completing-read
+             (completing-read
               "Zotero search method (nothing for title, creator, year): "
               zotxt-quicksearch-method-names
               nil t nil nil "title, creator, year")))
@@ -161,7 +155,7 @@ If SEARCH-STRING is supplied, it should be the search string."
                                       nil
                                     (if (= 1 count)
                                         (car (car results))
-                                      (zotxt-completing-read "Select item: " results))))
+                                      (completing-read "Select item: " results))))
                         (key (cdr (assoc-string citation results))))
                    (deferred:callback-post
                      d (if (null citation) nil
