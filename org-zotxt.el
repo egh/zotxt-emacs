@@ -199,7 +199,6 @@ Opens with `org-open-file', see for more information about ARG."
       (deferred:nextc it
         (lambda (response)
           (let ((paths (cdr (assq 'paths (elt (request-response-data response) 0)))))
-            (message "%s" arg)
             (org-open-file (org-zotxt-choose-path paths) arg))))
       (if zotxt--debug-sync (deferred:sync! it)))))
 
