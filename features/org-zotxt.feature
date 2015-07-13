@@ -17,7 +17,7 @@ Feature: Use org-zotxt-mode
     And I press "RET"
     And I type "doe"
     And I press "RET"
-    And I type "Doe, John. “Article.” Journal of Generic Studies 6 (2006): 33–34."
+    And I type "Doe, John - Article"
     And I press "RET"
     And I execute the action chain
     Then I should see "[[zotero://select/items/0_4T8MCITQ][Doe, John. “Article.” Journal of Generic Studies 6 (2006): 33–34.]]"

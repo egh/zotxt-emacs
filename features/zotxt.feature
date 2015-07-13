@@ -16,8 +16,7 @@ Feature: Use zotxt-easykey-mode
     And I press "RET"
     And I type "doe"
     And I press "RET"
-    And I type "Doe, John. First Book. Cambridge: Cambridge University Press, 2005."
+    And I type "Doe, John - First Book"
     And I press "RET"
     And I execute the action chain
     Then I should see "@doe:2005first"
-

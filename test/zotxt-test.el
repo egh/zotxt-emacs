@@ -144,7 +144,7 @@
          (deferred:$
            (zotxt-choose-deferred :title-creator-year "doe first book")
            (deferred:sync! it))))
-    (should (equal results '((:key "0_ZBZQ4KMP" :citation "Doe, John. First Book. Cambridge: Cambridge University Press, 2005."))))))
+    (should (equal results '((:key "0_ZBZQ4KMP"))))))
 
 (ert-deftest org-zotxt-test-insert-reference-link-to-item ()
   (let ((org-zotxt-link-description-style :citation)
