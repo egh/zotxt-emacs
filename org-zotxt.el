@@ -127,16 +127,17 @@ of `org-zotxt-link-description-style'."
       (zotxt-get-item-deferred item org-zotxt-link-description-style)
     (zotxt-get-item-bibliography-deferred item)))
 
-(defun org-zotxt-insert-reference-link (arg)
-  "Insert a zotero link in the org-mode document. Prompts for
-search to choose item. If prefix argument (C-u) is used, will
-insert the currently selected item from Zotero. If double prefix
-argument (C-u C-u) is used the search method will have to be
+(defun org-zotxt-insert-reference-link (&optional arg)
+  "Insert a zotero link in the `org-mode' document.
+
+Prompts for search to choose item.  If prefix argument ARG is used,
+will insert the currently selected item from Zotero.  If double
+prefix argument is used the search method will have to be
 selected even if `org-zotxt-default-search-method' is non-nil"
   (interactive "P")
   (lexical-let ((mk (point-marker)))
     (deferred:$
-      (if (equal '(4) arg) 
+      (if (equal '(4) arg)
           (zotxt-get-selected-items-deferred)
         (zotxt-choose-deferred (unless (equal '(16) arg) org-zotxt-default-search-method)))
       (deferred:nextc it
@@ -183,12 +184,10 @@ If only path is available, return it.  If no paths are available, error."
         (elt paths 0)
       (completing-read "File: " (append paths nil)))))
 
-(defun org-zotxt-open-attachment (arg)
+(defun org-zotxt-open-attachment (&optional arg)
   "Open attachment of Zotero items linked at point.
-If multiple attachments, will prompt.
-With optional prefix argument ARG, Emacs will visit the file.
-With a double C-u C-u prefix arg, Org tries to avoid opening in Emacs
-and to use an external application to visit the file."
+
+Opens with `org-open-file', see for more information about ARG."
   (interactive "P")
   (lexical-let ((item-id (org-zotxt-extract-link-id-at-point))
                 (arg arg))
@@ -212,7 +211,7 @@ Non-null prefix argument turns on the mode.
 Null prefix argument turns off the mode.
 
 This is a minor mode for managing your citations with Zotero in a
-org-mode document."  
+org-mode document."
   nil
   " OrgZot"
   org-zotxt-mode-map)

@@ -45,6 +45,10 @@
   "Use synchronous requests.  For debug only!")
 
 (defun zotxt-mapcar-deferred (func lst)
+  "Apply FUNC (which must return a deferred object), to each element of LST.
+
+Will pass on a list of results.
+Runs in parallel using `deferred:parallel'."
   (apply #'deferred:parallel
          (mapcar func lst)))
 
@@ -76,7 +80,9 @@ Use STYLE to specify a custom bibliography style.
 Adds a plist entry with the name of the style as a self-quoting symbol, e.g.
 :chicago-note-bibliography.
 Also adds :citation entry if STYLE is the default.
-Also adds HTML versions, suffixed with -html"
+Also adds HTML versions, suffixed with -html.
+
+For use only in a `deferred:$' chain."
   (lexical-let ((d (deferred:new))
                 (style zotxt-default-bibliography-style)
                 (item item))
@@ -107,6 +113,9 @@ Also adds HTML versions, suffixed with -html"
     d))
 
 (defun zotxt-get-selected-items-deferred ()
+  "Return the currently selected items in Zotero.
+
+For use only in a `deferred:$' chain."
   (lexical-let ((d (deferred:new)))
     (request
      (format "%s/items" zotxt-url-base)
@@ -137,12 +146,13 @@ Also adds HTML versions, suffixed with -html"
     (:everything . "everything")))
 
 (defun zotxt-choose-deferred (&optional method search-string)
-  "Prompt a user for a search string, then ask the user to select an item from the citation.
+  "Allow the user to select an item interactively.
 
-If METHOD is supplied, it should be one of :title-creator-year, :fields, or :everything.
+If METHOD is supplied, it should be one
+of :title-creator-year, :fields, or :everything.
 If SEARCH-STRING is supplied, it should be the search string."
   (if (null method)
-      (let ((method-name 
+      (let ((method-name
              (completing-read
               "Zotero search method (nothing for title, creator, year): "
               zotxt-quicksearch-method-names
@@ -160,7 +170,7 @@ If SEARCH-STRING is supplied, it should be the search string."
      :parser 'json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
-                 (let* ((results (mapcar (lambda (e) 
+                 (let* ((results (mapcar (lambda (e)
                                            (cons (zotxt-make-quick-bib-string `(:json ,e))
                                                  (zotxt--id2key (cdr (assq 'id e)))))
                                          data))
@@ -177,11 +187,13 @@ If SEARCH-STRING is supplied, it should be the search string."
     d))
 
 (defun zotxt-select-easykey (easykey)
+  "Select the item identified by EASYKEY in Zotero."
   (request
    (format "%s/select" zotxt-url-base)
    :params `(("easykey" . ,easykey))))
 
 (defun zotxt-select-key (key)
+  "Select the item identified by KEY in Zotero."
   (request
    (format "%s/select" zotxt-url-base)
    :params `(("key" . ,key))))
@@ -196,6 +208,7 @@ If SEARCH-STRING is supplied, it should be the search string."
     map))
 
 (defun zotxt-easykey-at-point-match ()
+  "Match an easykey at point."
   (or (looking-at zotxt-easykey-regex)
       (save-excursion
         ;; always try to back up one char
@@ -206,14 +219,17 @@ If SEARCH-STRING is supplied, it should be the search string."
         (looking-at zotxt-easykey-regex))))
 
 (defun zotxt-easykey-at-point ()
-  "Return the value of the easykey at point. Easykey must start
-with a @ or { to be recognized, but this will *not* be returned."
+  "Return the value of the easykey at point.
+
+Easykey must start with a @ or { to be recognized, but this will
+not be returned."
   (save-excursion
     (if (zotxt-easykey-at-point-match)
         (match-string 1)
       nil)))
   
 (defun zotxt-easykey-complete-at-point ()
+  "Complete the easykey at point."
   (save-excursion
     (if (not (zotxt-easykey-at-point-match))
         nil
@@ -236,7 +252,9 @@ with a @ or { to be recognized, but this will *not* be returned."
           (list start end completions))))))
 
 (defun zotxt-get-item-deferred (item format)
-  "Given a plist ITEM, add the FORMAT."
+  "Given a plist ITEM, add the FORMAT.
+
+For use only in a `deferred:$' chain."
   (lexical-let ((item item)
                 (format format)
                 (d (deferred:new)))
@@ -256,13 +274,14 @@ with a @ or { to be recognized, but this will *not* be returned."
                  (deferred:callback-post d item))))
     d))
 
-(defun zotxt-easykey-insert (arg)
-  "Prompt for a search string and insert an easy key. With C-u,
-insert easykeys for the currently selected items in Zotero."
-  (interactive "P")
+(defun zotxt-easykey-insert (&optional selected)
+  "Prompt for a search string and insert an easy key.
+
+If SELECTED is non-nill (interactively, With prefix argument), insert easykeys for the currently selected items in Zotero."
+  (interactive (if current-prefix-arg t))
   (lexical-let ((mk (point-marker)))
     (deferred:$
-      (if arg
+      (if selected
           (zotxt-get-selected-items-deferred)
         (zotxt-choose-deferred))
       (deferred:nextc it
@@ -302,7 +321,7 @@ including completion."
                   (cons 'zotxt-easykey-complete-at-point
                         completion-at-point-functions))
     (setq-local completion-at-point-functions
-                (remove 'zotxt-easykey-complete-at-point 
+                (remove 'zotxt-easykey-complete-at-point
                         completion-at-point-functions))))
 
 (provide 'zotxt)
