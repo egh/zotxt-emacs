@@ -63,10 +63,15 @@ Runs in parallel using `deferred:parallel'."
 
 (defun zotxt-make-quick-bib-string (item)
   "Make a useful quick bibliography string from ITEM."
-  (-let* (((&plist :json (&alist 'author author 'title title)) item)
-          (author-string (if (= (length author) 0)
-                             ""
-                           (-let (((&alist 'given given 'family family) (elt author 0))) (format "%s, %s" family given)))))
+  (let* ((json (plist-get item :json))
+         (author (cdr (assq 'author json)))
+         (title (cdr (assq 'title json)))
+         (author-string (if (= (length author) 0)
+                            ""
+                          (let* ((first (elt author 0))
+                                 (given (cdr (assq 'given first)))
+                                 (family (cdr (assq 'family first))))
+                            (format "%s, %s" family given)))))
     (format "%s - %s" author-string title)))
 
 (defun zotxt--id2key (id)
