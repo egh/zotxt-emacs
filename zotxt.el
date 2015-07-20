@@ -171,13 +171,13 @@ If SEARCH-STRING is supplied, it should be the search string."
      (format "%s/search" zotxt-url-base)
      :params `(("q" . ,search-string)
                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
-               ("format" . "json"))
+               ("format" . "quickBib"))
      :parser 'json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (let* ((results (mapcar (lambda (e)
-                                           (cons (zotxt-make-quick-bib-string `(:json ,e))
-                                                 (zotxt--id2key (cdr (assq 'id e)))))
+                                           (cons (cdr (assq 'quickBib e))
+                                                 (cdr (assq 'key e))))
                                          data))
                         (count (length results))
                         (citation (if (= 0 count)
