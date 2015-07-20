@@ -64,16 +64,20 @@ get '/zotxt/search' do
   if q == 'doe first book' && method == 'titleCreatorYear'
     if format == 'json'
       return JSON.pretty_generate(
-        [{ 'id' => 'http://zotero.org/users/1254/items/ZBZQ4KMP',
-           'type' => 'book',
-           'title' => 'First Book',
-           'publisher' => 'Cambridge University Press',
-           'publisher-place' => 'Cambridge',
-           'event-place' => 'Cambridge',
-           'note' => 'bibtex: Doe2005',
-           'author' => [{ 'family' => 'Doe', 'given' => 'John' }],
-           'issued' => { 'date-parts' => [['2005']] }
-         }])
+               [{ 'id' => 'http://zotero.org/users/1254/items/ZBZQ4KMP',
+                  'type' => 'book',
+                  'title' => 'First Book',
+                  'publisher' => 'Cambridge University Press',
+                  'publisher-place' => 'Cambridge',
+                  'event-place' => 'Cambridge',
+                  'note' => 'bibtex: Doe2005',
+                  'author' => [{ 'family' => 'Doe', 'given' => 'John' }],
+                  'issued' => { 'date-parts' => [['2005']] }
+                }])
+    elsif format == 'quickBib'
+      return JSON.pretty_generate(
+               [{ 'key' => '0_ZBZQ4KMP',
+                  'quickBib' => 'Doe, John - First Book' }])
     end
   elsif q == 'doe' && method == 'titleCreatorYear'
     if format == 'json'
@@ -242,6 +246,44 @@ get '/zotxt/search' do
                   'author' => [{ 'family' => 'McCloskey', 'given' => 'Donald N.' }],
                   'issued' => { 'date-parts' => [['1976', 6, 1]] },
                   'accessed' => { 'date-parts' => [['2013', 5, 25]] } }])
+    elsif format == 'quickBib'
+      return JSON.pretty_generate(
+        [{ 'key' => '25522_HCJIH6C2',
+           'quickBib' => 'Doe, Jane - Duplicated in group library' },
+         { 'key' => '0_4T8MCITQ',
+           'quickBib' => 'Doe, John - Article' },
+         { 'key' => '0_5BST32AT',
+           'quickBib' => ' - Why Does the OAS Defend the Rule of Law in Honduras but Not Venezuela?' },
+         { 'key' => '0_7HDTQQN3',
+           'quickBib' => 'Johnson, Victoria L. - How Many Machine Guns Does It Take to Cook One Meal?: The Seattle and San Francisco General Strikes' },
+         { 'key' => '0_8VPAZITB',
+           'quickBib' => 'Herndon, Thomas - Does High Public Debt Consistently Stifle Economic Growth? A Critique of Reinhart and Rogoff' },
+         { 'key' => '0_9WIEAQCQ',
+           'quickBib' => 'Rothstein, Jesse - Does competition among public schools benefit students and taxpayers? A comment of Hoxby' },
+         { 'key' => '0_AUP63UAA',
+           'quickBib' => 'Roe Doe, Jane - Double Name' },
+         { 'key' => '0_BT26FFUM',
+           'quickBib' => 'Constantopoulos, P. - Reliability modelling for long term digital preservation' },
+         { 'key' => '0_HQKCK44E',
+           'quickBib' => 'Doets, Kees - The Haskell road to logic, maths and programming' },
+         { 'key' => '0_JQEUW7AI',
+           'quickBib' => 'Roe-Doe, John - Hyphens' },
+         { 'key' => '0_KTWC3JF2',
+           'quickBib' => 'Doe, John - Test section' },
+         { 'key' => '0_MWFHJ2N8',
+           'quickBib' => 'Thompson, Henry - What Is a URI and Why Does It Matter?' },
+         { 'key' => '0_MXFJSDA5',
+           'quickBib' => 'Storper, Michael - Why Does a City Grow? Specialisation, Human Capital or Institutions?' },
+         { 'key' => '0_NJNUZID2',
+           'quickBib' => 'Rees, Jonathan - Why does the address bar show the tempolink instead of the permalink?' },
+         { 'key' => '0_TWCW4IJ7',
+           'quickBib' => 'Smith, Sam - <i>Why Water</i> Is Wet' },
+         { 'key' => '0_UCA4RC22',
+           'quickBib' => 'Doe, Jane - Duplicated in group library' },
+         { 'key' => '0_ZBZQ4KMP',
+           'quickBib' => 'Doe, John - First Book' },
+         { 'key' => '0_ZNK43456',
+           'quickBib' => 'McCloskey, Donald N. - Does the Past Have Useful Economics?' }])
     end
   end
 end
