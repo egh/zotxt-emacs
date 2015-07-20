@@ -194,7 +194,7 @@ Opens with `org-open-file', see for more information about ARG."
     (deferred:$
       (request-deferred
        (format "%s/items" zotxt-url-base)
-       :params `(("key" . ,item-id) ("format" . "recoll"))
+       :params `(("key" . ,item-id) ("format" . "paths"))
        :parser 'json-read)
       (deferred:nextc it
         (lambda (response)
