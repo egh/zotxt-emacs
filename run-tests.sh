@@ -1,7 +1,7 @@
 #/bin/sh -ex
 
 # ensure no compile errors
-rm ./*.elc
+rm -f ./*.elc
 cask exec emacs -Q --batch -L . --eval '(setq byte-compile-error-on-warn t)' \
      -f batch-byte-compile zotxt.el
 cask exec emacs -Q --batch -L . --eval '(setq byte-compile-error-on-warn t)' \
