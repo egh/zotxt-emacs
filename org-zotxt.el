@@ -155,17 +155,30 @@ selected even if `org-zotxt-default-search-method' is non-nil"
           (error (error-message-string err))))
       (if zotxt--debug-sync (deferred:sync! it)))))
 
+(defun org-zotxt--link-follow (path)
+  "Function used for zotero links to follow the link to PATH."
+  (zotxt-select-key (substring path 15)))
+
+(defun org-zotxt--link-export (path desc format)
+  "Function used for zotero links to export the link.
+
+PATH is the path of the link, the text after the prefix (like \"http:\")
+DESC is the description of the link, if any
+FORMAT is the export format, a symbol like ‘html’ or ‘latex’ or ‘ascii’."
+  (if (string-match "^@\\(.*\\)$" desc)
+      (pcase format
+        (`latex (format "\\cite{%s}"
+                        ;; hack to replace all the escaping that latex
+                        ;; gives us in the desc with _
+                        (replace-regexp-in-string
+                         "\\([{}]\\|\\\\text\\|\\\\(\\|\\\\)\\)" ""
+                         (match-string 1 desc))))
+        (`md desc)
+        (_ nil))))
+
 (org-add-link-type "zotero"
-                   (lambda (rest)
-                     (zotxt-select-key (substring rest 15)))
-                   (lambda (path desc format)
-                     (if (string-match "^@\\(.*\\)$" desc)
-                         (cond ((eq format 'latex)
-                                (format "\\cite{%s}" (match-string 1 desc)))
-                               ((eq format 'md)
-                                desc)
-                               (t nil))
-                       nil)))
+                   #'org-zotxt--link-follow
+                   #'org-zotxt--link-export)
 
 (defvar org-zotxt-mode-map
   (let ((map (make-sparse-keymap)))
