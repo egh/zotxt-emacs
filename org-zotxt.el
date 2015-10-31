@@ -106,17 +106,14 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
   "Update all zotero:// links in a document."
   (interactive)
   (save-excursion
-    (goto-char (point-min))
-    (let ((next-link (org-element-link-successor)))
-      (while (not (null next-link))
-        (goto-char (cdr next-link))
-        (let* ((parse (org-element-link-parser))
-               (path (org-element-property :path parse))
-               (end (org-element-property :end parse)))
-          (if (org-zotxt-extract-link-id-from-path path)
-              (org-zotxt-update-reference-link-at-point))
-          (goto-char end))
-        (setq next-link (org-element-link-successor))))))
+    (widen)
+    (goto-char (point-max))
+    (while (re-search-backward org-any-link-re nil t)
+      (let* ((parse (org-element-link-parser))
+             (path (org-element-property :path parse)))
+        (when (org-zotxt-extract-link-id-from-path path)
+          (message "[zotxt] updating path: %s" path)
+          (org-zotxt-update-reference-link-at-point))))))
 
 (defun org-zotxt-get-item-link-text-deferred (item)
   "Get the link text for ITEM.
