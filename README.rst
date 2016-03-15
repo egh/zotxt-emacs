@@ -47,14 +47,6 @@ zotero link with descriptive link text.
 To update the link text to reflect changed metadata from Zotero_, use
 ``C-c " u`` over the link.
 
-Following links
----------------
-
-To ensure that ``zotero:`` links are followed by xdg-open, the default
-browser called by emacs, you may need to run the following command::
-  
-  xdg-mime default firefox.desktop x-scheme-handler/zotero
-
 zotxt EasyKey integration
 -------------------------
 
@@ -74,7 +66,7 @@ Now, the user can ``@doe`` and then ``C-M-i``. If the only matching
 easy key is ``@doe:2014title`` this will be completed. If there are
 multiple matches, the user will be presented with a buffer containing
 possible completions.
- 
+
 
 .. _Zotero: http://www.zotero.org/
 .. _emacs: http://www.gnu.org/software/emacs/
