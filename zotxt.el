@@ -1,5 +1,5 @@
 ;;; zotxt.el --- Interface emacs with Zotero via the zotxt extension
-     
+
 ;; Copyright (C) 2010-2014 Erik Hetzner
 
 ;; Author: Erik Hetzner <egh@e6h.org>
@@ -52,14 +52,12 @@ Runs in parallel using `deferred:parallel'."
   (apply #'deferred:parallel
          (mapcar func lst)))
 
-(defun zotxt-clean-bib-entry (entry)
-  "Clean up a bibliography ENTRY as returned by Zotxt."
-  (let ((retval entry))
-    (setq retval (replace-regexp-in-string "\n" "" retval))
-    (setq retval (replace-regexp-in-string "\" "“" retval))
-    (setq retval (replace-regexp-in-string "\" "’" retval))
-    (setq retval (replace-regexp-in-string "\^]" "”" retval))
-    retval))
+(defun zotxt--json-read ()
+  "UTF-8 aware `json-read'.
+
+request.el is not decoding our responses as UTF-8.  Recode text as UTF-8 and parse."
+  (recode-region (point-min) (point-max) 'utf-8 'raw-text)
+  (json-read))
 
 (defun zotxt-make-quick-bib-string (item)
   "Make a useful quick bibliography string from ITEM."
@@ -100,13 +98,13 @@ For use only in a `deferred:$' chain."
        :params `(("key" . ,(plist-get item :key))
                  ("format" . "bibliography")
                  ("style" . ,style))
-       :parser 'json-read
+       :parser #'zotxt--json-read
        :success (function*
                  (lambda (&key data &allow-other-keys)
                    (let* ((style-key (intern (format ":%s" style)))
                           (style-key-html (intern (format ":%s-html" style)))
                           (first (elt data 0))
-                          (text (zotxt-clean-bib-entry (cdr (assq 'text first))))
+                          (text (cdr (assq 'text first)))
                           (html (cdr (assq 'html first))))
                      (if (string= style zotxt-default-bibliography-style)
                          (progn
@@ -126,7 +124,7 @@ For use only in a `deferred:$' chain."
      (format "%s/items" zotxt-url-base)
      :params '(("selected" . "selected")
                ("format" . "key"))
-     :parser 'json-read
+     :parser #'zotxt--json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
                      (deferred:callback-post
@@ -172,7 +170,7 @@ If SEARCH-STRING is supplied, it should be the search string."
      :params `(("q" . ,search-string)
                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
                ("format" . "quickBib"))
-     :parser 'json-read
+     :parser #'zotxt--json-read
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (let* ((results (mapcar (lambda (e)
@@ -232,7 +230,7 @@ not be returned."
     (if (zotxt-easykey-at-point-match)
         (match-string 1)
       nil)))
-  
+
 (defun zotxt-easykey-complete-at-point ()
   "Complete the easykey at point."
   (save-excursion
@@ -246,7 +244,7 @@ not be returned."
                 (request-deferred
                  (format "%s/complete" zotxt-url-base)
                  :params `(("easykey" . ,key))
-                 :parser 'json-read)
+                 :parser #'zotxt--json-read)
                 (deferred:nextc it
                   (lambda (response)
                     (mapcar (lambda (k) (format "@%s" k))
@@ -268,7 +266,7 @@ For use only in a `deferred:$' chain."
      :params `(("key" . ,(plist-get item :key))
                ("format" . ,(substring (symbol-name format) 1)))
      :parser (if (member format zotxt--json-formats)
-                 #'json-read
+                 #'zotxt--json-read
                #'buffer-string)
      :success (function*
                (lambda (&key data &allow-other-keys)
