@@ -71,6 +71,6 @@ possible completions.
 .. _Zotero: http://www.zotero.org/
 .. _emacs: http://www.gnu.org/software/emacs/
 .. _`org-mode`: http://orgmode.org/
-.. _`zot4rst`: http://bitbucket.org/egh/zot4rst
-.. _zotxt: http://bitbucket.org/egh/zotxt
+.. _`zot4rst`: http://gitlab.com/egh/zot4rst
+.. _zotxt: http://gitlab.com/egh/zotxt
 .. _MELPA: http://melpa.milkbox.net/
