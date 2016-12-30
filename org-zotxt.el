@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl))
 (require 'request)
 (require 'org-element)
 (require 'zotxt)
