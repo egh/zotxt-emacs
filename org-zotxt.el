@@ -175,9 +175,9 @@ FORMAT is the export format, a symbol like ‘html’ or ‘latex’ or ‘ascii
         (`md desc)
         (_ nil))))
 
-(org-add-link-type "zotero"
-                   #'org-zotxt--link-follow
-                   #'org-zotxt--link-export)
+(org-link-set-parameters "zotero"
+			 :follow #'org-zotxt--link-follow
+			 :export #'org-zotxt--link-export)
 
 (defvar org-zotxt-mode-map
   (let ((map (make-sparse-keymap)))
