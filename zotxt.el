@@ -4,6 +4,7 @@
 
 ;; Author: Erik Hetzner <egh@e6h.org>
 ;; Keywords: bib
+;; Version: 0.1.35
 
 ;; This file is not part of GNU Emacs.
 
