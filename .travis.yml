@@ -16,4 +16,4 @@ before_install:
   - export PATH="/home/travis/.cask/bin:$PATH"
   - cask
 script:
-  sh -e run-tests.sh
+  sh -ex run-tests.sh
