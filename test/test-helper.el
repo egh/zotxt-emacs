@@ -1,9 +1,5 @@
-(require 'f)
+(add-to-list 'load-path (f-parent (f-dirname load-file-name)))
 
-(defvar zotxt-root-path
-  (f-parent (f-dirname load-file-name)))
-
-(add-to-list 'load-path zotxt-root-path)
 
 (require 'undercover)
 (undercover "*.el")
