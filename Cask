@@ -4,9 +4,9 @@
 (depends-on "request-deferred")
 (depends-on "org-plus-contrib")
 
-(files ("*.el"))
+(package-file "zotxt.el")
 
-(package "zotxt" "0.1.16" "zotxt integration with emacs")
+(files "zotxt.el" "org-zotxt.el")
 
 (development
   (depends-on "ert-runner")
