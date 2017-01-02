@@ -4,7 +4,6 @@
 (require 'undercover)
 (undercover "*.el")
 
-(require 'cl) ;; this should not be necessary
 (require 'zotxt)
 (require 'org-zotxt)
 
