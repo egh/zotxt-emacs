@@ -14,6 +14,5 @@ before_install:
   # setup cask
   - curl -fsSkL https://raw.github.com/cask/cask/master/go | python
   - export PATH="/home/travis/.cask/bin:$PATH"
-  - cask
 script:
   sh -ex run-tests.sh
