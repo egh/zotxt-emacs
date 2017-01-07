@@ -1,11 +1,10 @@
 (source melpa)
-(source org)
 
 (depends-on "request-deferred")
 
-(package-file "../../zotxt.el")
+(package-file "zotxt.el")
 
-(files "../../zotxt.el" "../../org-zotxt.el")
+(files "zotxt.el" "org-zotxt.el")
 
 (development
   (depends-on "ert-runner")
