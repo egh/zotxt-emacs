@@ -175,9 +175,22 @@ FORMAT is the export format, a symbol like ‘html’ or ‘latex’ or ‘ascii
         (`md desc)
         (_ nil))))
 
-(org-link-set-parameters "zotero"
-			 :follow #'org-zotxt--link-follow
-			 :export #'org-zotxt--link-export)
+(defvar org-zotxt--links-defined nil)
+
+;; We need to support org 9 and org 8, but this code will generate compiler
+;; warnings without this
+(with-no-warnings
+  (defun org-zotxt--define-links ()
+    "Set up the links for zotxt."
+    (when (not org-zotxt--links-defined)
+      (setq org-zotxt--links-defined t)
+      (if (functionp #'org-link-set-parameters)
+          (org-link-set-parameters "zotero"
+                                   :follow #'org-zotxt--link-follow
+                                   :export #'org-zotxt--link-export)
+        (org-add-link-type "zotero"
+                           #'org-zotxt--link-follow
+                           #'org-zotxt--link-export)))))
 
 (defvar org-zotxt-mode-map
   (let ((map (make-sparse-keymap)))
@@ -225,7 +238,8 @@ This is a minor mode for managing your citations with Zotero in a
 org-mode document."
   nil
   " OrgZot"
-  org-zotxt-mode-map)
+  org-zotxt-mode-map
+  (org-zotxt--define-links))
 
 (provide 'org-zotxt)
 ;;; org-zotxt.el ends here
