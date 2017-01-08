@@ -12,6 +12,13 @@ Installation
 zotxt-emacs can be installed via MELPA_; please see the ``zotxt``
 package.
 
+Requirements
+------------
+
+zotxt-emacs requires GNU emacs >= 24.3, or any version of emacs 25, including
+unreleased versions. It should work with a builtin org-mode or with the latest
+org-mode installed via the org ELPA repository.
+
 Emacs integration
 -----------------
 
