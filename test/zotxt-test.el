@@ -116,6 +116,13 @@
     (goto-char (point-min))
     (should (equal (org-zotxt-extract-link-id-at-point) "0_ZBZQ4KMP"))))
 
+(ert-deftest org-zotxt-extract-link-id-from-path ()
+  (let ((link-id "0_ZBZQ4KMP"))
+    (should (equal link-id
+		   (org-zotxt-extract-link-id-from-path "zotero://select/items/0_ZBZQ4KMP")))
+    (should (equal link-id
+		   (org-zotxt-extract-link-id-from-path "//select/items/0_ZBZQ4KMP")))))
+
 (ert-deftest org-zotxt-test-update-reference-link-at-point ()
   (let ((org-zotxt-link-description-style :citation)
         (start-text "[[zotero://select/items/0_ZBZQ4KMP][foo]]")

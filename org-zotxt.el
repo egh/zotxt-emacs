@@ -60,8 +60,8 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
 
 (defun org-zotxt-extract-link-id-from-path (path)
   "Return the zotxt ID from a link PATH."
-  (if (string-match "^//select/items/\\(.*\\)$" path)
-      (match-string 1 path)
+  (if (string-match "^\\(zotero:\\)?//select/items/\\(.*\\)$" path)
+      (match-string 2 path)
     nil))
 
 (defun org-zotxt-insert-reference-link-to-item (item)
