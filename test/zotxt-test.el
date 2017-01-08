@@ -112,6 +112,8 @@
 
 (ert-deftest org-zotxt-test-extract-link-id-at-point ()
   (with-temp-buffer
+    (org-mode)
+    (org-zotxt-mode)
     (insert "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]")
     (goto-char (point-min))
     (should (equal (org-zotxt-extract-link-id-at-point) "0_ZBZQ4KMP"))))
@@ -128,6 +130,8 @@
         (start-text "[[zotero://select/items/0_ZBZQ4KMP][foo]]")
         (end-text "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]"))
     (with-temp-buffer
+      (org-mode)
+      (org-zotxt-mode)
       (insert start-text)
       (goto-char (point-min))
       (org-zotxt-update-reference-link-at-point)
@@ -142,6 +146,8 @@
         (end-text "[[zotero://select/items/0_ZBZQ4KMP][Doe, John. First Book. Cambridge: Cambridge University Press, 2005.]]
 [[zotero://select/items/0_TWCW4IJ7][Doe, John, and Jenny Roe. “Why Water Is Wet.” In Third Book, edited by Sam Smith. Oxford: Oxford University Press, 2007.]]"))
     (with-temp-buffer
+      (org-mode)
+      (org-zotxt-mode)
       (insert start-text)
       (goto-char (point-min))
       (org-zotxt-update-all-reference-links)
@@ -161,6 +167,8 @@
         (text "[[zotero://select/items/foo][Foo Bar]]")
         (item '(:key "foo" :citation "Foo Bar")))
     (with-temp-buffer
+      (org-mode)
+      (org-zotxt-mode)
       (org-zotxt-insert-reference-link-to-item item)
       (should (equal (buffer-string) text)))))
 
@@ -169,6 +177,8 @@
         (text "[[zotero://select/items/foo][@foo:2014bar]]")
         (item '(:key "foo" :easykey "foo:2014bar")))
     (with-temp-buffer
+      (org-mode)
+      (org-zotxt-mode)
       (org-zotxt-insert-reference-link-to-item item)
       (should (equal (buffer-string) text)))))
 
@@ -177,6 +187,8 @@
         (text "[[zotero://select/items/foo][@foo:2014bar]]")
         (item '(:key "foo" :betterbibtexkey "foo:2014bar")))
     (with-temp-buffer
+      (org-mode)
+      (org-zotxt-mode)
       (org-zotxt-insert-reference-link-to-item item)
       (should (equal (buffer-string) text)))))
 
@@ -188,6 +200,8 @@
         (items '((:key "foo" :citation "Foo Bar")
                  (:key "bar" :citation "Bar Foo"))))
     (with-temp-buffer
+      (org-mode)
+      (org-zotxt-mode)
       (org-zotxt-insert-reference-links-to-items items)
       (should (equal (buffer-string) text)))))
 
