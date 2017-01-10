@@ -6,7 +6,7 @@
 
 (package-file "zotxt.el")
 
-(files "zotxt.el" "org-zotxt.el")
+(files "zotxt.el" "org-zotxt.el" "zotxt-easykey.el")
 
 (development
   (depends-on "ert-runner")

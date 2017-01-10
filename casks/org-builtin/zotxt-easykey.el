@@ -1,0 +1,1 @@
+../../zotxt-easykey.el

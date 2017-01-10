@@ -13,6 +13,7 @@
 
 (require 'org)
 (require 'zotxt)
+(require 'zotxt-easykey)
 (require 'org-zotxt)
 (require 'espuds)
 (require 'ert)
