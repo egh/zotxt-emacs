@@ -28,8 +28,6 @@
 (eval-when-compile
   (require 'cl))
 (require 'json)
-(require 'request)
-(require 'deferred)
 (require 'request-deferred)
 
 (defvar zotxt-default-bibliography-style

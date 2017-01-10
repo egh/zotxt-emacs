@@ -27,7 +27,7 @@
 
 (eval-when-compile
   (require 'cl))
-(require 'request)
+(require 'request-deferred)
 (require 'org-element)
 (require 'zotxt)
 
