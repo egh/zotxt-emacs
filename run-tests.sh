@@ -11,10 +11,10 @@ for CASK_DIR in casks/* ; do
     cask clean-elc
     cask
     # ensure no compile errors
-    cask exec emacs -Q --batch -L . --eval '(setq byte-compile-error-on-warn t)' \
-         -f batch-byte-compile zotxt.el
-    cask exec emacs -Q --batch -L . --eval '(setq byte-compile-error-on-warn t)' \
-         -f batch-byte-compile org-zotxt.el
+    for elfile in *.el ; do
+        cask exec emacs -Q --batch -L . --eval '(setq byte-compile-error-on-warn t)' \
+             -f batch-byte-compile $elfile
+    done
     cask exec ert-runner --quiet
     cask exec ecukes --quiet
     cd ../.. || exit

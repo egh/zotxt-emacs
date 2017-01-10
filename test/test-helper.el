@@ -6,6 +6,6 @@
 
 (require 'zotxt)
 (require 'org-zotxt)
-(require 'zotxt-easykey)
+(require 'pandoc-zotxt)
 
 (setq zotxt-url-base "http://127.0.0.1:33119/zotxt")

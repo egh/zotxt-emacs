@@ -131,4 +131,4 @@ including completion."
                 (remove 'zotxt-easykey-complete-at-point
                         completion-at-point-functions))))
 
-(provide 'zotxt-easykey)
+(provide 'pandoc-zotxt)
