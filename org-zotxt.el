@@ -226,6 +226,34 @@ Opens with `org-open-file', see for more information about ARG."
           (let ((paths (cdr (assq 'paths (elt (request-response-data response) 0)))))
             (org-open-file (org-zotxt-choose-path paths) arg))))
       (if zotxt--debug-sync (deferred:sync! it)))))
+        ;; (org-entry-put nil org-noter-property-doc-file document-property))
+
+(defun org-zotxt-noter (arg)
+  "Like `org-noter', but use Zotero.
+
+If no document path propery is found, will prompt for a Zotero
+search to choose an attachment to annotate, then calls `org-noter'.
+
+If a document path property is found, simply call `org-noter'."
+  (interactive "P")
+  (when (eq major-mode 'org-mode)
+    (when (org-before-first-heading-p)
+      (error "`org-zotxt-noter' must be issued inside a heading"))
+    (let* ((document-property (org-entry-get nil org-noter-property-doc-file (not (equal arg '(4)))))
+           (document-path (when (stringp document-property) (expand-file-name document-property))))
+      (if (and document-path (not (file-directory-p document-path)) (file-readable-p document-path))
+          (org-noter arg)
+        (lexical-let ((arg arg))
+          (deferred:$
+            (zotxt-choose-deferred)
+            (deferred:nextc it
+              (lambda (item-ids)
+                (zotxt-get-item-deferred (car item-ids) :paths)))
+            (deferred:nextc it
+              (lambda (resp)
+                (let ((path (org-zotxt-choose-path (cdr (assq 'paths (plist-get resp :paths))))))
+                  (org-entry-put nil org-noter-property-doc-file path))
+                (org-noter arg)))))))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode
