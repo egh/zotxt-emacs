@@ -226,7 +226,6 @@ Opens with `org-open-file', see for more information about ARG."
           (let ((paths (cdr (assq 'paths (elt (request-response-data response) 0)))))
             (org-open-file (org-zotxt-choose-path paths) arg))))
       (if zotxt--debug-sync (deferred:sync! it)))))
-        ;; (org-entry-put nil org-noter-property-doc-file document-property))
 
 (defun org-zotxt-noter (arg)
   "Like `org-noter', but use Zotero.
@@ -236,7 +235,9 @@ search to choose an attachment to annotate, then calls `org-noter'.
 
 If a document path property is found, simply call `org-noter'."
   (interactive "P")
-  (when (eq major-mode 'org-mode)
+  (when (and (eq major-mode 'org-mode)
+             (boundp 'org-noter-property-doc-file)
+             (fboundp 'org-noter))
     (when (org-before-first-heading-p)
       (error "`org-zotxt-noter' must be issued inside a heading"))
     (let* ((document-property (org-entry-get nil org-noter-property-doc-file (not (equal arg '(4)))))
