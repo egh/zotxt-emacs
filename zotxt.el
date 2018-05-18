@@ -39,7 +39,7 @@
   "Base URL to contact.")
 
 (defconst zotxt--json-formats
-  '(:easykey :betterbibtexkey :json)
+  '(:easykey :betterbibtexkey :json :paths :quickBib)
   "Formats to parse as JSON.")
 
 (defvar zotxt--debug-sync nil
