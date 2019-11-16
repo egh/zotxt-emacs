@@ -1,26 +1,16 @@
-#/bin/sh -e
+#!/bin/sh
 
-bundle install --quiet
-ruby mock-server.rb -p 33119 >/dev/null 2>/dev/null &
+set -ex
+
+bundle exec ruby mock-server.rb -p 33119 &
 MOCK_PID=$!
 sleep 2
 
-for CASK_DIR in casks/* ; do
-    printf "Testing %s\n" "$(basename "${CASK_DIR}")"
-    cd "$CASK_DIR" || exit
-    cask clean-elc
-    cask
-    # ensure no compile errors
-    cask exec emacs -Q --batch -L . --eval '(setq byte-compile-error-on-warn t)' \
-         -f batch-byte-compile zotxt.el
-    cask exec emacs -Q --batch -L . --eval '(setq byte-compile-error-on-warn t)' \
-         -f batch-byte-compile org-zotxt.el
-    cask exec ert-runner --quiet
-    cask exec ecukes --quiet
-    cd ../.. || exit
-done
+cd casks/"$CASK" || exit
+cask clean-elc
+cask
+cask build
+cask exec ert-runner
+cask exec ecukes
 
 kill "$MOCK_PID"
-while (kill -0 "$MOCK_PID" > /dev/null 2> /dev/null) ; do
-    sleep 1
-done

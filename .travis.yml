@@ -1,18 +1,103 @@
-language: generic
-sudo: false
-env:
-  - EVM_EMACS=emacs-24.4-travis
-  - EVM_EMACS=emacs-24.5-travis
-  - EVM_EMACS=emacs-25.1-travis
-  - EVM_EMACS=emacs-25.2-travis
-  - EVM_EMACS=emacs-25.3-travis
-  - EVM_EMACS=emacs-26-pretest-travis
+language: emacs-lisp
+
+matrix:
+  include:
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-24.4-travis
+        - CASK=org-builtin
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-24.4-travis
+        - CASK=org-latest
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-24.5-travis
+        - CASK=org-builtin
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-24.5-travis
+        - CASK=org-latest
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-25.1-travis
+        - CASK=org-builtin
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-25.1-travis
+        - CASK=org-latest
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-25.2-travis
+        - CASK=org-builtin
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-25.2-travis
+        - CASK=org-latest
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-25.3-travis
+        - CASK=org-builtin
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-25.3-travis
+        - CASK=org-latest
+    - os: linux
+      dist: xenial
+      env:
+      - EVM_EMACS=emacs-26.1-travis-linux-xenial
+      - CASK=org-builtin
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-26.1-travis-linux-xenial
+        - CASK=org-latest
+    - os: linux
+      dist: xenial
+      env:
+      - EVM_EMACS=emacs-26.2-travis-linux-xenial
+      - CASK=org-builtin
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-26.2-travis-linux-xenial
+        - CASK=org-latest
+    - os: linux
+      dist: xenial
+      env: 
+      - EVM_EMACS=emacs-26.3-travis-linux-xenial
+      - CASK=org-builtin
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-26.3-travis-linux-xenial
+        - CASK=org-latest
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-git-snapshot-travis-linux-xenial
+        - CASK=org-builtin
+    - os: linux
+      dist: xenial
+      env:
+        - EVM_EMACS=emacs-git-snapshot-travis-linux-xenial
+        - CASK=org-latest
 before_install:
   # setup evm
   - curl -fsSkL https://raw.github.com/rejeep/evm/master/go | bash
   - export PATH="/home/travis/.evm/bin:$PATH"
   - evm config path /tmp
-  - evm install $EVM_EMACS --use --skip
+  - evm install $EVM_EMACS --use --force
   # setup cask
   - curl -fsSkL https://raw.github.com/cask/cask/master/go | python
   - export PATH="/home/travis/.cask/bin:$PATH"
