@@ -9,6 +9,8 @@ tools), which been moved to [zot4rst](http://gitlab.com/egh/zot4rst).
 zotxt-emacs can be installed via [MELPA](http://melpa.milkbox.net/);
 please see the `zotxt` package.
 
+If installing without MELPA, please note that zotxt-emacs depends on https://github.com/tkf/emacs-request
+
 ## Requirements
 
 zotxt-emacs requires GNU emacs &gt;= 24.3, or any version of emacs 25,
