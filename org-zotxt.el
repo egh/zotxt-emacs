@@ -235,26 +235,28 @@ search to choose an attachment to annotate, then calls `org-noter'.
 
 If a document path property is found, simply call `org-noter'."
   (interactive "P")
-  (when (and (eq major-mode 'org-mode)
-             (boundp 'org-noter-property-doc-file)
-             (fboundp 'org-noter))
-    (when (org-before-first-heading-p)
+  (require 'org-noter nil t)
+  (unless (eq major-mode 'org-mode)
+    (error "Org mode not running"))
+  (unless (fboundp 'org-noter)
+    (error "`org-noter' not installed"))
+  (if (org-before-first-heading-p)
       (error "`org-zotxt-noter' must be issued inside a heading"))
-    (let* ((document-property (org-entry-get nil org-noter-property-doc-file (not (equal arg '(4)))))
-           (document-path (when (stringp document-property) (expand-file-name document-property))))
-      (if (and document-path (not (file-directory-p document-path)) (file-readable-p document-path))
-          (org-noter arg)
-        (lexical-let ((arg arg))
-          (deferred:$
-            (zotxt-choose-deferred)
-            (deferred:nextc it
-              (lambda (item-ids)
-                (zotxt-get-item-deferred (car item-ids) :paths)))
-            (deferred:nextc it
-              (lambda (resp)
-                (let ((path (org-zotxt-choose-path (cdr (assq 'paths (plist-get resp :paths))))))
-                  (org-entry-put nil org-noter-property-doc-file path))
-                (org-noter arg)))))))))
+  (let* ((document-property (org-entry-get nil org-noter-property-doc-file (not (equal arg '(4)))))
+         (document-path (when (stringp document-property) (expand-file-name document-property))))
+    (if (and document-path (not (file-directory-p document-path)) (file-readable-p document-path))
+        (org-noter arg)
+      (lexical-let ((arg arg))
+        (deferred:$
+          (zotxt-choose-deferred)
+          (deferred:nextc it
+            (lambda (item-ids)
+              (zotxt-get-item-deferred (car item-ids) :paths)))
+          (deferred:nextc it
+            (lambda (resp)
+              (let ((path (org-zotxt-choose-path (cdr (assq 'paths (plist-get resp :paths))))))
+                (org-entry-put nil org-noter-property-doc-file path))
+              (org-noter arg))))))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode
