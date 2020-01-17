@@ -1,6 +1,6 @@
 ;;; org-zotxt.el --- Interface org-mode with Zotero via the zotxt extension
 
-;; Copyright (C) 2010-2016 Erik Hetzner
+;; Copyright (C) 2010-2020 Erik Hetzner
 
 ;; Author: Erik Hetzner <egh@e6h.org>
 ;; Keywords: bib
