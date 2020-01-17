@@ -78,6 +78,16 @@ request.el is not decoding our responses as UTF-8.  Recode text as UTF-8 and par
   (if (string-match "/\\([^/]+\\)$" id)
       (format "0_%s" (match-string 1 id))))
 
+(defun zotxt--check-server ()
+  "Use the zotxt version endpoint to check if Zotero is running and zotxt is installed."
+  (let* ((response
+         (request
+           (format "%s/version" zotxt-url-base)
+           :sync t))
+         (status-code (request-response-status-code response)))
+    (unless (and status-code (= 200 status-code))
+      (error "Zotxt version endpoint not found; is Zotero running and zotxt installed?"))))
+
 (defun zotxt-get-item-bibliography-deferred (item)
   "Retrieve the generated bibliography for ITEM (a plist).
 Use STYLE to specify a custom bibliography style.
