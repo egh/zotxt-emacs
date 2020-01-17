@@ -70,6 +70,7 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
     nil))
 
 (defun org-zotxt-make-item-link (item)
+  "Return an Org mode link for ITEM as a string."
   (org-make-link-string (format "zotero://select/items/%s"
                                 (plist-get item :key))
                         (if (or (eq org-zotxt-link-description-style :easykey)
@@ -241,7 +242,9 @@ Opens with `org-open-file', see for more information about ARG."
 If no document path propery is found, will prompt for a Zotero
 search to choose an attachment to annotate, then calls `org-noter'.
 
-If a document path property is found, simply call `org-noter'."
+If a document path property is found, simply call `org-noter'.
+
+See `org-noter' for details and ARG usage."
   (interactive "P")
   (require 'org-noter nil t)
   (unless (eq major-mode 'org-mode)
