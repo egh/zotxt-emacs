@@ -51,6 +51,11 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
                  (lambda (c) (list 'const :tag (car c) (cdr c)))
                  zotxt-quicksearch-method-names)))
 
+(defcustom org-zotxt-noter-zotero-link "ZOTERO_LINK"
+  "Default property name for zotero link."
+  :group 'org-zotxt
+  :type 'string)
+
 (defun org-zotxt-extract-link-id-at-point ()
   "Extract the Zotero key of the link at point."
   (let ((ct (org-element-context)))
@@ -64,14 +69,17 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
       (match-string 2 path)
     nil))
 
+(defun org-zotxt-make-item-link (item)
+  (org-make-link-string (format "zotero://select/items/%s"
+                                (plist-get item :key))
+                        (if (or (eq org-zotxt-link-description-style :easykey)
+                                (eq org-zotxt-link-description-style :betterbibtexkey))
+                            (concat "@" (plist-get item org-zotxt-link-description-style))
+                          (plist-get item :citation))))
+
 (defun org-zotxt-insert-reference-link-to-item (item)
   "Insert link to Zotero ITEM in buffer."
-  (insert (org-make-link-string (format "zotero://select/items/%s"
-                                        (plist-get item :key))
-                                (if (or (eq org-zotxt-link-description-style :easykey)
-                                        (eq org-zotxt-link-description-style :betterbibtexkey))
-                                    (concat "@" (plist-get item org-zotxt-link-description-style))
-                                  (plist-get item :citation)))))
+  (insert (org-zotxt-make-item-link item)))
 
 (defun org-zotxt-insert-reference-links-to-items (items)
   "Insert links to Zotero ITEMS in buffer."
@@ -253,8 +261,12 @@ If a document path property is found, simply call `org-noter'."
             (lambda (item-ids)
               (zotxt-get-item-deferred (car item-ids) :paths)))
           (deferred:nextc it
+            (lambda (item)
+              (org-zotxt-get-item-link-text-deferred item)))
+          (deferred:nextc it
             (lambda (resp)
               (let ((path (org-zotxt-choose-path (cdr (assq 'paths (plist-get resp :paths))))))
+                (org-entry-put nil org-zotxt-noter-zotero-link (org-zotxt-make-item-link resp))
                 (org-entry-put nil org-noter-property-doc-file path))
               (org-noter arg))))))))
 
