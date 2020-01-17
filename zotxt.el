@@ -26,8 +26,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 (require 'json)
 (require 'request-deferred)
 
@@ -111,7 +110,7 @@ For use only in a `deferred:$' chain."
                  ("format" . "bibliography")
                  ("style" . ,style))
        :parser #'zotxt--json-read
-       :success (function*
+       :success (cl-function
                  (lambda (&key data &allow-other-keys)
                    (let* ((style-key (intern (format ":%s" style)))
                           (style-key-html (intern (format ":%s-html" style)))
@@ -137,7 +136,7 @@ For use only in a `deferred:$' chain."
      :params '(("selected" . "selected")
                ("format" . "key"))
      :parser #'zotxt--json-read
-     :success (function*
+     :success (cl-function
                (lambda (&key data &allow-other-keys)
                      (deferred:callback-post
                        d (mapcar (lambda (k)
@@ -183,7 +182,7 @@ If SEARCH-STRING is supplied, it should be the search string."
                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
                ("format" . "quickBib"))
      :parser #'zotxt--json-read
-     :success (function*
+     :success (cl-function
                (lambda (&key data &allow-other-keys)
                  (let* ((results (mapcar (lambda (e)
                                            (cons (cdr (assq 'quickBib e))
@@ -280,7 +279,7 @@ For use only in a `deferred:$' chain."
      :parser (if (member format zotxt--json-formats)
                  #'zotxt--json-read
                #'buffer-string)
-     :success (function*
+     :success (cl-function
                (lambda (&key data &allow-other-keys)
                  (if (member format zotxt--json-formats)
                      ;; json data
