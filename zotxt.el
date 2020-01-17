@@ -160,6 +160,15 @@ For use only in a `deferred:$' chain."
     (:fields . "fields")
     (:everything . "everything")))
 
+(defun zotxt--read-search-method ()
+  "Prompt user for Zotero search method to use, return a symbol."
+  (let ((method-name
+         (completing-read
+          "Zotero search method (nothing for title, creator, year): "
+          zotxt-quicksearch-method-names
+          nil t nil nil "title, creator, year")))
+    (cdr (assoc method-name zotxt-quicksearch-method-names))))
+  
 (defun zotxt-choose-deferred (&optional method search-string)
   "Allow the user to select an item interactively.
 
@@ -167,12 +176,7 @@ If METHOD is supplied, it should be one
 of :title-creator-year, :fields, or :everything.
 If SEARCH-STRING is supplied, it should be the search string."
   (if (null method)
-      (let ((method-name
-             (completing-read
-              "Zotero search method (nothing for title, creator, year): "
-              zotxt-quicksearch-method-names
-              nil t nil nil "title, creator, year")))
-        (setq method (cdr (assoc method-name zotxt-quicksearch-method-names)))))
+      (setq method (zotxt--read-search-method)))
   (if (null search-string)
       (setq search-string
             (read-string (format "Zotero quicksearch (%s) query: " (cdr (assq method zotxt-quicksearch-method-to-names))))))
