@@ -176,6 +176,8 @@ If SEARCH-STRING is supplied, it should be the search string."
   (if (null search-string)
       (setq search-string
             (read-string (format "Zotero quicksearch (%s) query: " (cdr (assq method zotxt-quicksearch-method-to-names))))))
+  (if (string-match-p "\\`\\s-*$" search-string)
+      (error "Please provide search string"))
   (lexical-let ((d (deferred:new)))
     (request
      (format "%s/search" zotxt-url-base)
