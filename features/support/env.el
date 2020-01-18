@@ -19,7 +19,11 @@
 
 (Setup
  (setq zotxt-url-base "http://127.0.0.1:33119/zotxt"
-       zotxt--debug-sync t))
+       zotxt--debug-sync t)
+ (async-shell-command
+  (format "bundle exec ruby %s/mock-server.rb -p 33119" zotxt-root-path))
+ (sleep-for 2))
+
 
 (Before
  ;; Before each scenario is run
