@@ -82,16 +82,6 @@ matrix:
       env:
         - EVM_EMACS=emacs-26.3-travis-linux-xenial
         - CASK=org-latest
-    - os: linux
-      dist: xenial
-      env:
-        - EVM_EMACS=emacs-git-snapshot-travis-linux-xenial
-        - CASK=org-builtin
-    - os: linux
-      dist: xenial
-      env:
-        - EVM_EMACS=emacs-git-snapshot-travis-linux-xenial
-        - CASK=org-latest
 before_install:
   # setup evm
   - curl -fsSkL https://raw.github.com/rejeep/evm/master/go | bash
