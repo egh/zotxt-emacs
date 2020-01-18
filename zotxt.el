@@ -31,20 +31,35 @@
 (require 'json)
 (require 'request-deferred)
 
-(defvar zotxt-default-bibliography-style
-  "chicago-note-bibliography"
-  "Default bibliography style to use.")
-
 (defconst zotxt-url-base
   "http://127.0.0.1:23119/zotxt"
   "Base URL to contact.")
+
+(defconst  zotxt-quicksearch-method-params
+  '((:title-creator-year . "titleCreatorYear")
+    (:fields . "fields")
+    (:everything . "everything")))
 
 (defconst zotxt--json-formats
   '(:easykey :betterbibtexkey :json :paths :quickBib)
   "Formats to parse as JSON.")
 
+(defconst zotxt-quicksearch-method-names
+  '(("title, creator, year" . :title-creator-year)
+    ("fields" . :fields)
+    ("everything" . :everything)))
+
+(defconst zotxt-quicksearch-method-to-names
+  '((:title-creator-year . "title, creator, year")
+    (:fields . "fields")
+    (:everything . "everything")))
+
 (defvar zotxt--debug-sync nil
   "Use synchronous requests.  For debug only!")
+
+(defvar zotxt-default-bibliography-style
+  "chicago-note-bibliography"
+  "Default bibliography style to use.")
 
 (defun zotxt-mapcar-deferred (func lst)
   "Apply FUNC (which must return a deferred object), to each element of LST.
@@ -145,21 +160,15 @@ For use only in a `deferred:$' chain."
                                  data)))))
       d))
 
-(defconst zotxt-quicksearch-method-names
-  '(("title, creator, year" . :title-creator-year)
-    ("fields" . :fields)
-    ("everything" . :everything)))
-
-(defconst  zotxt-quicksearch-method-params
-  '((:title-creator-year . "titleCreatorYear")
-    (:fields . "fields")
-    (:everything . "everything")))
-
-(defconst zotxt-quicksearch-method-to-names
-  '((:title-creator-year . "title, creator, year")
-    (:fields . "fields")
-    (:everything . "everything")))
-
+(defun zotxt--read-search-method ()
+  "Prompt user for Zotero search method to use, return a symbol."
+  (let ((method-name
+         (completing-read
+          "Zotero search method (nothing for title, creator, year): "
+          zotxt-quicksearch-method-names
+          nil t nil nil "title, creator, year")))
+    (cdr (assoc method-name zotxt-quicksearch-method-names))))
+  
 (defun zotxt-choose-deferred (&optional method search-string)
   "Allow the user to select an item interactively.
 
@@ -167,15 +176,12 @@ If METHOD is supplied, it should be one
 of :title-creator-year, :fields, or :everything.
 If SEARCH-STRING is supplied, it should be the search string."
   (if (null method)
-      (let ((method-name
-             (completing-read
-              "Zotero search method (nothing for title, creator, year): "
-              zotxt-quicksearch-method-names
-              nil t nil nil "title, creator, year")))
-        (setq method (cdr (assoc method-name zotxt-quicksearch-method-names)))))
+      (setq method (zotxt--read-search-method)))
   (if (null search-string)
       (setq search-string
             (read-string (format "Zotero quicksearch (%s) query: " (cdr (assq method zotxt-quicksearch-method-to-names))))))
+  (if (string-match-p "\\`\\s-*$" search-string)
+      (error "Please provide search string"))
   (lexical-let ((d (deferred:new)))
     (request
      (format "%s/search" zotxt-url-base)
@@ -292,7 +298,7 @@ For use only in a `deferred:$' chain."
 (defun zotxt-easykey-insert (&optional selected)
   "Prompt for a search string and insert an easy key.
 
-If SELECTED is non-nill (interactively, With prefix argument), insert easykeys for the currently selected items in Zotero."
+If SELECTED is non-nil (interactively, With prefix argument), insert easykeys for the currently selected items in Zotero."
   (interactive (if current-prefix-arg t))
   (lexical-let ((mk (point-marker)))
     (deferred:$
