@@ -1,6 +1,7 @@
 (source melpa)
 
-(depends-on "request-deferred")
+(depends-on "request")
+(depends-on "deferred")
 
 (package-file "zotxt.el")
 
