@@ -31,20 +31,35 @@
 (require 'json)
 (require 'request-deferred)
 
-(defvar zotxt-default-bibliography-style
-  "chicago-note-bibliography"
-  "Default bibliography style to use.")
-
 (defconst zotxt-url-base
   "http://127.0.0.1:23119/zotxt"
   "Base URL to contact.")
+
+(defconst  zotxt-quicksearch-method-params
+  '((:title-creator-year . "titleCreatorYear")
+    (:fields . "fields")
+    (:everything . "everything")))
 
 (defconst zotxt--json-formats
   '(:easykey :betterbibtexkey :json :paths :quickBib)
   "Formats to parse as JSON.")
 
+(defconst zotxt-quicksearch-method-names
+  '(("title, creator, year" . :title-creator-year)
+    ("fields" . :fields)
+    ("everything" . :everything)))
+
+(defconst zotxt-quicksearch-method-to-names
+  '((:title-creator-year . "title, creator, year")
+    (:fields . "fields")
+    (:everything . "everything")))
+
 (defvar zotxt--debug-sync nil
   "Use synchronous requests.  For debug only!")
+
+(defvar zotxt-default-bibliography-style
+  "chicago-note-bibliography"
+  "Default bibliography style to use.")
 
 (defun zotxt-mapcar-deferred (func lst)
   "Apply FUNC (which must return a deferred object), to each element of LST.
@@ -144,21 +159,6 @@ For use only in a `deferred:$' chain."
                                    (list :key k))
                                  data)))))
       d))
-
-(defconst zotxt-quicksearch-method-names
-  '(("title, creator, year" . :title-creator-year)
-    ("fields" . :fields)
-    ("everything" . :everything)))
-
-(defconst  zotxt-quicksearch-method-params
-  '((:title-creator-year . "titleCreatorYear")
-    (:fields . "fields")
-    (:everything . "everything")))
-
-(defconst zotxt-quicksearch-method-to-names
-  '((:title-creator-year . "title, creator, year")
-    (:fields . "fields")
-    (:everything . "everything")))
 
 (defun zotxt--read-search-method ()
   "Prompt user for Zotero search method to use, return a symbol."
