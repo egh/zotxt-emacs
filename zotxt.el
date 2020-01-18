@@ -298,7 +298,7 @@ For use only in a `deferred:$' chain."
 (defun zotxt-easykey-insert (&optional selected)
   "Prompt for a search string and insert an easy key.
 
-If SELECTED is non-nill (interactively, With prefix argument), insert easykeys for the currently selected items in Zotero."
+If SELECTED is non-nil (interactively, With prefix argument), insert easykeys for the currently selected items in Zotero."
   (interactive (if current-prefix-arg t))
   (lexical-let ((mk (point-marker)))
     (deferred:$
