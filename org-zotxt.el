@@ -27,9 +27,9 @@
 
 (eval-when-compile
   (require 'cl))
-(require 'request-deferred)
 (require 'org-element)
 (require 'zotxt)
+(require 'deferred)
 
 (defcustom org-zotxt-link-description-style
   :citation
@@ -228,7 +228,7 @@ Opens with `org-open-file', see for more information about ARG."
   (lexical-let ((item-id (org-zotxt-extract-link-id-at-point))
                 (arg arg))
     (deferred:$
-      (request-deferred
+      (zotxt--request-deferred
        (format "%s/items" zotxt-url-base)
        :params `(("key" . ,item-id) ("format" . "paths"))
        :parser 'json-read)

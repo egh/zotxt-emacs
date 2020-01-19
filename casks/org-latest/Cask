@@ -1,7 +1,8 @@
 (source melpa)
 (source org)
 
-(depends-on "request-deferred")
+(depends-on "request")
+(depends-on "deferred")
 (depends-on "org-plus-contrib")
 
 (package-file "zotxt.el")

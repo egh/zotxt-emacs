@@ -29,7 +29,8 @@
 (eval-when-compile
   (require 'cl))
 (require 'json)
-(require 'request-deferred)
+(require 'deferred)
+(require 'request)
 
 (defconst zotxt-url-base
   "http://127.0.0.1:23119/zotxt"
@@ -103,6 +104,23 @@ request.el is not decoding our responses as UTF-8.  Recode text as UTF-8 and par
          (status-code (request-response-status-code response)))
     (unless (and status-code (= 200 status-code))
       (error "Zotxt version endpoint not found; is Zotero running and zotxt installed?"))))
+
+(defun zotxt--request-deferred (url &rest args)
+  (let* ((d (deferred:new #'identity))
+         (callback-post (apply-partially
+                         (lambda (d &rest args)
+                           (deferred:callback-post
+                             d (plist-get args :response)))
+                         d))
+         (errorback-post (apply-partially
+                          (lambda (d &rest args)
+                            (deferred:errorback-post
+                             d (plist-get args :response)))
+                         d)))
+    (setq args (plist-put args :success callback-post))
+    (setq args (plist-put args :error errorback-post))
+    (apply #'request url args)
+    d))
 
 (defun zotxt-get-item-bibliography-deferred (item)
   "Retrieve the generated bibliography for ITEM (a plist).
@@ -259,7 +277,7 @@ not be returned."
              (key (match-string 1))
              (completions
               (deferred:$
-                (request-deferred
+                (zotxt--request-deferred
                  (format "%s/complete" zotxt-url-base)
                  :params `(("easykey" . ,key))
                  :parser #'zotxt--json-read)
