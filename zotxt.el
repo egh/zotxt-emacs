@@ -62,6 +62,14 @@
   "chicago-note-bibliography"
   "Default bibliography style to use.")
 
+
+(defun zotxt--deferred-handle-error (err)
+  "Deferred chain error handler.
+
+Prints ERR and checks if zotxt is installed."
+  (message "Caught error: %S" err)
+  (zotxt--check-server))
+
 (defun zotxt-mapcar-deferred (func lst)
   "Apply FUNC (which must return a deferred object), to each element of LST.
 
@@ -144,6 +152,8 @@ For use only in a `deferred:$' chain."
                  ("format" . "bibliography")
                  ("style" . ,style))
        :parser #'zotxt--json-read
+       :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+                           (deferred:errorback-post d error-thrown)))
        :success (function*
                  (lambda (&key data &allow-other-keys)
                    (let* ((style-key (intern (format ":%s" style)))
@@ -170,6 +180,8 @@ For use only in a `deferred:$' chain."
      :params '(("selected" . "selected")
                ("format" . "key"))
      :parser #'zotxt--json-read
+     :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+                         (deferred:errorback-post d error-thrown)))
      :success (function*
                (lambda (&key data &allow-other-keys)
                      (deferred:callback-post
@@ -207,6 +219,8 @@ If SEARCH-STRING is supplied, it should be the search string."
                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
                ("format" . "quickBib"))
      :parser #'zotxt--json-read
+     :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+                         (deferred:errorback-post d error-thrown)))
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (let* ((results (mapcar (lambda (e)
@@ -285,6 +299,7 @@ not be returned."
                   (lambda (response)
                     (mapcar (lambda (k) (format "@%s" k))
                             (request-response-data response))))
+                (deferred:error it #'zotxt--deferred-handle-error)
                 (deferred:sync! it))))
         (if (null completions)
             nil
@@ -304,6 +319,8 @@ For use only in a `deferred:$' chain."
      :parser (if (member format zotxt--json-formats)
                  #'zotxt--json-read
                #'buffer-string)
+     :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+                         (deferred:errorback-post d error-thrown)))
      :success (function*
                (lambda (&key data &allow-other-keys)
                  (if (member format zotxt--json-formats)
@@ -336,6 +353,7 @@ If SELECTED is non-nil (interactively, With prefix argument), insert easykeys fo
                      (lambda (item)
                        (format "@%s" (plist-get item :easykey)))
                      items " ")))))
+      (deferred:error it #'zotxt--deferred-handle-error)
       (if zotxt--debug-sync (deferred:sync! it)))))
 
 (defun zotxt-easykey-select-item-at-point ()
