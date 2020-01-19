@@ -20,7 +20,19 @@
                   lst)))
            (deferred:sync! it))))
     (should (equal '(2 3 4) results))))
-         
+
+(ert-deftest zotxt-test-deferred-error-handler ()
+  (let ((err (should-error
+              (deferred:$
+                (deferred:next
+                  (lambda ()
+                    (error "Huh")))
+                (deferred:error it #'zotxt--deferred-handle-error)
+                (deferred:sync! it)))))
+    (should (equal
+             (cdr err)
+             '("Zotxt version endpoint not found; is Zotero running and zotxt installed?")))))
+
 (ert-deftest zotxt-test-get-item-deferred ()
   (should (equal
            (let ((item

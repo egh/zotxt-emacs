@@ -111,6 +111,7 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
                     (delete-region (org-element-property :begin ct)
                                    (org-element-property :end ct))
                     (org-zotxt-insert-reference-link-to-item item))))))
+          (deferred:error it #'zotxt--deferred-handle-error)
           (if zotxt--debug-sync (deferred:sync! it))))))
 
 (defun org-zotxt-update-all-reference-links ()
@@ -160,9 +161,7 @@ selected even if `org-zotxt-default-search-method' is non-nil"
           (with-current-buffer (marker-buffer mk)
             (goto-char (marker-position mk))
             (org-zotxt-insert-reference-links-to-items items))))
-      (deferred:error it
-        (lambda (err)
-          (error (error-message-string err))))
+      (deferred:error it #'zotxt--deferred-handle-error)
       (if zotxt--debug-sync (deferred:sync! it)))))
 
 (defun org-zotxt--link-follow (path)
@@ -236,6 +235,7 @@ Opens with `org-open-file', see for more information about ARG."
         (lambda (response)
           (let ((paths (cdr (assq 'paths (elt (request-response-data response) 0)))))
             (org-open-file (org-zotxt-choose-path paths) arg))))
+      (deferred:error it #'zotxt--deferred-handle-error)
       (if zotxt--debug-sync (deferred:sync! it)))))
 
 (defun org-zotxt-noter (arg)
@@ -273,7 +273,8 @@ See `org-noter' for details and ARG usage."
               (let ((path (org-zotxt-choose-path (cdr (assq 'paths (plist-get resp :paths))))))
                 (org-entry-put nil org-zotxt-noter-zotero-link (org-zotxt-make-item-link resp))
                 (org-entry-put nil org-noter-property-doc-file path))
-              (org-noter arg))))))))
+              (org-noter arg)))
+          (deferred:error it #'zotxt--deferred-handle-error))))))
 
 ;;;###autoload
 (define-minor-mode org-zotxt-mode
