@@ -167,7 +167,7 @@
         (sleep-for 0 1))
       (should (equal (buffer-string) end-text)))))
 
-(ert-deftest zotxt-test-choose-deferred ()
+(ert-deftest zotxt-test-search-deferred ()
   (let ((results
          (deferred:$
            (zotxt-search-deferred :title-creator-year "doe first book")
