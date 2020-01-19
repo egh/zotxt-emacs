@@ -199,7 +199,7 @@ For use only in a `deferred:$' chain."
           nil t nil nil "title, creator, year")))
     (cdr (assoc method-name zotxt-quicksearch-method-names))))
   
-(defun zotxt-choose-deferred (&optional method search-string)
+(defun zotxt-search-deferred (&optional method search-string)
   "Allow the user to select an item interactively.
 
 If METHOD is supplied, it should be one
@@ -238,6 +238,21 @@ If SEARCH-STRING is supplied, it should be the search string."
                      d (if (null citation) nil
                          `((:key ,key))))))))
     d))
+
+(defun zotxt-choose-deferred (&optional arg)
+  "Allow the user to select an item interactively.
+
+ARG should be numberic prefix argugument from (interactive \"P\").
+  
+If universal argment was used, will insert the currently selected
+item from Zotero. If double universal argument is used the search
+method will have to be selected even if
+`org-zotxt-default-search-method' is non-nil."
+  (let ((use-current-selected (eq 4 arg))
+        (force-choose-search-method (eq 16 arg)))
+    (if use-current-selected
+        (zotxt-get-selected-items-deferred)
+      (zotxt-search-deferred (unless force-choose-search-method org-zotxt-default-search-method)))))
 
 (defun zotxt-select-easykey (easykey)
   "Select the item identified by EASYKEY in Zotero."
@@ -330,16 +345,17 @@ For use only in a `deferred:$' chain."
                  (deferred:callback-post d item))))
     d))
 
-(defun zotxt-easykey-insert (&optional selected)
-  "Prompt for a search string and insert an easy key.
+(defun zotxt-easykey-insert (arg)
+  "Insert an easy key.
 
-If SELECTED is non-nil (interactively, With prefix argument), insert easykeys for the currently selected items in Zotero."
-  (interactive (if current-prefix-arg t))
+Prompts for search to choose item.  If prefix argument ARG is used,
+will insert the currently selected item from Zotero.  If double
+prefix argument is used the search method will have to be
+selected even if `org-zotxt-default-search-method' is non-nil"
+  (interactive "p")
   (lexical-let ((mk (point-marker)))
     (deferred:$
-      (if selected
-          (zotxt-get-selected-items-deferred)
-        (zotxt-choose-deferred))
+      (zotxt-choose-deferred arg)
       (deferred:nextc it
         (lambda (items)
           (zotxt-mapcar-deferred (lambda (item)

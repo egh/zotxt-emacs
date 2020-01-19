@@ -143,14 +143,12 @@ Prompts for search to choose item.  If prefix argument ARG is used,
 will insert the currently selected item from Zotero.  If double
 prefix argument is used the search method will have to be
 selected even if `org-zotxt-default-search-method' is non-nil"
-  (interactive "P")
+  (interactive "p")
   (lexical-let ((mk (point-marker))
                 (use-current-selected (equal '(4) arg))
                 (force-choose-search-method (equal '(16) arg)))
     (deferred:$
-      (if use-current-selected
-          (zotxt-get-selected-items-deferred)
-        (zotxt-choose-deferred (unless force-choose-search-method org-zotxt-default-search-method)))
+      (zotxt-choose-deferred arg)
       (deferred:nextc it
         (lambda (items)
           (if (null items)
