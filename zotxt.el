@@ -199,7 +199,7 @@ For use only in a `deferred:$' chain."
           nil t nil nil "title, creator, year")))
     (cdr (assoc method-name zotxt-quicksearch-method-names))))
   
-(defun zotxt-choose-deferred (&optional method search-string)
+(defun zotxt-search-deferred (&optional method search-string)
   "Allow the user to select an item interactively.
 
 If METHOD is supplied, it should be one
@@ -339,7 +339,7 @@ If SELECTED is non-nil (interactively, With prefix argument), insert easykeys fo
     (deferred:$
       (if selected
           (zotxt-get-selected-items-deferred)
-        (zotxt-choose-deferred))
+        (zotxt-search-deferred))
       (deferred:nextc it
         (lambda (items)
           (zotxt-mapcar-deferred (lambda (item)

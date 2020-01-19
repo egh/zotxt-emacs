@@ -150,7 +150,7 @@ selected even if `org-zotxt-default-search-method' is non-nil"
     (deferred:$
       (if use-current-selected
           (zotxt-get-selected-items-deferred)
-        (zotxt-choose-deferred (unless force-choose-search-method org-zotxt-default-search-method)))
+        (zotxt-search-deferred (unless force-choose-search-method org-zotxt-default-search-method)))
       (deferred:nextc it
         (lambda (items)
           (if (null items)
@@ -261,7 +261,7 @@ See `org-noter' for details and ARG usage."
         (org-noter arg)
       (lexical-let ((arg arg))
         (deferred:$
-          (zotxt-choose-deferred)
+          (zotxt-search-deferred)
           (deferred:nextc it
             (lambda (item-ids)
               (zotxt-get-item-deferred (car item-ids) :paths)))

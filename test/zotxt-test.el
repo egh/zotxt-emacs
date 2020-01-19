@@ -170,7 +170,7 @@
 (ert-deftest zotxt-test-choose-deferred ()
   (let ((results
          (deferred:$
-           (zotxt-choose-deferred :title-creator-year "doe first book")
+           (zotxt-search-deferred :title-creator-year "doe first book")
            (deferred:sync! it))))
     (should (equal results '((:key "0_ZBZQ4KMP"))))))
 
