@@ -1,69 +1,35 @@
 # zotxt-emacs
 
-Note: zotero-plain has been split into two parts: zotxt-emacs (this
-repository) for working with org, and `zot4rst` (zotero reStructuredText
-tools), which been moved to [zot4rst](http://gitlab.com/egh/zot4rst).
+## Introduction
+
+zotxt-emacs works with [zotxt](https://github.com/egh/zotxt) to provide an Emacs integration with Zotero, allowing you to manage citation keys for pandoc markdown documents as well as org mode links to items in your Zotero collection.
 
 ## Installation
 
-zotxt-emacs can be installed via [MELPA](http://melpa.milkbox.net/);
-please see the `zotxt` package.
+zotxt-emacs depends on [Zotero](https://www.zotero.org/) and the [zotxt](https://github.com/egh/zotxt) Zotero addon, which must be installed first. [Better BibTeX](https://retorque.re/zotero-better-bibtex/) is required for pandoc integration.
 
-If installing without MELPA, please note that zotxt-emacs depends on https://github.com/tkf/emacs-request
+zotxt-emacs can be installed via [MELPA](https://melpa.org/#/?q=zotxt).
+
+If installing without MELPA, please note that zotxt-emacs depends on [request.el](https://github.com/tkf/emacs-request) and [deferred.el](https://github.com/kiwanami/emacs-deferred)
 
 ## Requirements
 
-zotxt-emacs requires GNU emacs &gt;= 24.3, or any version of emacs 25,
-including unreleased versions. It should work with a builtin org-mode or
-with the latest org-mode installed via the org ELPA repository.
+zotxt-emacs requires GNU emacs >= 24.3. It should work with built-in org-mode or with the latest org-mode installed via the org ELPA repository.
 
-## Emacs integration
+zotxt-emacs requires Zotero and the zotxt addon >= 5.0.5.
 
-Emacs integration has 3 parts: a core library (`zotxt.el`),
-[org-mode](http://orgmode.org/) integration (`org-zotxt.el`), and an
-“easykey” mode (`zotxt-easykey.el`). Emacs integration depends on the
-[zotxt](http://gitlab.com/egh/zotxt) Zotero extension.
+# Org mode integration
 
-## For pandoc markdown files
-
-zoxtxt-easykey, in combination with pandoc-zotxt, can help you edit your
-pandoc markdown files. Load the zotxt-easykey minor mode using
-`M-x zotxt-easykey-mode` and get started by inserting an easykey using
-`C-c " k`. This will prompt you for a search string, which will do a
-quicksearch in your Zotero library. You will then be prompted to make a
-selection from the results of that search. An easykey for your selection
-will then be inserted into your document.
-
-### zotxt + org-mode
-
-To insert a citation into a [org-mode](http://orgmode.org/) document,
-first enable the `org-zotxt` minor mode:
+To insert a citation into a [org-mode](https://orgmode.org/) document, first enable the `org-zotxt` minor mode:
 
     M-x org-zotxt-mode
 
-Then select one or more items in [Zotero](http://www.zotero.org/) pane.
-Finally, in [emacs](http://www.gnu.org/software/emacs/), use: `C-c " i`
-to insert these items as citations. This inserts a zotero link with
-descriptive link text.
+Then you can use: `C-c " i` (`org-zotxt-insert-reference-link`) to insert an item.
 
-To update the link text to reflect changed metadata from
-[Zotero](http://www.zotero.org/), use `C-c " u` over the link.
+To update the current link text at point to reflect changed metadata from Zotero, use `C-c " u` (`org-zotxt-update-reference-link-at-point`).
 
-## zotxt EasyKey integration
+To open an attachment of the link at point, use `C-c " a` (`org-zotxt-open-attachment`)
 
-zotxt supports a feature known as “easy keys” for integration with
-zotero and pandoc or zot4rst. These keys look like `@doe:2014title`
-where Doe is the author’s last name, 2014 is the publication year, and
-title is the first word of the title (excluding “stop words”, such as
-“the” or “a”). The provided `zotxt-easykey-mode` supports completion of
-these easykeys in a buffer using the command `completion-at-point`.
-(This function is not bound in org-mode, but I replace the binding to
-`pcomplete` using:
+## org-noter
 
-    ;; prefer completion-at-point to pcomplete
-    (define-key org-mode-map (kbd "C-M-i") 'completion-at-point)
-
-Now, the user can `@doe` and then `C-M-i`. If the only matching easy key
-is `@doe:2014title` this will be completed. If there are multiple
-matches, the user will be presented with a buffer containing possible
-completions.
+If you use [Org-noter](https://github.com/weirdNox/org-noter) you can use the `org-zotxt-noter` command to select an item in Zotero and take notes on its attachment. Use the command in a headline, and it will either open the Org-noter interface or prompt for a Zotero search to load an attachment that can be annotated using Org-noter.
