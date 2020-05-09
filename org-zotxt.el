@@ -256,7 +256,7 @@ See `org-noter' for details and ARG usage."
   (let* ((document-property (org-entry-get nil org-noter-property-doc-file (not (equal arg '(4)))))
          (document-path (when (stringp document-property) (expand-file-name document-property))))
     (if (and document-path (not (file-directory-p document-path)) (file-readable-p document-path))
-        (org-noter arg)
+        (call-interactively #'org-noter)
       (lexical-let ((arg arg))
         (deferred:$
           (zotxt-choose-deferred)
@@ -271,7 +271,7 @@ See `org-noter' for details and ARG usage."
               (let ((path (org-zotxt-choose-path (cdr (assq 'paths (plist-get resp :paths))))))
                 (org-entry-put nil org-zotxt-noter-zotero-link (org-zotxt-make-item-link resp))
                 (org-entry-put nil org-noter-property-doc-file path))
-              (org-noter arg)))
+              (call-interactively #'org-noter)))
           (deferred:error it #'zotxt--deferred-handle-error))))))
 
 ;;;###autoload
