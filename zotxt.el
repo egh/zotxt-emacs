@@ -36,7 +36,7 @@
   "http://127.0.0.1:23119/zotxt"
   "Base URL to contact.")
 
-(defconst  zotxt-quicksearch-method-params
+(defconst zotxt-quicksearch-method-params
   '((:title-creator-year . "titleCreatorYear")
     (:fields . "fields")
     (:everything . "everything")))
