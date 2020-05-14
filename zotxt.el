@@ -62,6 +62,11 @@
   "chicago-note-bibliography"
   "Default bibliography style to use.")
 
+(defcustom zotxt-default-library :all
+  "Default library to search. :all for all libraries, :user for user library."
+  :group 'zotxt
+  :type '(choice (const :tag "Search all libraries" :all)
+                 (const :tag "User library" :all)))
 
 (defun zotxt--deferred-handle-error (err)
   "Deferred chain error handler.
@@ -217,6 +222,10 @@ If SEARCH-STRING is supplied, it should be the search string."
      (format "%s/search" zotxt-url-base)
      :params `(("q" . ,search-string)
                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
+               ,@(cond ((eq :all zotxt-default-library)
+                        '(("library" ."all")))
+                       ((eq :user zotxt-default-library)
+                        nil))
                ("format" . "quickBib"))
      :parser #'zotxt--json-read
      :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
