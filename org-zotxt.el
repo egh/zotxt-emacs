@@ -45,7 +45,7 @@ If nil, the user is prompted to choose each time.
 
 A selected default method can be bypassed by giving a double
 prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
-  :group 'org-zotxt
+  :group 'zotxt
   :type (append '(choice) '((const :tag "Choose each time" nil))
                 (mapcar
                  (lambda (c) (list 'const :tag (car c) (cdr c)))
@@ -53,7 +53,7 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
 
 (defcustom org-zotxt-noter-zotero-link "ZOTERO_LINK"
   "Default property name for zotero link."
-  :group 'org-zotxt
+  :group 'zotxt
   :type 'string)
 
 (defun org-zotxt-extract-link-id-at-point ()
