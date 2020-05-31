@@ -8,7 +8,7 @@ zotxt-emacs works with [zotxt](https://github.com/egh/zotxt) to provide an Emacs
 
 zotxt-emacs depends on [Zotero](https://www.zotero.org/) and the [zotxt](https://github.com/egh/zotxt) Zotero addon, which must be installed first. [Better BibTeX](https://retorque.re/zotero-better-bibtex/) is required for pandoc integration.
 
-zotxt-emacs can be installed via [MELPA](https://melpa.org/#/?q=zotxt).
+zotxt-emacs can be installed via [MELPA](https://melpa.org/#/?q=zotxt) by installing the package named `zotxt`.
 
 If installing without MELPA, please note that zotxt-emacs depends on [request.el](https://github.com/tkf/emacs-request) and [deferred.el](https://github.com/kiwanami/emacs-deferred)
 
