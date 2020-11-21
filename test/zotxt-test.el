@@ -61,7 +61,7 @@
              (plist-get item :248bebf1-46ab-4067-9f93-ec3d2960d0cd))
            "{ | Doe, 2005 | | |zu:1254:ZBZQ4KMP}")))
 
-(ert-deftest zotxt-test-get-item-easykey-list-chain ()
+(ert-deftest zotxt-test-get-item-citekey-list-chain ()
   (should (equal
            (let* ((items
                   (deferred:$
@@ -76,9 +76,9 @@
                            (zotxt-get-item-deferred item :easykey))
                          items)))
                     (deferred:sync! it)))
-                  (easykeys (mapcar (lambda (item)
+                  (citekeys (mapcar (lambda (item)
                                       (plist-get item :easykey)) items)))
-             (sort easykeys #'string-lessp))
+             (sort citekeys #'string-lessp))
            '("doe:2005first" "doe:2007why"))))
 
 (ert-deftest zotxt-test-get-item-bibliography-deferred ()
@@ -110,7 +110,7 @@
            (deferred:sync! it))))
     (should (equal text (plist-get item :citation)))))
 
-(ert-deftest org-zotxt-test-get-item-link-text-deferred-with-easykey ()
+(ert-deftest org-zotxt-test-get-item-link-text-deferred-with-citekey ()
   (let ((text "doe:2005first")
         (item
          (deferred:$
@@ -184,7 +184,7 @@
       (org-zotxt-insert-reference-link-to-item item)
       (should (equal (buffer-string) text)))))
 
-(ert-deftest org-zotxt-test-insert-reference-link-to-item-with-easykey ()
+(ert-deftest org-zotxt-test-insert-reference-link-to-item-with-citekey ()
   (let ((org-zotxt-link-description-style :easykey)
         (text "[[zotero://select/items/foo][@foo:2014bar]]")
         (item '(:key "foo" :easykey "foo:2014bar")))

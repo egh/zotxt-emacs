@@ -111,9 +111,9 @@ request.el is not decoding our responses as UTF-8.  Recode text as UTF-8 and par
 (defun zotxt--check-server ()
   "Use the zotxt version endpoint to check if Zotero is running and zotxt is installed."
   (let* ((response
-         (request
-           (format "%s/version" zotxt-url-base)
-           :sync t))
+          (request
+            (format "%s/version" zotxt-url-base)
+            :sync t))
          (status-code (request-response-status-code response)))
     (unless (and status-code (= 200 status-code))
       (error "Zotxt version endpoint not found; is Zotero running and zotxt installed?"))))
@@ -128,8 +128,8 @@ request.el is not decoding our responses as UTF-8.  Recode text as UTF-8 and par
          (errorback-post (apply-partially
                           (lambda (d &rest args)
                             (deferred:errorback-post
-                             d (plist-get args :response)))
-                         d)))
+                              d (plist-get args :response)))
+                          d)))
     (setq args (plist-put args :success callback-post))
     (setq args (plist-put args :error errorback-post))
     (apply #'request url args)
@@ -152,27 +152,27 @@ For use only in a `deferred:$' chain."
         ;; item already has citation, no need to fetch
         (deferred:callback-post d item)
       (request
-       (format "%s/items" zotxt-url-base)
-       :params `(("key" . ,(plist-get item :key))
-                 ("format" . "bibliography")
-                 ("style" . ,style))
-       :parser #'zotxt--json-read
-       :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
-                           (deferred:errorback-post d error-thrown)))
-       :success (function*
-                 (lambda (&key data &allow-other-keys)
-                   (let* ((style-key (intern (format ":%s" style)))
-                          (style-key-html (intern (format ":%s-html" style)))
-                          (first (elt data 0))
-                          (text (cdr (assq 'text first)))
-                          (html (cdr (assq 'html first))))
-                     (if (string= style zotxt-default-bibliography-style)
-                         (progn
-                           (plist-put item :citation text)
-                           (plist-put item :citation-html html)))
-                     (plist-put item style-key text)
-                     (plist-put item style-key-html html)
-                     (deferred:callback-post d item))))))
+        (format "%s/items" zotxt-url-base)
+        :params `(("key" . ,(plist-get item :key))
+                  ("format" . "bibliography")
+                  ("style" . ,style))
+        :parser #'zotxt--json-read
+        :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+                            (deferred:errorback-post d error-thrown)))
+        :success (function*
+                  (lambda (&key data &allow-other-keys)
+                    (let* ((style-key (intern (format ":%s" style)))
+                           (style-key-html (intern (format ":%s-html" style)))
+                           (first (elt data 0))
+                           (text (cdr (assq 'text first)))
+                           (html (cdr (assq 'html first))))
+                      (if (string= style zotxt-default-bibliography-style)
+                          (progn
+                            (plist-put item :citation text)
+                            (plist-put item :citation-html html)))
+                      (plist-put item style-key text)
+                      (plist-put item style-key-html html)
+                      (deferred:callback-post d item))))))
     d))
 
 (defun zotxt-get-selected-items-deferred ()
@@ -181,19 +181,19 @@ For use only in a `deferred:$' chain."
 For use only in a `deferred:$' chain."
   (lexical-let ((d (deferred:new)))
     (request
-     (format "%s/items" zotxt-url-base)
-     :params '(("selected" . "selected")
-               ("format" . "key"))
-     :parser #'zotxt--json-read
-     :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
-                         (deferred:errorback-post d error-thrown)))
-     :success (function*
-               (lambda (&key data &allow-other-keys)
-                     (deferred:callback-post
-                       d (mapcar (lambda (k)
-                                   (list :key k))
-                                 data)))))
-      d))
+      (format "%s/items" zotxt-url-base)
+      :params '(("selected" . "selected")
+                ("format" . "key"))
+      :parser #'zotxt--json-read
+      :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+                          (deferred:errorback-post d error-thrown)))
+      :success (function*
+                (lambda (&key data &allow-other-keys)
+                  (deferred:callback-post
+                    d (mapcar (lambda (k)
+                                (list :key k))
+                              data)))))
+    d))
 
 (defun zotxt--read-search-method ()
   "Prompt user for Zotero search method to use, return a symbol."
@@ -203,7 +203,7 @@ For use only in a `deferred:$' chain."
           zotxt-quicksearch-method-names
           nil t nil nil "title, creator, year")))
     (cdr (assoc method-name zotxt-quicksearch-method-names))))
-  
+
 (defun zotxt-search-deferred (&optional method search-string)
   "Allow the user to select an item interactively.
 
@@ -219,40 +219,40 @@ If SEARCH-STRING is supplied, it should be the search string."
       (error "Please provide search string"))
   (lexical-let ((d (deferred:new)))
     (request
-     (format "%s/search" zotxt-url-base)
-     :params `(("q" . ,search-string)
-               ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
-               ,@(cond ((eq :all zotxt-default-library)
-                        '(("library" ."all")))
-                       ((eq :user zotxt-default-library)
-                        nil))
-               ("format" . "quickBib"))
-     :parser #'zotxt--json-read
-     :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
-                         (deferred:errorback-post d error-thrown)))
-     :success (function*
-               (lambda (&key data &allow-other-keys)
-                 (let* ((results (mapcar (lambda (e)
-                                           (cons (cdr (assq 'quickBib e))
-                                                 (cdr (assq 'key e))))
-                                         data))
-                        (count (length results))
-                        (citation (if (= 0 count)
-                                      nil
-                                    (if (= 1 count)
-                                        (car (car results))
-                                      (completing-read "Select item: " results))))
-                        (key (cdr (assoc-string citation results))))
-                   (deferred:callback-post
-                     d (if (null citation) nil
-                         `((:key ,key))))))))
+      (format "%s/search" zotxt-url-base)
+      :params `(("q" . ,search-string)
+                ("method" . ,(cdr (assq method zotxt-quicksearch-method-params)))
+                ,@(cond ((eq :all zotxt-default-library)
+                         '(("library" ."all")))
+                        ((eq :user zotxt-default-library)
+                         nil))
+                ("format" . "quickBib"))
+      :parser #'zotxt--json-read
+      :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+                          (deferred:errorback-post d error-thrown)))
+      :success (function*
+                (lambda (&key data &allow-other-keys)
+                  (let* ((results (mapcar (lambda (e)
+                                            (cons (cdr (assq 'quickBib e))
+                                                  (cdr (assq 'key e))))
+                                          data))
+                         (count (length results))
+                         (citation (if (= 0 count)
+                                       nil
+                                     (if (= 1 count)
+                                         (car (car results))
+                                       (completing-read "Select item: " results))))
+                         (key (cdr (assoc-string citation results))))
+                    (deferred:callback-post
+                      d (if (null citation) nil
+                          `((:key ,key))))))))
     d))
 
 (defun zotxt-choose-deferred (&optional arg)
   "Allow the user to select an item interactively.
 
 ARG should be numberic prefix argugument from (interactive \"P\").
-  
+
 If universal argment was used, will insert the currently selected
 item from Zotero. If double universal argument is used the search
 method will have to be selected even if
@@ -263,52 +263,52 @@ method will have to be selected even if
         (zotxt-get-selected-items-deferred)
       (zotxt-search-deferred (unless force-choose-search-method org-zotxt-default-search-method)))))
 
-(defun zotxt-select-easykey (easykey)
-  "Select the item identified by EASYKEY in Zotero."
+(defun zotxt-select-citekey (citekey)
+  "Select the item identified by CITEKEY in Zotero."
   (request
-   (format "%s/select" zotxt-url-base)
-   :params `(("easykey" . ,easykey))))
+    (format "%s/select" zotxt-url-base)
+    :params `(("easykey" . ,citekey))))
 
 (defun zotxt-select-key (key)
   "Select the item identified by KEY in Zotero."
   (request
-   (format "%s/select" zotxt-url-base)
-   :params `(("key" . ,key))))
+    (format "%s/select" zotxt-url-base)
+    :params `(("key" . ,key))))
 
-(defvar zotxt-easykey-regex
+(defvar zotxt-citekey-regex
   "[@{]\\([[:alnum:]:]+\\)")
 
-(defvar zotxt-easykey-mode-map
+(defvar zotxt-citekey-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c \" o") 'zotxt-easykey-select-item-at-point)
-    (define-key map (kbd "C-c \" k") 'zotxt-easykey-insert)
+    (define-key map (kbd "C-c \" o") 'zotxt-citekey-select-item-at-point)
+    (define-key map (kbd "C-c \" k") 'zotxt-citekey-insert)
     map))
 
-(defun zotxt-easykey-at-point-match ()
-  "Match an easykey at point."
-  (or (looking-at zotxt-easykey-regex)
+(defun zotxt-citekey-at-point-match ()
+  "Match an citekey at point."
+  (or (looking-at zotxt-citekey-regex)
       (save-excursion
         ;; always try to back up one char
         (backward-char)
-        (while (and (not (looking-at zotxt-easykey-regex))
+        (while (and (not (looking-at zotxt-citekey-regex))
                     (looking-at "[[:alnum:]:]"))
           (backward-char))
-        (looking-at zotxt-easykey-regex))))
+        (looking-at zotxt-citekey-regex))))
 
-(defun zotxt-easykey-at-point ()
-  "Return the value of the easykey at point.
+(defun zotxt-citekey-at-point ()
+  "Return the value of the citekey at point.
 
-Easykey must start with a @ or { to be recognized, but this will
+Citekey must start with a @ or { to be recognized, but this will
 not be returned."
   (save-excursion
-    (if (zotxt-easykey-at-point-match)
+    (if (zotxt-citekey-at-point-match)
         (match-string 1)
       nil)))
 
-(defun zotxt-easykey-complete-at-point ()
-  "Complete the easykey at point."
+(defun zotxt-citekey-complete-at-point ()
+  "Complete the citekey at point."
   (save-excursion
-    (if (not (zotxt-easykey-at-point-match))
+    (if (not (zotxt-citekey-at-point-match))
         nil
       (let* ((start (match-beginning 0))
              (end (match-end 0))
@@ -337,25 +337,25 @@ For use only in a `deferred:$' chain."
                 (format format)
                 (d (deferred:new)))
     (request
-     (format "%s/items" zotxt-url-base)
-     :params `(("key" . ,(plist-get item :key))
-               ("format" . ,(substring (symbol-name format) 1)))
-     :parser (if (member format zotxt--json-formats)
-                 #'zotxt--json-read
-               #'buffer-string)
-     :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
-                         (deferred:errorback-post d error-thrown)))
-     :success (function*
-               (lambda (&key data &allow-other-keys)
-                 (if (member format zotxt--json-formats)
-                     ;; json data
-                     (plist-put item format (elt data 0))
-                   (plist-put item format data))
-                 (deferred:callback-post d item))))
+      (format "%s/items" zotxt-url-base)
+      :params `(("key" . ,(plist-get item :key))
+                ("format" . ,(substring (symbol-name format) 1)))
+      :parser (if (member format zotxt--json-formats)
+                  #'zotxt--json-read
+                #'buffer-string)
+      :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+                          (deferred:errorback-post d error-thrown)))
+      :success (function*
+                (lambda (&key data &allow-other-keys)
+                  (if (member format zotxt--json-formats)
+                      ;; json data
+                      (plist-put item format (elt data 0))
+                    (plist-put item format data))
+                  (deferred:callback-post d item))))
     d))
 
-(defun zotxt-easykey-insert (arg)
-  "Insert an easy key.
+(defun zotxt-citekey-insert (arg)
+  "Insert a citekey.
 
 Prompts for search to choose item.  If prefix argument ARG is used,
 will insert the currently selected item from Zotero.  If double
@@ -381,30 +381,35 @@ selected even if `org-zotxt-default-search-method' is non-nil"
       (deferred:error it #'zotxt--deferred-handle-error)
       (if zotxt--debug-sync (deferred:sync! it)))))
 
-(defun zotxt-easykey-select-item-at-point ()
-  "Select the item referred to by the easykey at point in Zotero."
+(define-obsolete-function-alias 'zotxt-easykey-insert #'zotxt-citekey-insert "6.0")
+
+(defun zotxt-citekey-select-item-at-point ()
+  "Select the item referred to by the citekey at point in Zotero."
   (interactive)
-  (zotxt-select-easykey (zotxt-easykey-at-point)))
+  (zotxt-select-citekey (zotxt-citekey-at-point)))
 
 ;;;###autoload
-(define-minor-mode zotxt-easykey-mode
-  "Toggle zotxt-easykey-mode.
+(define-minor-mode zotxt-citekey-mode
+  "Toggle zotxt-citekey-mode.
 With no argument, this command toggles the mode.
 Non-null prefix argument turns on the mode.
 Null prefix argument turns off the mode.
 
-This is a minor mode for managing your easykey citations,
+This is a minor mode for managing your citekey citations,
 including completion."
   :init-value nil
-  :lighter " ZotEasykey"
-  :keymap zotxt-easykey-mode-map
-  (if zotxt-easykey-mode
+  :lighter " ZotCitekey"
+  :keymap zotxt-citekey-mode-map
+  (if zotxt-citekey-mode
       (setq-local completion-at-point-functions
-                  (cons 'zotxt-easykey-complete-at-point
+                  (cons 'zotxt-citekey-complete-at-point
                         completion-at-point-functions))
     (setq-local completion-at-point-functions
-                (remove 'zotxt-easykey-complete-at-point
+                (remove 'zotxt-citekey-complete-at-point
                         completion-at-point-functions))))
+
+;;;###autoload
+(define-obsolete-function-alias 'zotxt-easykey-mode #'zotxt-citekey-mode "6.0")
 
 (provide 'zotxt)
 ;;; zotxt.el ends here

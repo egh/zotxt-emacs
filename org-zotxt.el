@@ -35,7 +35,7 @@
   :citation
   "Style to use for org zotxt link texts."
   :group 'org-zotxt
-  :type '(choice (const :tag "easykey" :easykey)
+  :type '(choice (const :tag "citekey" :easykey)
                  (const :tag "better BibTeX" :betterbibtexkey)
                  (const :tag "citation" :citation)))
 
@@ -129,7 +129,7 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
 
 (defun org-zotxt-get-item-link-text-deferred (item)
   "Get the link text for ITEM.
-May be either an easy key or bibliography, depending on the value
+May be either an citekey or bibliography, depending on the value
 of `org-zotxt-link-description-style'."
   (if (or (eq org-zotxt-link-description-style :easykey)
           (eq org-zotxt-link-description-style :betterbibtexkey))
