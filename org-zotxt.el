@@ -35,8 +35,7 @@
   :citation
   "Style to use for org zotxt link texts."
   :group 'org-zotxt
-  :type '(choice (const :tag "citekey" :easykey)
-                 (const :tag "better BibTeX" :betterbibtexkey)
+  :type '(choice (const :tag "citekey" :citekey)
                  (const :tag "citation" :citation)))
 
 (defcustom org-zotxt-default-search-method nil
@@ -73,8 +72,7 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
   "Return an Org mode link for ITEM as a string."
   (org-make-link-string (format "zotero://select/items/%s"
                                 (plist-get item :key))
-                        (if (or (eq org-zotxt-link-description-style :easykey)
-                                (eq org-zotxt-link-description-style :betterbibtexkey))
+                        (if (eq org-zotxt-link-description-style :citekey)
                             (concat "@" (plist-get item org-zotxt-link-description-style))
                           (plist-get item :citation))))
 
@@ -131,8 +129,7 @@ prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
   "Get the link text for ITEM.
 May be either an citekey or bibliography, depending on the value
 of `org-zotxt-link-description-style'."
-  (if (or (eq org-zotxt-link-description-style :easykey)
-          (eq org-zotxt-link-description-style :betterbibtexkey))
+  (if (eq org-zotxt-link-description-style :citekey)
       (zotxt-get-item-deferred item org-zotxt-link-description-style)
     (zotxt-get-item-bibliography-deferred item)))
 

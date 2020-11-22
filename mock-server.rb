@@ -16,7 +16,7 @@ get '/zotxt/items' do
           'text' => 'Doe, John. First Book. Cambridge: Cambridge University Press, 2005.'
         }
       ].to_json
-    elsif format == 'easykey'
+    elsif format == 'citekey'
       return ['doe:2005first'].to_json
     elsif format == '248bebf1-46ab-4067-9f93-ec3d2960d0cd'
       return '{ | Doe, 2005 | | |zu:1254:ZBZQ4KMP}'
@@ -41,7 +41,7 @@ get '/zotxt/items' do
           'text' => 'Doe, John, and Jenny Roe. “Why Water Is Wet.” In Third Book, edited by Sam Smith. Oxford: Oxford University Press, 2007.'
         }
       ].to_json
-    elsif format == 'easykey'
+    elsif format == 'citekey'
       return ['doe:2007why'].to_json
     end
   elsif key == '0_4T8MCITQ'

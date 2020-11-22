@@ -42,7 +42,7 @@
     (:everything . "everything")))
 
 (defconst zotxt--json-formats
-  '(:easykey :betterbibtexkey :json :paths :quickBib)
+  '(:citekey :json :paths :quickBib)
   "Formats to parse as JSON.")
 
 (defconst zotxt-quicksearch-method-names
@@ -267,7 +267,7 @@ method will have to be selected even if
   "Select the item identified by CITEKEY in Zotero."
   (request
     (format "%s/select" zotxt-url-base)
-    :params `(("easykey" . ,citekey))))
+    :params `(("citekey" . ,citekey))))
 
 (defun zotxt-select-key (key)
   "Select the item identified by KEY in Zotero."
@@ -317,7 +317,7 @@ not be returned."
               (deferred:$
                 (zotxt--request-deferred
                  (format "%s/complete" zotxt-url-base)
-                 :params `(("easykey" . ,key))
+                 :params `(("citekey" . ,key))
                  :parser #'zotxt--json-read)
                 (deferred:nextc it
                   (lambda (response)
@@ -368,7 +368,7 @@ selected even if `org-zotxt-default-search-method' is non-nil"
       (deferred:nextc it
         (lambda (items)
           (zotxt-mapcar-deferred (lambda (item)
-                                   (zotxt-get-item-deferred item :easykey))
+                                   (zotxt-get-item-deferred item :citekey))
                                  items)))
       (deferred:nextc it
         (lambda (items)
@@ -376,7 +376,7 @@ selected even if `org-zotxt-default-search-method' is non-nil"
             (goto-char (marker-position mk))
             (insert (mapconcat
                      (lambda (item)
-                       (format "@%s" (plist-get item :easykey)))
+                       (format "@%s" (plist-get item :citekey)))
                      items " ")))))
       (deferred:error it #'zotxt--deferred-handle-error)
       (if zotxt--debug-sync (deferred:sync! it)))))
