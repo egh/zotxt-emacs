@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; org-zotxt.el --- Interface org-mode with Zotero via the zotxt extension
 
 ;; Copyright (C) 2010-2020 Erik Hetzner
@@ -81,8 +82,8 @@
 (defun org-zotxt-update-reference-link-at-point ()
   "Update the zotero:// link at point."
   (interactive)
-  (lexical-let ((mk (point-marker))
-                (item-id (org-zotxt-extract-link-id-at-point)))
+  (let ((mk (point-marker))
+        (item-id (org-zotxt-extract-link-id-at-point)))
     (if item-id
         (deferred:$
           (deferred:next (lambda () `(:key ,item-id)))
@@ -131,9 +132,9 @@ will insert the currently selected item from Zotero.  If double
 prefix argument is used the search method will have to be
 selected even if `org-zotxt-default-search-method' is non-nil"
   (interactive "p")
-  (lexical-let ((mk (point-marker))
-                (use-current-selected (equal '(4) arg))
-                (force-choose-search-method (equal '(16) arg)))
+  (let ((mk (point-marker))
+        (use-current-selected (equal '(4) arg))
+        (force-choose-search-method (equal '(16) arg)))
     (deferred:$
       (zotxt-choose-deferred arg)
       (deferred:nextc it
@@ -209,8 +210,8 @@ If only path is available, return it.  If no paths are available, error."
 
 Opens with `org-open-file', see for more information about ARG."
   (interactive "P")
-  (lexical-let ((item-id (org-zotxt-extract-link-id-at-point))
-                (arg arg))
+  (let ((item-id (org-zotxt-extract-link-id-at-point))
+        (arg arg))
     (deferred:$
       (zotxt--request-deferred
        (format "%s/items" zotxt-url-base)

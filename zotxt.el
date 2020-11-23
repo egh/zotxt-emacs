@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; zotxt.el --- Interface emacs with Zotero via the zotxt extension
 
 ;; Copyright (C) 2010-2020 Erik Hetzner
@@ -154,9 +155,9 @@ Also adds :citation entry if STYLE is the default.
 Also adds HTML versions, suffixed with -html.
 
 For use only in a `deferred:$' chain."
-  (lexical-let ((d (deferred:new))
-                (style zotxt-default-bibliography-style)
-                (item item))
+  (let ((d (deferred:new))
+        (style zotxt-default-bibliography-style)
+        (item item))
     (if (and (string= style zotxt-default-bibliography-style)
              (plist-get item :citation))
         ;; item already has citation, no need to fetch
@@ -189,7 +190,7 @@ For use only in a `deferred:$' chain."
   "Return the currently selected items in Zotero.
 
 For use only in a `deferred:$' chain."
-  (lexical-let ((d (deferred:new)))
+  (let ((d (deferred:new)))
     (request
       (format "%s/items" zotxt-url-base)
       :params '(("selected" . "selected")
@@ -227,7 +228,7 @@ If SEARCH-STRING is supplied, it should be the search string."
             (read-string (format "Zotero quicksearch (%s) query: " (cdr (assq method zotxt-quicksearch-method-to-names))))))
   (if (string-match-p "\\`\\s-*$" search-string)
       (error "Please provide search string"))
-  (lexical-let ((d (deferred:new)))
+  (let ((d (deferred:new)))
     (request
       (format "%s/search" zotxt-url-base)
       :params `(("q" . ,search-string)
@@ -343,9 +344,9 @@ not be returned."
   "Given a plist ITEM, add the FORMAT.
 
 For use only in a `deferred:$' chain."
-  (lexical-let ((item item)
-                (format format)
-                (d (deferred:new)))
+  (let ((item item)
+        (format format)
+        (d (deferred:new)))
     (request
       (format "%s/items" zotxt-url-base)
       :params `(("key" . ,(plist-get item :key))
@@ -372,7 +373,7 @@ will insert the currently selected item from Zotero.  If double
 prefix argument is used the search method will have to be
 selected even if `zotxt-default-search-method' is non-nil"
   (interactive "p")
-  (lexical-let ((mk (point-marker)))
+  (let ((mk (point-marker)))
     (deferred:$
       (zotxt-choose-deferred arg)
       (deferred:nextc it

@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t -*-
+
 (eval-when-compile
   (require 'cl))
 
@@ -11,8 +13,8 @@
              (lambda (lst)
                (zotxt-mapcar-deferred
                 (lambda (n)
-                  (lexical-let ((n n)
-                                (d (deferred:new)))
+                  (let ((n n)
+                        (d (deferred:new)))
                     (deferred:setTimeout
                       (lambda ()
                         (deferred:callback-post d (+ 1 n))) 1)

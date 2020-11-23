@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t -*-
 ;;; org-zotxt-noter.el --- Zotxt support for org-noter
 
 ;; Copyright (C) 2010-2020 Erik Hetzner
@@ -48,7 +49,7 @@ See `org-noter' for details and ARG usage."
          (document-path (when (stringp document-property) (expand-file-name document-property))))
     (if (and document-path (not (file-directory-p document-path)) (file-readable-p document-path))
         (call-interactively #'org-noter)
-      (lexical-let ((arg arg))
+      (let ((arg arg))
         (deferred:$
           (zotxt-choose-deferred)
           (deferred:nextc it
@@ -64,3 +65,6 @@ See `org-noter' for details and ARG usage."
                 (org-entry-put nil org-noter-property-doc-file path))
               (call-interactively #'org-noter)))
           (deferred:error it #'zotxt--deferred-handle-error))))))
+
+(provide 'org-zotxt-noter)
+;;; org-zotxt-noter.el ends here
