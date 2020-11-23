@@ -68,6 +68,16 @@
   :type '(choice (const :tag "Search all libraries" :all)
                  (const :tag "User library" :all)))
 
+(defcustom zotxt-default-search-method nil
+  "Default method to use for searching for items.
+If nil, the user is prompted to choose each time."
+
+  :group 'zotxt
+  :type (append '(choice) '((const :tag "Choose each time" nil))
+                (mapcar
+                 (lambda (c) (list 'const :tag (car c) (cdr c)))
+                 zotxt-quicksearch-method-names)))
+
 (defun zotxt--deferred-handle-error (err)
   "Deferred chain error handler.
 
@@ -256,12 +266,12 @@ ARG should be numberic prefix argugument from (interactive \"P\").
 If universal argment was used, will insert the currently selected
 item from Zotero. If double universal argument is used the search
 method will have to be selected even if
-`org-zotxt-default-search-method' is non-nil."
+`zotxt-default-search-method' is non-nil."
   (let ((use-current-selected (eq 4 arg))
         (force-choose-search-method (eq 16 arg)))
     (if use-current-selected
         (zotxt-get-selected-items-deferred)
-      (zotxt-search-deferred (unless force-choose-search-method org-zotxt-default-search-method)))))
+      (zotxt-search-deferred (unless force-choose-search-method zotxt-default-search-method)))))
 
 (defun zotxt-select-citekey (citekey)
   "Select the item identified by CITEKEY in Zotero."
@@ -360,7 +370,7 @@ For use only in a `deferred:$' chain."
 Prompts for search to choose item.  If prefix argument ARG is used,
 will insert the currently selected item from Zotero.  If double
 prefix argument is used the search method will have to be
-selected even if `org-zotxt-default-search-method' is non-nil"
+selected even if `zotxt-default-search-method' is non-nil"
   (interactive "p")
   (lexical-let ((mk (point-marker)))
     (deferred:$

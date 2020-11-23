@@ -38,17 +38,7 @@
   :type '(choice (const :tag "citekey" :citekey)
                  (const :tag "citation" :citation)))
 
-(defcustom org-zotxt-default-search-method nil
-  "Default method to use for searching with `org-zotxt-insert-reference-link'.
-If nil, the user is prompted to choose each time.
-
-A selected default method can be bypassed by giving a double
-prefix argument (C-u C-u) to `org-zotxt-insert-reference-link'"
-  :group 'zotxt
-  :type (append '(choice) '((const :tag "Choose each time" nil))
-                (mapcar
-                 (lambda (c) (list 'const :tag (car c) (cdr c)))
-                 zotxt-quicksearch-method-names)))
+(make-obsolete-variable 'org-zotxt-default-search-method 'zotxt-default-search-method "6.0")
 
 (defcustom org-zotxt-noter-zotero-link "ZOTERO_LINK"
   "Default property name for zotero link."
