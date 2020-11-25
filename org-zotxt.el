@@ -26,8 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
 (require 'org-element)
 (require 'zotxt)
 (require 'deferred)

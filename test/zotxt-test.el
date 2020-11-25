@@ -1,8 +1,5 @@
 ;; -*- lexical-binding: t -*-
 
-(eval-when-compile
-  (require 'cl))
-
 (ert-deftest zotxt-test-mapcar-deferred ()
   (let ((results
          (deferred:$
