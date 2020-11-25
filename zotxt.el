@@ -168,9 +168,9 @@ For use only in a `deferred:$' chain."
                   ("format" . "bibliography")
                   ("style" . ,style))
         :parser #'zotxt--json-read
-        :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+        :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
                             (deferred:errorback-post d error-thrown)))
-        :success (function*
+        :success (cl-function
                   (lambda (&key data &allow-other-keys)
                     (let* ((style-key (intern (format ":%s" style)))
                            (style-key-html (intern (format ":%s-html" style)))
@@ -196,9 +196,9 @@ For use only in a `deferred:$' chain."
       :params '(("selected" . "selected")
                 ("format" . "key"))
       :parser #'zotxt--json-read
-      :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+      :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
                           (deferred:errorback-post d error-thrown)))
-      :success (function*
+      :success (cl-function
                 (lambda (&key data &allow-other-keys)
                   (deferred:callback-post
                     d (mapcar (lambda (k)
@@ -239,9 +239,9 @@ If SEARCH-STRING is supplied, it should be the search string."
                          nil))
                 ("format" . "quickBib"))
       :parser #'zotxt--json-read
-      :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+      :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
                           (deferred:errorback-post d error-thrown)))
-      :success (function*
+      :success (cl-function
                 (lambda (&key data &allow-other-keys)
                   (let* ((results (mapcar (lambda (e)
                                             (cons (cdr (assq 'quickBib e))
@@ -354,9 +354,9 @@ For use only in a `deferred:$' chain."
       :parser (if (member format zotxt--json-formats)
                   #'zotxt--json-read
                 #'buffer-string)
-      :error (function* (lambda (&rest args &key error-thrown &allow-other-keys)
+      :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
                           (deferred:errorback-post d error-thrown)))
-      :success (function*
+      :success (cl-function
                 (lambda (&key data &allow-other-keys)
                   (if (member format zotxt--json-formats)
                       ;; json data
