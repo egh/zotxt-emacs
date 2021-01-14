@@ -2,6 +2,10 @@
 require 'sinatra'
 require 'json'
 
+get '/zotxt/version' do
+  return { "version": "5.1.0" }.to_json
+end
+
 get '/zotxt/items' do
   key = params[:key]
   format = params[:format]
