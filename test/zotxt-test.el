@@ -30,7 +30,7 @@
                 (deferred:sync! it)))))
     (should (equal
              (cdr err)
-             '("Zotxt version endpoint not found; is Zotero running and zotxt installed?")))))
+             "Huh"))))
 
 (ert-deftest zotxt-test-get-item-deferred ()
   (should (equal

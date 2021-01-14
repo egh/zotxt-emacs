@@ -83,7 +83,8 @@ If nil, the user is prompted to choose each time."
 
 Prints ERR and checks if zotxt is installed."
   (message "Caught error: %S" err)
-  (zotxt--check-server))
+  (zotxt--check-server)
+  (apply #'signal err))
 
 (defun zotxt-mapcar-deferred (func lst)
   "Apply FUNC (which must return a deferred object), to each element of LST.
