@@ -171,7 +171,7 @@ For use only in a `deferred:$' chain."
                   ("style" . ,style))
         :parser #'zotxt--json-read
         :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                            (deferred:errorback-post d error-thrown)))
+                              (deferred:errorback-post d error-thrown)))
         :success (cl-function
                   (lambda (&key data &allow-other-keys)
                     (let* ((style-key (intern (format ":%s" style)))
@@ -199,7 +199,7 @@ For use only in a `deferred:$' chain."
                 ("format" . "key"))
       :parser #'zotxt--json-read
       :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                          (deferred:errorback-post d error-thrown)))
+                            (deferred:errorback-post d error-thrown)))
       :success (cl-function
                 (lambda (&key data &allow-other-keys)
                   (deferred:callback-post
@@ -242,7 +242,7 @@ If SEARCH-STRING is supplied, it should be the search string."
                 ("format" . "quickBib"))
       :parser #'zotxt--json-read
       :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                          (deferred:errorback-post d error-thrown)))
+                            (deferred:errorback-post d error-thrown)))
       :success (cl-function
                 (lambda (&key data &allow-other-keys)
                   (let* ((results (mapcar (lambda (e)
@@ -357,7 +357,7 @@ For use only in a `deferred:$' chain."
                   #'zotxt--json-read
                 #'buffer-string)
       :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
-                          (deferred:errorback-post d error-thrown)))
+                            (deferred:errorback-post d error-thrown)))
       :success (cl-function
                 (lambda (&key data &allow-other-keys)
                   (if (member format zotxt--json-formats)
