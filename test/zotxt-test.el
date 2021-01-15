@@ -1,5 +1,4 @@
-(eval-when-compile
-  (require 'cl))
+;; -*- lexical-binding: t -*-
 
 (ert-deftest zotxt-test-mapcar-deferred ()
   (let ((results
@@ -11,8 +10,8 @@
              (lambda (lst)
                (zotxt-mapcar-deferred
                 (lambda (n)
-                  (lexical-let ((n n)
-                                (d (deferred:new)))
+                  (let ((n n)
+                        (d (deferred:new)))
                     (deferred:setTimeout
                       (lambda ()
                         (deferred:callback-post d (+ 1 n))) 1)
@@ -42,9 +41,9 @@
                         '(:key "0_ZBZQ4KMP")))
                     (deferred:nextc it
                       (lambda (item)
-                        (zotxt-get-item-deferred item :easykey)))
+                        (zotxt-get-item-deferred item :citekey)))
                     (deferred:sync! it))))
-             (plist-get item :easykey))
+             (plist-get item :citekey))
            "doe:2005first")))
 
 (ert-deftest zotxt-test-get-item-uuid-deferred ()
@@ -61,7 +60,7 @@
              (plist-get item :248bebf1-46ab-4067-9f93-ec3d2960d0cd))
            "{ | Doe, 2005 | | |zu:1254:ZBZQ4KMP}")))
 
-(ert-deftest zotxt-test-get-item-easykey-list-chain ()
+(ert-deftest zotxt-test-get-item-citekey-list-chain ()
   (should (equal
            (let* ((items
                   (deferred:$
@@ -73,12 +72,12 @@
                       (lambda (items)
                         (zotxt-mapcar-deferred
                          (lambda (item)
-                           (zotxt-get-item-deferred item :easykey))
+                           (zotxt-get-item-deferred item :citekey))
                          items)))
                     (deferred:sync! it)))
-                  (easykeys (mapcar (lambda (item)
-                                      (plist-get item :easykey)) items)))
-             (sort easykeys #'string-lessp))
+                  (citekeys (mapcar (lambda (item)
+                                      (plist-get item :citekey)) items)))
+             (sort citekeys #'string-lessp))
            '("doe:2005first" "doe:2007why"))))
 
 (ert-deftest zotxt-test-get-item-bibliography-deferred ()
@@ -110,17 +109,17 @@
            (deferred:sync! it))))
     (should (equal text (plist-get item :citation)))))
 
-(ert-deftest org-zotxt-test-get-item-link-text-deferred-with-easykey ()
+(ert-deftest org-zotxt-test-get-item-link-text-deferred-with-citekey ()
   (let ((text "doe:2005first")
         (item
          (deferred:$
            (deferred:next (lambda () '(:key "0_ZBZQ4KMP")))
            (deferred:nextc it
              (lambda (item)
-               (let ((org-zotxt-link-description-style :easykey))
+               (let ((org-zotxt-link-description-style :citekey))
                  (org-zotxt-get-item-link-text-deferred item))))
             (deferred:sync! it))))
-    (should (equal text (plist-get item :easykey)))))
+    (should (equal text (plist-get item :citekey)))))
 
 (ert-deftest org-zotxt-test-extract-link-id-at-point ()
   (with-temp-buffer
@@ -184,20 +183,10 @@
       (org-zotxt-insert-reference-link-to-item item)
       (should (equal (buffer-string) text)))))
 
-(ert-deftest org-zotxt-test-insert-reference-link-to-item-with-easykey ()
-  (let ((org-zotxt-link-description-style :easykey)
+(ert-deftest org-zotxt-test-insert-reference-link-to-item-with-citekey ()
+  (let ((org-zotxt-link-description-style :citekey)
         (text "[[zotero://select/items/foo][@foo:2014bar]]")
-        (item '(:key "foo" :easykey "foo:2014bar")))
-    (with-temp-buffer
-      (org-mode)
-      (org-zotxt-mode)
-      (org-zotxt-insert-reference-link-to-item item)
-      (should (equal (buffer-string) text)))))
-
-(ert-deftest org-zotxt-test-insert-reference-link-to-item-with-betterbibtexkey ()
-  (let ((org-zotxt-link-description-style :betterbibtexkey)
-        (text "[[zotero://select/items/foo][@foo:2014bar]]")
-        (item '(:key "foo" :betterbibtexkey "foo:2014bar")))
+        (item '(:key "foo" :citekey "foo:2014bar")))
     (with-temp-buffer
       (org-mode)
       (org-zotxt-mode)
