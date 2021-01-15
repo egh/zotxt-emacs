@@ -19,7 +19,7 @@ function doExport() {
     var item;
     while(item = Zotero.nextItem()) {
         var library_id = item.LibraryID ? item.LibraryID : 0;
-        Zotero.write("[[zotero://select//" + library_id + "_" + item.key + "][" + library_id + "_" + item.key + "]]");
+        Zotero.write("[[zotero://select/items/" + library_id + "_" + item.key + "][" + library_id + "_" + item.key + "]]");
         Zotero.write("\n");
     }
 }
