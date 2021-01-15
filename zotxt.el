@@ -58,9 +58,11 @@
 (defvar zotxt--debug-sync nil
   "Use synchronous requests.  For debug only!")
 
-(defvar zotxt-default-bibliography-style
+(defcustom zotxt-default-bibliography-style
   "chicago-note-bibliography"
-  "Default bibliography style to use.")
+  "Default bibliography style to use. Should be named after the style file name, e.g. apa, ieee, chicago-note-bibliography. Sorry, there should be a better way to get the name!"
+  :group 'zotxt
+  :type '(string))
 
 (defcustom zotxt-default-library :all
   "Default library to search. :all for all libraries, :user for user library."
