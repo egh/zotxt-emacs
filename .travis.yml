@@ -92,4 +92,4 @@ before_install:
   - curl -fsSkL https://raw.github.com/cask/cask/master/go | python
   - export PATH="/home/travis/.cask/bin:$PATH"
 script:
-  sh -e run-tests.sh
+  make
