@@ -26,6 +26,7 @@
 
 ;;; Code:
 
+(require 'deferred)
 (require 'org-noter)
 
 (defun org-zotxt-noter (arg)
