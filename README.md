@@ -38,6 +38,8 @@ To insert citation keys into a markdown document (for use with pandoc), first en
   
 Then you can use: `C-c " k` (`zotxt-citekey-insert`) to insert a citation key. You can also use `complete-at-point` to complete the citekey. For example, if you type `@doe` `M-x completion-at-point`, you will be presented with a list of completions. In `markdown-mode` this is not bound to any key sequence, but you can of course bind it as you would like.
 
+See [zotxt](https://github.com/egh/zotxt) for instructions on using [pandoc-zotxt.lua](https://github.com/odkr/pandoc-zotxt.lua) to automatically connect to a running Zotero instance to fetch citation data when using pandoc.
+
 ## org-noter
 
 If you use [Org-noter](https://github.com/weirdNox/org-noter) you can use the `org-zotxt-noter` command to select an item in Zotero and take notes on its attachment. Use the command in a headline, and it will either open the Org-noter interface or prompt for a Zotero search to load an attachment that can be annotated using Org-noter.
