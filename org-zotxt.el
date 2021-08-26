@@ -36,7 +36,7 @@
   :group 'org-zotxt
   :type '(choice (const :tag "citekey" :citekey)
                  (const :tag "citation" :citation)
-		 (const :tag "title" :title)))
+                 (const :tag "title" :title)))
 
 (defcustom org-zotxt-link-insert-newline t
   "Whether or not to insert a newline after a link.
@@ -133,9 +133,9 @@ of `org-zotxt-link-description-style'."
    (cl-case org-zotxt-link-description-style
      (:citekey (zotxt-get-item-deferred item org-zotxt-link-description-style))
      (:title (deferred:callback-post
-	       (deferred:new)
-	       (plist-put item
-			  :title (zotxt-key-to-title (plist-get item :key)))))
+               (deferred:new)
+               (plist-put item
+                          :title (zotxt-key-to-title (plist-get item :key)))))
      (t (zotxt-get-item-bibliography-deferred item)))))
 
 (defun org-zotxt-insert-reference-link (&optional arg)

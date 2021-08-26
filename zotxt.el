@@ -192,20 +192,20 @@ For use only in a `deferred:$' chain."
   "Return the complete alist of an item by ITEM-ID.
 ITEM-ID appears to be the `<libraryId>_<key>' in the `items' table."
   (let* ((item `(:key ,item-id))
-	 (plist-key :full)
-	 (zotxt--json-formats (list plist-key)))
+         (plist-key :full)
+         (zotxt--json-formats (list plist-key)))
     (->> (zotxt-get-item-deferred item plist-key)
-	 (funcall (lambda (item)
-		    (deferred:error item #'zotxt--deferred-handle-error)))
-	 deferred:sync!
-	 (funcall (lambda (plist)
-		    (plist-get plist plist-key))))))
+         (funcall (lambda (item)
+                    (deferred:error item #'zotxt--deferred-handle-error)))
+         deferred:sync!
+         (funcall (lambda (plist)
+                    (plist-get plist plist-key))))))
 
 (defun zotxt-key-to-title (item-id)
   "Return the title of a paper identified by ITEM-ID."
   (->> (zotxt-item-alist item-id)
        (funcall (lambda (alist)
-		  (or (assoc 'title-short alist) (assoc 'title alist))))
+                  (or (assoc 'title-short alist) (assoc 'title alist))))
        cdr))
 
 (defun zotxt-get-selected-items-deferred ()
