@@ -35,7 +35,14 @@
   "Style to use for org zotxt link texts."
   :group 'org-zotxt
   :type '(choice (const :tag "citekey" :citekey)
-                 (const :tag "citation" :citation)))
+                 (const :tag "citation" :citation)
+		 (const :tag "title" :title)))
+
+(defcustom org-zotxt-link-insert-newline t
+  "Whether or not to insert a newline after a link.
+See `org-zotxt-insert-reference-link'."
+  :group 'org-zotxt
+  :type 'boolean)
 
 (make-obsolete-variable 'org-zotxt-default-search-method 'zotxt-default-search-method "6.0")
 
@@ -59,11 +66,13 @@
 
 (defun org-zotxt-make-item-link (item)
   "Return an Org mode link for ITEM as a string."
-  (org-make-link-string (format "zotero://select/items/%s"
-                                (plist-get item :key))
-                        (if (eq org-zotxt-link-description-style :citekey)
-                            (concat "@" (plist-get item org-zotxt-link-description-style))
-                          (plist-get item :citation))))
+  (org-make-link-string
+   (format "zotero://select/items/%s"
+           (plist-get item :key))
+   (cl-case org-zotxt-link-description-style
+     (:citekey (concat "@" (plist-get item org-zotxt-link-description-style)))
+     (:title (plist-get item :title))
+     (t (plist-get item :citation)))))
 
 (defun org-zotxt-insert-reference-link-to-item (item)
   "Insert link to Zotero ITEM in buffer."
@@ -73,8 +82,9 @@
   "Insert links to Zotero ITEMS in buffer."
   (mapc (lambda (item)
           (org-zotxt-insert-reference-link-to-item item)
-          (insert "\n")
-          (forward-line 1))
+	  (when org-zotxt-link-insert-newline
+            (insert "\n")
+            (forward-line 1)))
         items))
 
 (defun org-zotxt-update-reference-link-at-point ()
@@ -119,9 +129,14 @@
   "Get the link text for ITEM.
 May be either an citekey or bibliography, depending on the value
 of `org-zotxt-link-description-style'."
-  (if (eq org-zotxt-link-description-style :citekey)
-      (zotxt-get-item-deferred item org-zotxt-link-description-style)
-    (zotxt-get-item-bibliography-deferred item)))
+  (let ((item (copy-tree item)))
+   (cl-case org-zotxt-link-description-style
+     (:citekey (zotxt-get-item-deferred item org-zotxt-link-description-style))
+     (:title (deferred:callback-post
+	       (deferred:new)
+	       (plist-put item
+			  :title (zotxt-key-to-title (plist-get item :key)))))
+     (t (zotxt-get-item-bibliography-deferred item)))))
 
 (defun org-zotxt-insert-reference-link (&optional arg)
   "Insert a zotero link in the `org-mode' document.
