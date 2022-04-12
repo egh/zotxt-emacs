@@ -42,4 +42,4 @@ See [zotxt](https://github.com/egh/zotxt) for instructions on using [pandoc-zotx
 
 ## org-noter
 
-If you use [Org-noter](https://github.com/weirdNox/org-noter) you can use the `org-zotxt-noter` command to select an item in Zotero and take notes on its attachment. Use the command in a headline, and it will either open the Org-noter interface or prompt for a Zotero search to load an attachment that can be annotated using Org-noter.
+If you use [Org-noter](https://github.com/weirdNox/org-noter) you can use the `org-zotxt-noter` command to select an item in Zotero and take notes on its attachment. You will need to load the library using `M-x load-library org-zotxt-noter` or `(require 'org-zotxt-noter)`. Use the command in a headline, and it will either open the Org-noter interface or prompt for a Zotero search to load an attachment that can be annotated using Org-noter.
