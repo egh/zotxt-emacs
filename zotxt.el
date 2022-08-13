@@ -75,7 +75,7 @@ This is either the JSON key, or if a number, the Nth entry in the list.
 For example, the string:
    \"{author.0.0.family} et al. ({issued.0.date-parts.0.0})\"
 
-Creates a string like \"Hetzner (2022)\"."
+Creates a string like \"Hetzner et al. (2022)\"."
   :group 'zotxt
   :type '(choice :tag "Format"
 		 (const :tag "Bibliography" bibliography)
