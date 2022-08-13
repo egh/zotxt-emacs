@@ -196,7 +196,6 @@ request.el is not decoding our responses as UTF-8.  Recode text as UTF-8 and par
 
 (defun zotxt-get-item-format-citation (entry-alist)
   "Format a citation from the fields in ENTRY-ALIST."
-  (setq a entry-alist)
   (cl-flet ((make-path
 	     (path-string)
 	     (mapcar (lambda (arg)
