@@ -136,7 +136,7 @@ of `org-zotxt-link-description-style'."
                (deferred:new)
                (plist-put item
                           :title (zotxt-key-to-title (plist-get item :key)))))
-     (t (zotxt-get-item-bibliography-deferred item)))))
+     (t (zotxt-get-item-formatted-deferred item)))))
 
 (defun org-zotxt-insert-reference-link (&optional arg)
   "Insert a zotero link in the `org-mode' document.
