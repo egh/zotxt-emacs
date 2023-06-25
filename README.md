@@ -30,6 +30,8 @@ To update the current link text at point to reflect changed metadata from Zotero
 
 To open an attachment of the link at point, use `C-c " a` (`org-zotxt-open-attachment`)
 
+To look up a reference and open its attachment, use `C-c " o` (`org-zotxt-search-open-attachment`)
+
 # Pandoc citekey integration
 
 To insert citation keys into a markdown document (for use with pandoc), first enable  `zotxt-citekey` minor mode:
