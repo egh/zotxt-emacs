@@ -90,7 +90,7 @@
          (deferred:$
            (deferred:next (lambda () '(:key "0_ZBZQ4KMP")))
            (deferred:nextc it
-             (lambda (item) (zotxt-get-item-bibliography-deferred item)))
+             (lambda (item) (zotxt-get-item-formatted-deferred item)))
            (deferred:sync! it))))
     (should (equal text (plist-get item :citation)))
     (should (equal html (plist-get item :citation-html)))

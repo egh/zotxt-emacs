@@ -64,6 +64,23 @@
   :group 'zotxt
   :type '(string))
 
+(defcustom zotxt-default-format 'bibliography
+  "The text formatting to use when inserting citations or bibliographies.
+
+If this value is set to a string, a citation is created.  In this case, the
+string contains paths encoded with curly braces ({}) contain dot separated
+paths used to substitute from the JSON retrieved from the entry from Zotero.
+This is either the JSON key, or if a number, the Nth entry in the list.
+
+For example, the string:
+   \"{author.0.0.family} et al. ({issued.0.date-parts.0.0})\"
+
+Creates a string like \"Hetzner et al. (2022)\"."
+  :group 'zotxt
+  :type '(choice :tag "Format"
+		 (const :tag "Bibliography" bibliography)
+		 (string :tag "Citation")))
+
 (defcustom zotxt-default-library :all
   "Default library to search. :all for all libraries, :user for user library."
   :group 'zotxt
@@ -148,7 +165,66 @@ request.el is not decoding our responses as UTF-8.  Recode text as UTF-8 and par
     (apply #'request url args)
     d))
 
-(defun zotxt-get-item-bibliography-deferred (item)
+(defun zotxt-get-item-format-bibliography (style item data)
+  "Format a STYLE bibliography from ITEM with properties in DATA."
+  (let* ((style-key (intern (format ":%s" style)))
+         (style-key-html (intern (format ":%s-html" style)))
+         (first (elt data 0))
+         (text (cdr (assq 'text first)))
+         (html (cdr (assq 'html first))))
+    (if (string= style zotxt-default-bibliography-style)
+        (progn
+          (plist-put item :citation text)
+          (plist-put item :citation-html html)))
+    (plist-put item style-key text)
+    (plist-put item style-key-html html)))
+
+(defun zotxt-traverse-tree (node path)
+  "Traverse tree NODE using PATH list."
+  (let* ((key (car path))
+	 (child (if (symbolp key)
+		    (if (and (consp node) (not (consp (cdr node))))
+			(cdr node)
+		      (cdr (assq key node)))
+		  (and (sequencep node)
+		       (< key (length node))
+		       (elt node key))))
+	 (child-path (cdr path)))
+    (if (and child-path node)
+	(zotxt-traverse-tree child child-path)
+      child)))
+
+(defun zotxt-get-item-format-citation (entry-alist)
+  "Format a citation from the fields in ENTRY-ALIST."
+  (cl-flet ((make-path
+	     (path-string)
+	     (mapcar (lambda (arg)
+		       (if (string-match "^[0-9]+$" arg)
+			   (string-to-number arg)
+			 (intern arg)))
+		     (split-string path-string "\\."))))
+    (with-temp-buffer
+      (insert zotxt-default-format)
+      (goto-char (point-min))
+      (while (re-search-forward "{\\([^}]+\\)}" nil t)
+	(let* ((path-str (match-string 1))
+	       (val (save-match-data
+		      (zotxt-traverse-tree entry-alist (make-path path-str)))))
+	  (setq val (if (not (stringp val))
+			(prin1-to-string val)
+		      val))
+	  (replace-match val)))
+      (buffer-string))))
+
+(defun zotxt-get-item-format-item (style item data)
+  "Format ITEM as FORMAT with bibliography STYLE.
+STYLE is only relevant if FORMAT is `bibliography'."
+  (if (eq 'bibliography zotxt-default-format)
+      (zotxt-get-item-format-bibliography style item data)
+    (plist-put item :citation
+	       (zotxt-get-item-format-citation (elt data 0)))))
+
+(defun zotxt-get-item-formatted-deferred (item)
   "Retrieve the generated bibliography for ITEM (a plist).
 Use STYLE to specify a custom bibliography style.
 Adds a plist entry with the name of the style as a self-quoting symbol, e.g.
@@ -167,25 +243,17 @@ For use only in a `deferred:$' chain."
       (request
         (format "%s/items" zotxt-url-base)
         :params `(("key" . ,(plist-get item :key))
-                  ("format" . "bibliography")
+                  ("format" . ,(if (eq 'bibliography zotxt-default-format)
+				   "bibliography"
+				 "json"))
                   ("style" . ,style))
         :parser #'zotxt--json-read
         :error (cl-function (lambda (&rest args &key error-thrown &allow-other-keys)
                               (deferred:errorback-post d error-thrown)))
         :success (cl-function
                   (lambda (&key data &allow-other-keys)
-                    (let* ((style-key (intern (format ":%s" style)))
-                           (style-key-html (intern (format ":%s-html" style)))
-                           (first (elt data 0))
-                           (text (cdr (assq 'text first)))
-                           (html (cdr (assq 'html first))))
-                      (if (string= style zotxt-default-bibliography-style)
-                          (progn
-                            (plist-put item :citation text)
-                            (plist-put item :citation-html html)))
-                      (plist-put item style-key text)
-                      (plist-put item style-key-html html)
-                      (deferred:callback-post d item))))))
+                    (zotxt-get-item-format-item style item data)
+		    (deferred:callback-post d item)))))
     d))
 
 (defun zotxt-item-alist (item-id)
