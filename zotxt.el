@@ -6,7 +6,7 @@
 ;; Author: Erik Hetzner <egh@e6h.org>
 ;; Keywords: bib
 ;; Version: 5.0.5
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "24.3") (deferred "0.5.1") (request "0.3.2"))
 
 ;; This file is not part of GNU Emacs.
 
