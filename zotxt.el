@@ -1,5 +1,4 @@
-;; -*- lexical-binding: t -*-
-;;; zotxt.el --- Interface emacs with Zotero via the zotxt extension
+;;; zotxt.el --- Interface emacs with Zotero via the zotxt extension  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2010-2020 Erik Hetzner
 
