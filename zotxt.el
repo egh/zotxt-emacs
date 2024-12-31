@@ -1,12 +1,11 @@
-;; -*- lexical-binding: t -*-
-;;; zotxt.el --- Interface emacs with Zotero via the zotxt extension
+;;; zotxt.el --- Interface emacs with Zotero via the zotxt extension  -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2010-2020 Erik Hetzner
 
 ;; Author: Erik Hetzner <egh@e6h.org>
 ;; Keywords: bib
 ;; Version: 5.0.5
-;; Package-Requires: ((emacs "24.3"))
+;; Package-Requires: ((emacs "24.3") (deferred "0.5.1") (request "0.3.2"))
 
 ;; This file is not part of GNU Emacs.
 

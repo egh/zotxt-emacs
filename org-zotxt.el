@@ -247,9 +247,9 @@ Null prefix argument turns off the mode.
 
 This is a minor mode for managing your citations with Zotero in a
 org-mode document."
-  nil
-  " OrgZot"
-  org-zotxt-mode-map
+  :init-value nil
+  :lighter " OrgZot"
+  :keymap org-zotxt-mode-map
   (org-zotxt--define-links))
 
 (provide 'org-zotxt)
