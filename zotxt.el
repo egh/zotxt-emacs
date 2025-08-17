@@ -58,8 +58,8 @@
   "Use synchronous requests.  For debug only!")
 
 (defcustom zotxt-default-bibliography-style
-  "chicago-note-bibliography"
-  "Default bibliography style to use. Should be named after the style file name, e.g. apa, ieee, chicago-note-bibliography. Sorry, there should be a better way to get the name!"
+  "apa"
+  "Default bibliography style to use. Should be named after the style file name, e.g. apa, ieee, chicago-notes-bibliography. Sorry, there should be a better way to get the name!"
   :group 'zotxt
   :type '(string))
 
